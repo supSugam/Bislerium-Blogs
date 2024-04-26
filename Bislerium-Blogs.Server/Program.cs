@@ -1,45 +1,58 @@
 
-using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.Helpers;
-using Bislerium_Blogs.Server.Models;
+//using Bislerium_Blogs.Server.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddDbContext<BisleriumBlogsContext>();
-// Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddProblemDetails();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+//builder.Services.AddDbContext<BisleriumBlogsContext>(options =>
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("BisleriumBlogsDB")));
 
-// Authentication
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<BisleriumBlogsContext>()
-    .AddDefaultTokenProviders();
+//builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+//    options =>
+//    {
+//        options.User.RequireUniqueEmail = true;
+//        options.SignIn.RequireConfirmedEmail = true;
+//        options.Password.RequireDigit = true;
+//        options.Password.RequireLowercase = true;
+//        options.Password.RequireUppercase = true;
+//        options.Password.RequireNonAlphanumeric = true;
+//        options.Password.RequiredLength = 8;
 
-JwtConfig jwtConfig = new();
-builder.Configuration.GetSection("Jwt").Bind(jwtConfig);
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
- .AddJwtBearer(options =>
- {
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidateIssuer = true,
-         ValidateAudience = true,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         ValidIssuer = jwtConfig.Issuer,
-         ValidAudience = jwtConfig.Issuer,
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key))
-     };
- });
+//    })
+//    //.AddEntityFrameworkStores<BisleriumBlogsContext>()
+//    .AddDefaultTokenProviders();
+
+//builder.Services.AddAuthentication
+//    (options =>
+//    {
+//        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//    })
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//            ValidAudience = builder.Configuration["Jwt:Issuer"],
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+//        };  
+//    });
 
 var app = builder.Build();
 
