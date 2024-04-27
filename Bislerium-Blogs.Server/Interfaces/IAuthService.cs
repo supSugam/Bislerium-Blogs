@@ -2,9 +2,11 @@
 
 namespace Bislerium_Blogs.Server.Interfaces
 {
+
     public interface IAuthService
     {
         Task<string> RegisterUserAsync(RegisterUserDto registerUserDto);
+        Task<object> LoginUserAsync(LoginUserDto loginUserDto);
 
     }
 }

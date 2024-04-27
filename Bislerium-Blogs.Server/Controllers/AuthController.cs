@@ -34,5 +34,24 @@ namespace Bislerium_Blogs.Server.Controllers
             }
         }
 
+
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUserAsync([FromBody] LoginUserDto loginUserDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _authService.LoginUserAsync(loginUserDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }   
+
     }
 }

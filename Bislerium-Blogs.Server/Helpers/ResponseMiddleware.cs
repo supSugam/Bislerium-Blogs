@@ -24,13 +24,13 @@
             try
             {
                 await _next(context);
-                Console.WriteLine(context.Response.StatusCode);
+                context.Response.ContentType = "application/json";
+                responseBody.Seek(0, SeekOrigin.Begin);
+                string jsonResponse = await new StreamReader(responseBody).ReadToEndAsync();
+
                 if (context.Response.StatusCode >= 400)
                 {
-                    context.Response.ContentType = "application/json";
-                    responseBody.Seek(0, SeekOrigin.Begin);
                     List<string> allErrors = new();
-                    string jsonResponse = await new StreamReader(responseBody).ReadToEndAsync();
 
                     if (JSON.IsValidJSON(jsonResponse))
                     {
@@ -69,6 +69,21 @@
                     var errorResponseJson = JsonSerializer.Serialize(errorResponse);
                     responseBody.SetLength(0); // Clear the response body
                     await responseBody.WriteAsync(Encoding.UTF8.GetBytes(errorResponseJson)); // Write the custom error response
+                }
+                else
+                {
+                        var successResponse = new
+                    {
+                        path = context.Request.Path.Value,
+                        statusCode = context.Response.StatusCode,
+                        
+                        success = true,
+                        result = jsonResponse
+                        };
+                    var successResponseJson = JsonSerializer.Serialize(successResponse);
+                    responseBody.SetLength(0); // Clear the response body
+                    await responseBody.WriteAsync(Encoding.UTF8.GetBytes(successResponseJson)); // Write the custom success response
+
                 }
             } catch (Exception ex)
             {
