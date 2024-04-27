@@ -1,8 +1,6 @@
 ﻿using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Interfaces;
-using Bislerium_Blogs.Server.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Linq;
 
 namespace Bislerium_Blogs.Server.Services
 {
@@ -17,6 +15,9 @@ namespace Bislerium_Blogs.Server.Services
 
         public async Task<string> RegisterUserAsync(RegisterUserDto? registerUserDto)
         {
+            Console.WriteLine("User Registration Failed");
+            throw new Exception("User Registration Failed");
+
             ArgumentNullException.ThrowIfNull(registerUserDto, nameof(registerUserDto));
 
             var user = new IdentityUser
@@ -26,13 +27,11 @@ namespace Bislerium_Blogs.Server.Services
             };
 
             var result = await _userManager.CreateAsync(user, registerUserDto.Password);
-
             if (!result.Succeeded)
             {
-                throw new Exception(result.Errors.ToArray().Select(x => x.Description).ToString());
+                throw new Exception("User Registration Failed");
             }
-
-            return "User Registered!";
+            return "User Registered";
 
         }
 

@@ -1,5 +1,4 @@
 ﻿using Bislerium_Blogs.Server.DTOs;
-using Bislerium_Blogs.Server.Models;
 
 namespace Bislerium_Blogs.Server.Interfaces
 {

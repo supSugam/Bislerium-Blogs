@@ -22,9 +22,6 @@ builder.Services.AddSwaggerGen(config =>
 builder.Services.AddProblemDetails();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-
-
-
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(
     options =>
     {
@@ -68,8 +65,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseMiddleware<ResponseMiddleware>();
-
+app.UseResponseMiddleware();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

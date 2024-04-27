@@ -16,7 +16,8 @@ namespace Bislerium_Blogs.Server.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserDto registerUserDto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> RegisterUserAsync([FromForm] RegisterUserDto registerUserDto)
         {
             if(!ModelState.IsValid)
             {
