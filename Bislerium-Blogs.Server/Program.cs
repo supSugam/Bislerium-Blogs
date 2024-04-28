@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen(config =>
 builder.Services.AddProblemDetails();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(
     options =>
     {
         options.User.RequireUniqueEmail = true;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Bislerium_Blogs.Server.Configs;
 
 namespace Bislerium_Blogs.Server.Models;
 

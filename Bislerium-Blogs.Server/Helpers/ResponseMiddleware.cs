@@ -78,7 +78,7 @@
                         statusCode = context.Response.StatusCode,
                         
                         success = true,
-                        result = jsonResponse
+                        result = JSON.ParseJSON(jsonResponse)
                         };
                     var successResponseJson = JsonSerializer.Serialize(successResponse);
                     responseBody.SetLength(0); // Clear the response body

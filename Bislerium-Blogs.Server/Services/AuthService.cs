@@ -1,5 +1,6 @@
 ﻿using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.DTOs;
+using Bislerium_Blogs.Server.Enums;
 using Bislerium_Blogs.Server.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -11,25 +12,25 @@ namespace Bislerium_Blogs.Server.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthService(UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _configuration = configuration;
         }
 
 
-        private string GenerateJwtToken(ApplicationUser user)
+        private string GenerateJwtToken(IdentityUser user)
         {
             ArgumentNullException.ThrowIfNull(user, nameof(user));
-
+            var role = _userManager.GetRolesAsync(user).Result.FirstOrDefault();
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
                 new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Role,user.Role)
+                new(ClaimTypes.Role, role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -39,8 +40,10 @@ namespace Bislerium_Blogs.Server.Services
                                _configuration["Jwt:Issuer"],
                                               _configuration["Jwt:Issuer"],
                                                              claims,
-                                                                            expires: DateTime.Now.AddDays(30),
-                                                                                           signingCredentials: creds
+                                                                            expires: DateTime
+                                                                            .UtcNow
+                                                                            .AddDays(7),
+                                                                                                      signingCredentials: creds
                                                                                                       );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -50,13 +53,15 @@ namespace Bislerium_Blogs.Server.Services
         {
             ArgumentNullException.ThrowIfNull(registerUserDto, nameof(registerUserDto));
 
-            var user = new ApplicationUser
+            var user = new IdentityUser
             {
                 UserName = registerUserDto.Email,
                 Email = registerUserDto.Email,
             };
 
             var result = await _userManager.CreateAsync(user, registerUserDto.Password);
+            await _userManager.AddToRoleAsync(user, Constants.EnumToString(UserRole.USER));
+
             if (!result.Succeeded)
             {
                 throw new Exception("User Registration Failed");

@@ -16,7 +16,7 @@ namespace Bislerium_Blogs.Server.Configs
         {
             using var scope = _serviceProvider.CreateScope();
 
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             await SeedAllRoles(roleManager);
@@ -36,7 +36,7 @@ namespace Bislerium_Blogs.Server.Configs
             }
         }
 
-        private async Task SeedAdminUserAndRole(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private async Task SeedAdminUserAndRole(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // Check if the admin user already exists
             var adminUser = await userManager.FindByEmailAsync("super.admin@bislerium.com");
@@ -44,12 +44,11 @@ namespace Bislerium_Blogs.Server.Configs
             if (adminUser == null)
             {
                 // Create the admin user
-                adminUser = new ApplicationUser
+                adminUser = new IdentityUser
                 {
                     UserName = "SuperAdmin",
                     Email = "super.admin@bislerium.com",
                     EmailConfirmed = true,
-                    Role = Enum.GetName(typeof(UserRole), UserRole.ADMIN),
                 };
 
                 await userManager.CreateAsync(adminUser, Constants.ADMIN_PASSWORD);

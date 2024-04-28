@@ -17,5 +17,10 @@ namespace Bislerium_Blogs.Server.Helpers
                 return false;
             }
         }
+
+        public static string ParseJSON(this string json)
+        {
+            return JToken.Parse(json).ToString(Formatting.Indented);
+        }
     }
 }
