@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Bislerium_Blogs.Server.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bislerium_Blogs.Server.DTOs
 {
@@ -21,6 +22,8 @@ namespace Bislerium_Blogs.Server.DTOs
         public string FullName { get; set; }
 
         public byte[]? Avatar { get; set; }
+
+        public string? Role { get; set; } = Enum.GetName(typeof(UserRole), UserRole.USER);
 
     }
 }

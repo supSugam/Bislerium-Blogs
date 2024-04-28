@@ -3,13 +3,14 @@ using Bislerium_Blogs.Server.Helpers;
 using Bislerium_Blogs.Server.Interfaces;
 using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Services;
+using Bislerium_Blogs.Server.Configs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-
+using Microsoft.AspNetCore.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -22,7 +23,7 @@ builder.Services.AddSwaggerGen(config =>
 builder.Services.AddProblemDetails();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
     options =>
     {
         options.User.RequireUniqueEmail = true;
@@ -58,6 +59,9 @@ builder.Services.AddAuthentication
     });
 builder.Services.AddDbContext<BisleriumBlogsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+
+// Seed
+builder.Services.AddHostedService<DataSeeder>();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();

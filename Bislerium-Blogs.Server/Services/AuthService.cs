@@ -1,4 +1,5 @@
-﻿using Bislerium_Blogs.Server.DTOs;
+﻿using Bislerium_Blogs.Server.Configs;
+using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -10,25 +11,25 @@ namespace Bislerium_Blogs.Server.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public AuthService(UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _configuration = configuration;
         }
 
 
-        private string GenerateJwtToken(IdentityUser user)
+        private string GenerateJwtToken(ApplicationUser user)
         {
             ArgumentNullException.ThrowIfNull(user, nameof(user));
 
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Email, user.Email)
-                //new(ClaimTypes.Role,user.Role)
+                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Role,user.Role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -49,7 +50,7 @@ namespace Bislerium_Blogs.Server.Services
         {
             ArgumentNullException.ThrowIfNull(registerUserDto, nameof(registerUserDto));
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = registerUserDto.Email,
                 Email = registerUserDto.Email,
