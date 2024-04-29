@@ -25,25 +25,10 @@ const StyledText: React.FC<StyledTextProps> = ({
 }) => {
   const Tag = as;
 
-  const hoverVariants = {
-    hover: {
-      x: 3,
-    },
-  };
-
   return (
-    <motion.div
-      initial="hidden"
-      animate={animate ? 'visible' : 'hidden'}
-      transition={{ delay: animationDelay, ...transition }}
-      whileHover="hover"
-    >
-      <motion.div variants={hoverVariants}>
-        <Tag className={cn('text-base', className)} {...props}>
-          {text}
-        </Tag>
-      </motion.div>
-    </motion.div>
+    <Tag className={cn('text-base', className)} {...props}>
+      {text}
+    </Tag>
   );
 };
 

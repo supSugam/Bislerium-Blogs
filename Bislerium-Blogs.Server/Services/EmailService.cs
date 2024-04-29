@@ -4,8 +4,6 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using static System.Net.WebRequestMethods;
 namespace Bislerium_Blogs.Server.Services
 {
 
@@ -18,12 +16,7 @@ public class EmailService: IEmailService
             _emailSettings = emailSettings.Value;
         }
 
-        public Task SendEmailAsync(MailData mailData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task SendMailAsync(MailData mailData)
+        public Task<string> SendEmailAsync(MailData mailData)
         {
             try
             {
@@ -65,7 +58,7 @@ public class EmailService: IEmailService
                         mailClient.Disconnect(true);
                     }
                 }
-                return "Mail sent successfully!;
+                return "Mail sent successfully!";
             }
             catch (Exception ex)
             {

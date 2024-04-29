@@ -21,11 +21,11 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  color: var(--color-primary);
 }
 
 body {
   margin: 0;
+  color: var(--color-primary);
 }
 
 label,
@@ -36,4 +36,5 @@ summary,
 [type='submit'],
 [type='checkbox'] {
   cursor: pointer;
+  color: inherit;
 }

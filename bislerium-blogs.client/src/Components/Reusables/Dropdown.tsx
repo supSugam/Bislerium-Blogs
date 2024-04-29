@@ -16,6 +16,7 @@ interface IDropdownProps extends React.HTMLProps<HTMLButtonElement> {
   position?: 'left' | 'right';
   takeParentWidth?: boolean;
   open?: boolean;
+  closeOnClick?: boolean;
 }
 const Dropdown = ({
   targetComponent,
@@ -23,6 +24,7 @@ const Dropdown = ({
   takeParentWidth = false,
   position = 'right',
   open,
+  closeOnClick = true,
   ...props
 }: IDropdownProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -87,8 +89,14 @@ const Dropdown = ({
                   <motion.button
                     key={index}
                     type={type}
-                    onClick={item.onClick}
-                    // nice sliding animation
+                    onClick={(
+                      e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+                    ) => {
+                      if (closeOnClick) {
+                        setIsOpen(false);
+                      }
+                      item.onClick?.(e);
+                    }}
                     initial={{
                       opacity: 0,
                       x: 10,
