@@ -1,25 +1,67 @@
-'use client';
-import React, { useState } from 'react';
-import { ScrollText, Search, Heart } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import WriteIcon from '../../lib/SVGs/WriteIcon';
+import NotificationIcon from '../../lib/SVGs/NotificationIcon';
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useMotionValueEvent,
+} from 'framer-motion';
+import { cn } from '../../utils/cn';
 
 const Header = () => {
-  const [SearchInput, setSearchInput] = useState<string>('');
-  const navigate = useNavigate();
-  const MakeNewStory = async () => {};
+  const [searchInput, setSearchInput] = useState<string>('');
+  console.log(searchInput);
 
-  const SearchFun = (event: React.KeyboardEvent<HTMLInputElement>) => {};
+  const { scrollYProgress } = useScroll();
+
+  const [visible, setVisible] = useState<boolean>(true);
+
+  useMotionValueEvent(scrollYProgress, 'change', (current) => {
+    // Check if current is not undefined and is a number
+    if (typeof current === 'number') {
+      const direction = current! - scrollYProgress.getPrevious()!;
+
+      if (scrollYProgress.get() < 0.05) {
+        setVisible(true);
+      } else {
+        if (direction < 0) {
+          setVisible(true);
+        } else {
+          setVisible(true);
+        }
+      }
+    }
+  });
+
   return (
-    <div className="px-8 py-2 border-b-[1px]">
-      <div className="flex items-center justify-between">
+    <AnimatePresence>
+      <motion.div
+        initial={{
+          opacity: 1,
+          y: -100,
+        }}
+        animate={{
+          y: visible ? 0 : -100,
+          opacity: visible ? 1 : 0,
+        }}
+        transition={{
+          duration: 0.2,
+        }}
+        className={cn(
+          'flex w-full justify-between fixed top-0 inset-x-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[5000] pr-2 pl-8 py-2 items-center border-b-black'
+        )}
+      >
         <div className="flex items-center space-x-3">
           <Link to="/">
-            <Heart size={20} />
+            <Heart size={30} />
           </Link>
           <div className="flex items-center bg-gray-50 rounded-full px-2">
             <input
               onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => SearchFun(e)}
+              // onKeyDown={(e) => SearchFun(e)}
               type="text"
               placeholder="Search..."
               className="focus:outline-none px-1 py-2 placeholder:text-sm text-sm bg-gray-50"
@@ -27,40 +69,17 @@ const Header = () => {
           </div>
         </div>
         <div className="flex items-center space-x-7">
-          <span
-            onClick={MakeNewStory}
-            className="flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-label="Write"
-            >
-              <path
-                d="M14 4a.5.5 0 0 0 0-1v1zm7 6a.5.5 0 0 0-1 0h1zm-7-7H4v1h10V3zM3 4v16h1V4H3zm1 17h16v-1H4v1zm17-1V10h-1v10h1zm-1 1a1 1 0 0 0 1-1h-1v1zM3 20a1 1 0 0 0 1 1v-1H3zM4 3a1 1 0 0 0-1 1h1V3z"
-                fill="currentColor"
-              ></path>
-              <path
-                d="M17.5 4.5l-8.46 8.46a.25.25 0 0 0-.06.1l-.82 2.47c-.07.2.12.38.31.31l2.47-.82a.25.25 0 0 0 .1-.06L19.5 6.5m-2-2l2.32-2.32c.1-.1.26-.1.36 0l1.64 1.64c.1.1.1.26 0 .36L19.5 6.5m-2-2l2 2"
-                stroke="currentColor"
-              ></path>
-            </svg>
+          <span className="flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer">
+            <WriteIcon size={24} />
             <p className="font-light text-sm">Write</p>
           </span>
-          <Link
-            to="/me/drafts"
-            className="opacity-60 flex items-center space-x-1 text-sm font-light"
-          >
-            <ScrollText size={20} opacity={20} /> Me
-          </Link>
+          <NotificationIcon size={24} />
           <button className="bg-blue-500 text-white px-3 py-1 rounded-md font-light text-sm">
             Upgrade
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
