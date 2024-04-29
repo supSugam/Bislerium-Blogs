@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Hosting;
+using System.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -63,7 +65,9 @@ builder.Services.AddDbContext<BisleriumBlogsContext>(options =>
 // Seed
 builder.Services.AddHostedService<DataSeeder>();
 
-
+// Services
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();

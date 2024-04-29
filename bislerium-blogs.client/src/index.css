@@ -21,6 +21,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  color: var(--color-primary);
 }
 
 body {

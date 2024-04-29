@@ -1,11 +1,13 @@
 import React from 'react';
-import Header from './Header';
+import Navbar from './Navbar';
+import AuthModal from '../Modal/AuthModal';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <Header />
+      <Navbar />
       {children}
+      <AuthModal />
     </>
   );
 };

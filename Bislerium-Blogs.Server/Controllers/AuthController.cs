@@ -9,10 +9,12 @@ namespace Bislerium_Blogs.Server.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService,IEmailService emailService)
         {
             _authService = authService;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -51,7 +53,22 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 return BadRequest(ex.Message);
             }
-        }   
+        }
+
+        [HttpGet("test-mail")]
+        public async Task<IActionResult> TestMail()
+        {
+            try
+            {
+                await _emailService.SendOTP("sugam.subedi.s22@icp.edu.np", "Bruh");
+                return Ok("Mail Sent");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }
