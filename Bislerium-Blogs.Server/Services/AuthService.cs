@@ -14,10 +14,15 @@ namespace Bislerium_Blogs.Server.Services
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AuthService(UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public AuthService(UserManager<IdentityUser> userManager,
+            IEmailService emailService,
+            IConfiguration configuration
+            )
         {
             _userManager = userManager;
+            _emailService = emailService;
             _configuration = configuration;
         }
 
@@ -67,7 +72,10 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception("User Registration Failed");
             }
 
-            return $"User {registerUserDto.Email} registered successfully";
+
+            await _emailService.SendOTP(registerUserDto.Email, registerUserDto.FullName);
+
+            return "Signed Up, Check your email and enter the code to verify.";
 
         }
 
@@ -94,6 +102,20 @@ namespace Bislerium_Blogs.Server.Services
             {
                 accessToken
             };
+
+        }
+
+        public async Task<bool> VerifyOtpAsync(VerifyOtpDto verifyOtpDto)
+        {
+            ArgumentNullException.ThrowIfNull(verifyOtpDto, nameof(verifyOtpDto));
+
+            bool IsCorrect = _emailService.VerifyOTP(verifyOtpDto.Email, verifyOtpDto.Otp.ToString());
+            if (!IsCorrect)
+            {
+                throw new Exception("Invalid OTP");
+            }
+
+            return true;
 
         }
 

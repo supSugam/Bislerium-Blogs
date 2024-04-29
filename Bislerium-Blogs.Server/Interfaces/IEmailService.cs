@@ -8,6 +8,10 @@ namespace Bislerium_Blogs.Server.Interfaces
 
        public string GetOtpVerificationEmailBody(string name, int[] otp);
 
-        public Task SendOTP(string email, string name);
+        public Task<string> SendOTP(string email, string name);
+
+        void StoreOTP(string email, int otp);
+
+        bool VerifyOTP(string email, string otp);
     }
 }

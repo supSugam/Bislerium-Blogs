@@ -8,5 +8,8 @@ namespace Bislerium_Blogs.Server.Interfaces
         Task<string> RegisterUserAsync(RegisterUserDto registerUserDto);
         Task<object> LoginUserAsync(LoginUserDto loginUserDto);
 
+        Task<bool> VerifyOtpAsync(VerifyOtpDto verifyOtpDto);
+
+
     }
 }

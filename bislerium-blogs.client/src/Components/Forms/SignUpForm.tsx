@@ -24,6 +24,8 @@ const signUpFormSchema = yup.object().shape({
     .oneOf([yup.ref('password')], 'Passwords must match'),
 });
 import { useForm } from 'react-hook-form';
+import { objectToFormData } from '../../utils/object';
+import useAuthQuery from '../../hooks/react-query/useAuthQuery';
 
 export function SignupForm() {
   const {
@@ -35,8 +37,16 @@ export function SignupForm() {
     mode: 'onChange',
   });
 
+  const { signUp } = useAuthQuery();
+
   const onSubmit = (data: yup.InferType<typeof signUpFormSchema>) => {
-    console.log(data);
+    const payload = {
+      ...data,
+      role,
+      avatar: avatar ? new File([avatar], 'avatar.png') : null,
+    };
+    const formData = objectToFormData(payload);
+    signUp.mutate(formData);
   };
 
   const [avatar, setAvatar] = useState<string | null>(null);

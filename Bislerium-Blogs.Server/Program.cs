@@ -48,7 +48,7 @@ builder.Services.AddAuthentication
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
@@ -74,6 +74,12 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseResponseMiddleware();
+app.UseCors(options =>
+{
+    options.AllowAnyOrigin();
+    options.AllowAnyMethod();
+    options.AllowAnyHeader();
+});
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

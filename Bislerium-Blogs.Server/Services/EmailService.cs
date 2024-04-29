@@ -10,10 +10,12 @@ namespace Bislerium_Blogs.Server.Services
 public class EmailService: IEmailService
 {
         private readonly EmailSettings _emailSettings;
+        private readonly Dictionary<string, string> otpStorage;
 
         public EmailService(IOptions<EmailSettings> emailSettings)
         {
             _emailSettings = emailSettings.Value;
+            otpStorage = new Dictionary<string, string>();
         }
 
         public Task<string> SendEmailAsync(MailData mailData)
@@ -57,8 +59,8 @@ public class EmailService: IEmailService
                         mailClient.Send(emailMessage);
                         mailClient.Disconnect(true);
                     }
+                    return Task.FromResult("Mail sent successfully");
                 }
-                return "Mail sent successfully!";
             }
             catch (Exception ex)
             {
@@ -67,18 +69,35 @@ public class EmailService: IEmailService
             }
         }
 
-        public async Task SendOTP(string email, string name)
+        public async Task<string> SendOTP(string email, string name)
         {
             var otp = Number.GenerateRandomNumbers(6);
             var mailData = new MailData
             {
                 EmailToId = email,
                 EmailToName = name,
-                EmailSubject = "Bislerium Blogs - OTP Verification",
+                EmailSubject = "Account Verification",
                 EmailBody = GetOtpVerificationEmailBody(name, otp)
             };
+            StoreOTP(email, otp);
 
-            await SendMailAsync(mailData);
+            return await SendEmailAsync(mailData);
+        }
+
+        public void StoreOTP(string email, int[] otp)
+        {
+            var otpString = string.Join("", otp);
+            otpStorage[email] = otpString;
+        }
+
+        public bool VerifyOTP(string email, string otp)
+        {
+            if (!otpStorage.TryGetValue(email, out string? value))
+            {
+                return false;
+            }
+
+            return value == otp;
         }
 
         public string GetOtpVerificationEmailBody(string name, int[] otp)
