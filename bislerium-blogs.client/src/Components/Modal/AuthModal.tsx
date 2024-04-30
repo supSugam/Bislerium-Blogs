@@ -71,7 +71,7 @@ const AuthModal = () => {
                   await resendOtp.mutateAsync(
                     {
                       email: authSession.email,
-                      fullName: authSession.fullName || 'User',
+                      fullName: authSession.fullName || authSession.email,
                     },
                     {
                       onError: () => {

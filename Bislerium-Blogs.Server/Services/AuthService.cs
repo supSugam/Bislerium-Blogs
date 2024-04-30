@@ -2,6 +2,7 @@
 using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Enums;
 using Bislerium_Blogs.Server.Interfaces;
+using Bislerium_Blogs.Server.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,15 +16,19 @@ namespace Bislerium_Blogs.Server.Services
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly BisleriumBlogsContext _context;
+
 
         public AuthService(UserManager<IdentityUser> userManager,
             IEmailService emailService,
-            IConfiguration configuration
+            IConfiguration configuration,
+            BisleriumBlogsContext context
             )
         {
             _userManager = userManager;
             _emailService = emailService;
             _configuration = configuration;
+            _context = context;
         }
 
 
@@ -72,6 +77,21 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception("User Registration Failed");
             }
 
+            var existingUser = await _userManager.FindByEmailAsync(registerUserDto.Email);
+
+            _context.Users.Add(new User
+            {
+                UserId = new Guid(existingUser.Id),
+                Email = existingUser.Email,
+                Username = existingUser.UserName,
+                Avatar=registerUserDto.Avatar,
+                FullName = registerUserDto.FullName,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            });
+
+            await _context.SaveChangesAsync();
+
 
             await _emailService.SendOTP(registerUserDto.Email, registerUserDto.FullName);
 
@@ -97,16 +117,20 @@ namespace Bislerium_Blogs.Server.Services
             }
 
             var IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-            if (!IsEmailConfirmed)
+            string? accessToken = null;
+            if (IsEmailConfirmed)
             {
-                throw new Exception("Email is not confirmed");
+            accessToken = GenerateJwtToken(user);
+            await _emailService.SendOTP(user.Email, user.UserName);
             }
 
-            string accessToken = GenerateJwtToken(user);
 
             return new
             {
-                accessToken
+                accessToken,
+                isEmailConfirmed = IsEmailConfirmed,
+                email = user.Email,
+                username = user.UserName
             };
 
         }
@@ -119,11 +143,12 @@ namespace Bislerium_Blogs.Server.Services
             {
                 var existingUser = await _userManager.FindByEmailAsync(verifyOtpDto.Email);
 
-                if(existingUser == null)
+                if(existingUser != null)
                 {
                     var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
 
                     await _userManager.ConfirmEmailAsync(existingUser, emailConfirmationToken);
+
                 }
                 ;
             }

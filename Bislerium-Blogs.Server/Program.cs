@@ -67,6 +67,7 @@ builder.Services.AddHostedService<DataSeeder>();
 
 // Services
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 

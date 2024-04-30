@@ -8,7 +8,13 @@ import {
 import toast from 'react-hot-toast';
 import { toastWithInterval } from '../../utils/toast';
 const useAuthQuery = () => {
-  const { api, updateAccessToken, closeAuthModal } = useAuthStore();
+  const {
+    api,
+    updateAccessToken,
+    closeAuthModal,
+    setAuthModalActiveSection,
+    setAuthSession,
+  } = useAuthStore();
 
   // Sign Up
 
@@ -25,6 +31,7 @@ const useAuthQuery = () => {
       }),
     onSuccess: (data) => {
       toast.success(data.data.result);
+      setAuthModalActiveSection('verify-otp');
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -32,15 +39,32 @@ const useAuthQuery = () => {
   });
 
   const logIn = useMutation<
-    AxiosResponse<ISuccessResponse<{ accessToken: string }>>,
+    AxiosResponse<
+      ISuccessResponse<{
+        accessToken: string | null;
+        isEmailConfirmed: boolean;
+        email: string;
+        username: string;
+      }>
+    >,
     AxiosError<IFailedResponse>,
     { email: string; password: string }
   >({
     mutationFn: async (data) => await api.post('/auth/login', data),
     onSuccess: (data) => {
-      toast.success('Logged in successfully');
-      updateAccessToken(data.data.result.accessToken);
-      closeAuthModal();
+      console.log(data.data.result);
+      if (data.data.result.isEmailConfirmed && data.data.result.accessToken) {
+        updateAccessToken(data.data.result.accessToken);
+        toast.success('Logged in successfully');
+        closeAuthModal();
+      } else {
+        toast.error('Please verify your email first');
+        setAuthSession({
+          email: data.data.result.email,
+          fullName: data.data.result.username,
+        });
+        setAuthModalActiveSection('verify-otp');
+      }
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -57,7 +81,9 @@ const useAuthQuery = () => {
   >({
     mutationFn: async (data) => await api.post('/auth/verify-otp', data),
     onSuccess: (data) => {
-      toast.success(data.data.result);
+      console.log(data);
+      toast.success('Account Verified, You may login now.');
+      setAuthModalActiveSection('login');
     },
     onError: (error) => {
       toastWithInterval({ error });

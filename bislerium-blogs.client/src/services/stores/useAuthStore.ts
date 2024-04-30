@@ -27,7 +27,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
-    authModalActiveSection: 'verify-otp',
+    authModalActiveSection: 'login',
     setAuthModalActiveSection: (section) => {
       set(() => ({ authModalActiveSection: section }));
     },
@@ -65,15 +65,13 @@ export const useAuthStore = create<AuthStore>(
     },
     updateAccessToken: (accessToken) => {
       api.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
+      localStorage.setItem('accessToken', accessToken);
     },
     logout: () => {
       localStorage.removeItem('accessToken');
       set(() => ({ api }));
     },
-    authSession: {
-      email: 'vafaxin655@buzblox.com',
-      fullName: 'Bruh Moment',
-    },
+    authSession: {},
     setAuthSession: (data) => {
       const { authSession } = get();
       set(() => ({ authSession: { ...authSession, ...data } }));

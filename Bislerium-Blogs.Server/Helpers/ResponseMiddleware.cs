@@ -30,7 +30,6 @@
 
                 if (context.Response.StatusCode >= 400)
                 {
-                    Console.WriteLine("Errorrr");
                     List<string> allErrors = new();
                     if (JSON.IsValidJSON(jsonResponse))
                     {
@@ -79,9 +78,8 @@
                         path = context.Request.Path.Value,
                         statusCode = context.Response.StatusCode,
                         success = true,
-                        result = jsonResponse
+                        result = JSON.IsValidJSON(jsonResponse) ? JsonSerializer.Deserialize<dynamic>(jsonResponse) : jsonResponse
                     };
-                    Console.WriteLine(jsonResponse);
 
                     var successResponseJson = JsonSerializer.Serialize(successResponse);
                     responseBody.SetLength(0); // Clear the response body

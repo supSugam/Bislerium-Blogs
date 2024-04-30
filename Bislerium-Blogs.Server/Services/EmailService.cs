@@ -11,9 +11,9 @@ namespace Bislerium_Blogs.Server.Services
 public class EmailService: IEmailService
 {
         private readonly EmailSettings _emailSettings;
-        private readonly OtpService _otpService;
+        private readonly IOtpService _otpService;
 
-        public EmailService(IOptions<EmailSettings> emailSettings, OtpService otpService)
+        public EmailService(IOptions<EmailSettings> emailSettings, IOtpService otpService)
         {
             _emailSettings = emailSettings.Value;
             _otpService = otpService;

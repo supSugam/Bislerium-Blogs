@@ -14,6 +14,7 @@ import Dropdown from '../Reusables/Dropdown';
 import Avatar from '../Reusables/Avatar';
 import SearchInput from '../SearchInput';
 import { useAuthStore } from '../../services/stores/useAuthStore';
+import { NavbarAvatar } from './Avatar.navbar';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
@@ -68,29 +69,7 @@ const Navbar = () => {
             <p className="font-light text-sm">Write</p>
           </span>
           <NotificationIcon size={24} onClick={openAuthModal} />
-          <Dropdown
-            targetComponent={<Avatar />}
-            items={[
-              {
-                label: 'Profile',
-                onClick: () => console.log('Profile'),
-                icon: <UserRound size={20} />,
-                bordered: true,
-              },
-              {
-                label: 'Settings',
-                onClick: () => console.log('Settings'),
-                icon: <UserRound size={20} />,
-                bordered: true,
-              },
-              {
-                label: 'Logout',
-                onClick: () => console.log('Logout'),
-                icon: <UserRound size={20} />,
-                bordered: true,
-              },
-            ]}
-          />
+          <NavbarAvatar />
         </div>
       </motion.div>
     </AnimatePresence>

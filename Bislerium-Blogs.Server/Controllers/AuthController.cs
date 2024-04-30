@@ -108,7 +108,5 @@ namespace Bislerium_Blogs.Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-
     }
 }
