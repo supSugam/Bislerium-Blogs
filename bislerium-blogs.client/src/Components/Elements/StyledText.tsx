@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 
 interface StyledTextProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  text: string;
+  children: React.ReactNode;
   className?: string;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
   animate?: boolean;
@@ -15,7 +15,7 @@ interface StyledTextProps extends React.HTMLAttributes<HTMLParagraphElement> {
 }
 
 const StyledText: React.FC<StyledTextProps> = ({
-  text,
+  children,
   className,
   as = 'span',
   animate = false,
@@ -27,7 +27,7 @@ const StyledText: React.FC<StyledTextProps> = ({
 
   return (
     <Tag className={cn('text-base', className)} {...props}>
-      {text}
+      {children}
     </Tag>
   );
 };

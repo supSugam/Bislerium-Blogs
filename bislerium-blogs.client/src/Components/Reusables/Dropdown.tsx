@@ -123,7 +123,7 @@ const Dropdown = ({
                     {...rest}
                   >
                     {icon}
-                    <StyledText text={label} animate />
+                    <StyledText children={label} animate />
                   </motion.button>
                 );
               })}

@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import StyledText from '../Elements/StyledText';
 
 export default function ButtonWithIcon({
   icon, // FontAwesome icon className
@@ -17,10 +18,10 @@ export default function ButtonWithIcon({
       onClick={onClick}
       disabled={disabled}
     >
-      <span className="flex items-center gap-3 text-[14.2px] text-lighterblack leading-5 text-left">
+      <StyledText className="flex items-center gap-3 text-base text-lighterblack leading-5 text-left">
         {icon}
         {children}
-      </span>
+      </StyledText>
     </button>
   );
 }

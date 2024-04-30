@@ -1,17 +1,13 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { UserRole } from '../../enums/UserRole';
 import { capitalizeFirstLetter } from '../../utils/string';
 import StyledInput from '../Elements/StyledInput';
-import StyledLabel from '../Elements/StyledLabel';
 import StyledText from '../Elements/StyledText';
 import ButtonWithIcon from '../Helpers/ButtonWithIcon';
 import GoogleIcon from '../../lib/SVGs/GoogleIcon';
 import ImageInputDisplay from '../Reusables/ImageInput';
 import Dropdown from '../Reusables/Dropdown';
-import {
-  BottomGradient,
-  LabelInputContainer,
-} from '../Reusables/LabelnputContainer';
+import { LabelInputContainer } from '../Reusables/LabelnputContainer';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 const signUpFormSchema = yup.object().shape({
@@ -26,6 +22,8 @@ const signUpFormSchema = yup.object().shape({
 import { useForm } from 'react-hook-form';
 import { objectToFormData } from '../../utils/object';
 import useAuthQuery from '../../hooks/react-query/useAuthQuery';
+import { useAuthStore } from '../../services/stores/useAuthStore';
+import StyledButton from '../Elements/StyledButton';
 
 export function SignupForm() {
   const {
@@ -38,7 +36,7 @@ export function SignupForm() {
   });
 
   const { signUp } = useAuthQuery();
-
+  const { setAuthSession, setAuthModalActiveSection } = useAuthStore();
   const onSubmit = (data: yup.InferType<typeof signUpFormSchema>) => {
     const payload = {
       ...data,
@@ -47,13 +45,14 @@ export function SignupForm() {
     };
     const formData = objectToFormData(payload);
     signUp.mutate(formData);
+    setAuthSession({ email: data.email, fullName: data.fullName });
   };
 
   const [avatar, setAvatar] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole>(UserRole.USER);
   return (
-    <form className="mt-5" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+    <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
         <LabelInputContainer
           htmlFor="fullName"
           label="Full Name"
@@ -81,7 +80,7 @@ export function SignupForm() {
         </LabelInputContainer>
       </div>
 
-      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
+      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
         <LabelInputContainer
           htmlFor="username"
           label="Username"
@@ -100,7 +99,7 @@ export function SignupForm() {
             className="w-full"
             items={Object.values(UserRole)
               .filter((role) => role !== UserRole.ADMIN)
-              .map((role, i) => ({
+              .map((role) => ({
                 label: capitalizeFirstLetter(role),
                 onClick: () => setRole(role as UserRole),
                 bordered: true,
@@ -122,7 +121,7 @@ export function SignupForm() {
       <div className="flex flex-row space-x-6 items-center justify-between">
         <div className="flex flex-col flex-1">
           <LabelInputContainer
-            className="mb-4"
+            className="mb-2"
             htmlFor="password"
             label="Password"
             errorMessage={errors.password?.message}
@@ -135,7 +134,7 @@ export function SignupForm() {
             />
           </LabelInputContainer>
           <LabelInputContainer
-            className="mb-4"
+            className="mb-2"
             htmlFor="confirmPassword"
             label="Confirm Password"
             errorMessage={errors.confirmPassword?.message}
@@ -166,18 +165,12 @@ export function SignupForm() {
         </div>
       </div>
 
-      <button
-        className="bg-gradient-to-br relative group/btn from-neutral-700 to-neutral-900 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
+      <StyledButton
         type="submit"
-      >
-        <StyledText
-          text="Sign Up"
-          className="text-base text-white"
-          animate={false}
-        />
-        <BottomGradient />
-      </button>
-
+        text="Sign Up"
+        variant="dark"
+        className="mt-4"
+      />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
 
       <ButtonWithIcon
@@ -189,6 +182,18 @@ export function SignupForm() {
       >
         Continue with Google
       </ButtonWithIcon>
+
+      <StyledButton
+        onClick={() => setAuthModalActiveSection('login')}
+        text={
+          <StyledText className="text-center">
+            {`Already have an account?`}{' '}
+            <StyledText className="font-medium">Log In</StyledText>
+          </StyledText>
+        }
+        variant="secondary"
+        className="mt-3 w-full border-t-0 border-x-0 border-b border-b-neutral-400"
+      />
     </form>
   );
 }

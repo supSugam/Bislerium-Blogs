@@ -121,7 +121,7 @@ const ImageInputDisplay = ({
           >
             <ImageUp size={32} />
             <StyledText
-              text={
+              children={
                 isDragging && allowDnd
                   ? 'Release to upload'
                   : 'Drag and drop or click to upload'

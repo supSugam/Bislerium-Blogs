@@ -3,10 +3,12 @@ import { useMotionTemplate, useMotionValue, motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  fullHeight?: boolean;
+}
 
 const StyledInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, fullHeight, ...props }, ref) => {
     const radius = 100; // change this to increase the rdaius of the hover effect
     const [visible, setVisible] = useState<boolean>(false);
 
@@ -37,9 +39,9 @@ const StyledInput = forwardRef<HTMLInputElement, InputProps>(
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
-        className="p-[2px] rounded-lg transition duration-300 group/input relative"
+        className="p-[2px] rounded-lg transition duration-300 group/input relative h-full"
       >
-        <div className="relative w-full">
+        <div className="relative w-full h-full">
           <input
             type={inputType}
             className={cn(
@@ -48,7 +50,8 @@ const StyledInput = forwardRef<HTMLInputElement, InputProps>(
           focus-visible:outline-none focus-visible:ring-[2px]  focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600
            disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none transition duration-400
            `,
-              className
+              className,
+              fullHeight && 'h-full'
             )}
             ref={ref}
             {...props}

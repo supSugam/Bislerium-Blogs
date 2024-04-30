@@ -21,6 +21,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  letter-spacing: -0.04em;
 }
 
 body {
@@ -37,4 +38,14 @@ summary,
 [type='checkbox'] {
   cursor: pointer;
   color: inherit;
+}
+
+/* Hide spinner */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  appearance: textfield;
 }

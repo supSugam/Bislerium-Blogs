@@ -7,6 +7,7 @@
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.1.7",
+    "jwt-decode": "^4.0.0",
     "react-hook-form": "^7.51.3",
     "react-hot-toast": "^2.4.1",
     "tailwind-merge": "^2.3.0",

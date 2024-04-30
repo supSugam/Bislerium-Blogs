@@ -1,0 +1,172 @@
+import { createRef, useEffect, useState } from 'react';
+import {
+  addToPosition,
+  removeFromPosition,
+  seekValue,
+} from '../../utils/string';
+import StyledInput from '../Elements/StyledInput';
+import toast from 'react-hot-toast';
+import { cn } from '../../utils/cn';
+
+interface IPinCodeInputProps {
+  length?: number;
+  onChange: (num?: number) => void;
+  value?: number;
+  className?: string;
+}
+
+const PinCodeInput = ({
+  value,
+  onChange,
+  length = 6,
+  className,
+}: IPinCodeInputProps) => {
+  const handleKeyDown = (e: React.KeyboardEvent, position: number) => {
+    if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      navigator.clipboard.readText().then((text) => {
+        if (text.length !== length) {
+          toast.error(`Must be ${length} digits long.`);
+          return;
+        }
+        const isValidNumber = text
+          .split('')
+          .every((char) => char.match(/[0-9]/));
+        if (!isValidNumber) {
+          toast.error('Only Numbers Allowed.');
+          return;
+        }
+        allInputRefs[length - 1].current?.focus();
+        onChange(+text);
+      });
+      return;
+    }
+
+    if (value === undefined) {
+      const el = allInputRefs[0]?.current;
+      if (el) {
+        el.disabled = false;
+        el.focus();
+      }
+      onChange(undefined);
+    }
+    const enteredKey = e.key.toLowerCase();
+    if (!enteredKey.match(/[0-9]|(backspace)|(control)|(v)/g)) {
+      toast.error('Only Number, L/R Arrow & Backspace Allowed.');
+      return;
+    }
+
+    if (enteredKey === 'backspace') {
+      if (value !== undefined) {
+        const valueOnThatPositionExists = seekValue(value, position);
+        const newValue = removeFromPosition(
+          value,
+          valueOnThatPositionExists ? position : position - 1
+        );
+        onChange(newValue);
+        if (position !== 0) {
+          const el = allInputRefs[position - 1]?.current;
+          if (el) {
+            el.disabled = false;
+            el.focus();
+          }
+        }
+      }
+    }
+
+    if (value?.toString().length === length) return;
+
+    if (enteredKey.match(/[0-9]/)) {
+      if (value === undefined) {
+        onChange(+enteredKey);
+      } else {
+        const newValue = addToPosition(value, position, +enteredKey) as number;
+        onChange(newValue);
+      }
+
+      if (value !== undefined && position !== value?.toString().length - 1) {
+        const el = allInputRefs[position + 1]?.current;
+        if (el) {
+          el.disabled = false;
+          el.focus();
+        }
+      }
+    }
+  };
+  const allInputRefs: React.RefObject<HTMLInputElement>[] = new Array(length)
+    .fill(0)
+    .map(() => createRef<HTMLInputElement>());
+
+  useEffect(() => {
+    const onKeydown = (e: KeyboardEvent) => {
+      // Paste
+      const IsAnyInputFocused = allInputRefs.some(
+        (ref) => ref.current === document.activeElement
+      );
+      if (IsAnyInputFocused) return;
+
+      if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        navigator.clipboard.readText().then((text) => {
+          if (text.length > length) {
+            toast.error(`Must be ${length} digits long.`);
+            return;
+          }
+          const isValidNumber = text
+            .split('')
+            .every((char) => char.match(/[0-9]/));
+          if (!isValidNumber) {
+            toast.error('Only Numbers Allowed.');
+            return;
+          }
+          allInputRefs[length - 1].current?.focus();
+          onChange(+text);
+        });
+      }
+    };
+    document.addEventListener('keydown', onKeydown);
+
+    return () => document.removeEventListener('keydown', onKeydown);
+  }, [allInputRefs, length, onChange]);
+  return (
+    <div
+      className={cn(
+        'flex flex-row space-x-3 justify-between items-center w-full',
+        className
+      )}
+    >
+      {new Array(length).fill(0).map((_, i) => {
+        return (
+          <div
+            key={i}
+            className="w-16 h-24 rounded-xl overflow-hidden border border-b-2"
+          >
+            <StyledInput
+              type="text"
+              pattern="[0-9]*"
+              inputMode="numeric"
+              value={
+                value !== undefined
+                  ? seekValue(value, i) !== undefined
+                    ? seekValue(value, i)
+                    : ''
+                  : ''
+              }
+              fullHeight
+              className="flex items-center justify-center text-2xl text-center font-semibold"
+              onKeyDown={(e) => handleKeyDown(e, i)}
+              ref={allInputRefs[i]}
+              onChange={(e) => e.preventDefault()}
+              disabled={
+                (value === undefined && i !== 0) ||
+                (value !== undefined && value.toString().length < i)
+              }
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+export default PinCodeInput;

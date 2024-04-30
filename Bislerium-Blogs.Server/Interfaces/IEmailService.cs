@@ -10,7 +10,7 @@ namespace Bislerium_Blogs.Server.Interfaces
 
         public Task<string> SendOTP(string email, string name);
 
-        void StoreOTP(string email, int otp);
+        void StoreOTP(string email, int[] otp);
 
         bool VerifyOTP(string email, string otp);
     }

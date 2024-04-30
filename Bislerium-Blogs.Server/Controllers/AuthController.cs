@@ -62,7 +62,7 @@ namespace Bislerium_Blogs.Server.Controllers
         {
             try
             {
-                await _emailService.SendOTP("sugam.subedi.s22@icp.edu.np", "Bruh");
+                await _emailService.SendOTP("vafaxin655@buzblox.com", "Bruh Moment");
                 return Ok("Mail Sent");
             }
             catch (Exception ex)
@@ -73,8 +73,6 @@ namespace Bislerium_Blogs.Server.Controllers
 
 
         [HttpPost("verify-otp")]
-        [AuthorizedOnly]
-
         public async Task<IActionResult> VerifyOTP([FromBody] VerifyOtpDto verifyOtpDto)
         {
             if (!ModelState.IsValid)
@@ -85,6 +83,24 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                  await _authService.VerifyOtpAsync(verifyOtpDto);
                 return Ok("Verified, You may login now!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("resend-otp")]
+        public async Task<IActionResult> ResendOTP([FromBody] ResendOtpDto resendOtpDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _emailService.SendOTP(resendOtpDto.Email, resendOtpDto.FullName);
+                return Ok("OTP Sent");
             }
             catch (Exception ex)
             {
