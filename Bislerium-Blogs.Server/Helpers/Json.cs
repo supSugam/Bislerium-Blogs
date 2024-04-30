@@ -5,14 +5,31 @@ namespace Bislerium_Blogs.Server.Helpers
 {
     public static class JSON
     {
-        public static bool IsValidJSON(this string json)
+        public static bool IsValidJSON(string strInput)
         {
-            try
+            if (string.IsNullOrWhiteSpace(strInput)) { return false; }
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
             {
-                JToken.Parse(json);
-                return true;
+                try
+                {
+                    var obj = JToken.Parse(strInput);
+                    return true;
+                }
+                catch (JsonReaderException jex)
+                {
+                    //Exception in parsing json
+                    Console.WriteLine(jex.Message);
+                    return false;
+                }
+                catch (Exception ex) //some other exception
+                {
+                    Console.WriteLine(ex.ToString());
+                    return false;
+                }
             }
-            catch (JsonReaderException)
+            else
             {
                 return false;
             }

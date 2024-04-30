@@ -79,14 +79,15 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try
+            bool IsVerified = await _authService.VerifyOTP(verifyOtpDto);
+
+            if (IsVerified)
             {
-                 await _authService.VerifyOtpAsync(verifyOtpDto);
-                return Ok("Verified, You may login now!");
+                return Ok("OTP Verified");
             }
-            catch (Exception ex)
+            else
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Invalid OTP");
             }
         }
 

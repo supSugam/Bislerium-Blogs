@@ -192,7 +192,7 @@ export function SignupForm() {
           </StyledText>
         }
         variant="secondary"
-        className="mt-3 w-full border-t-0 border-x-0 border-b border-b-neutral-400"
+        className="mt-3 w-full border-none"
       />
     </form>
   );

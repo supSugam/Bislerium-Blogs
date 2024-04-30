@@ -27,7 +27,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>(
   (set, get): AuthStore => ({
-    authModalActiveSection: 'login',
+    authModalActiveSection: 'verify-otp',
     setAuthModalActiveSection: (section) => {
       set(() => ({ authModalActiveSection: section }));
     },

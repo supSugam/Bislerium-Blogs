@@ -34,18 +34,26 @@ export const seekValue = <T extends number | string>(
   }
 };
 
-export const removeFromPosition = <T extends number | string>(
+export const removeFromPosition = <T extends number | string | undefined>(
   value: T,
   position: number
 ): T => {
-  const currentValue = value.toString();
+  const currentValue = value?.toString();
 
-  if (position < 0 || position > currentValue.length) return value;
+  if (currentValue === undefined) return value as T;
+
+  if (position < 0 || position >= currentValue.length) return value;
 
   const finalValue =
     currentValue.slice(0, position) + currentValue.slice(position + 1);
 
-  return (typeof value === 'string' ? finalValue : Number(finalValue)) as T;
+  return (
+    typeof value === 'string'
+      ? finalValue
+      : finalValue !== ''
+      ? Number(finalValue)
+      : undefined
+  ) as T;
 };
 
 export const addToPosition = <T extends number | string>(
@@ -62,4 +70,16 @@ export const addToPosition = <T extends number | string>(
   return (typeof value === 'string'
     ? finalValue
     : Number(finalValue)) as unknown as T;
+};
+
+export const parseStringToNumber = (input: string): number | undefined => {
+  // Attempt to parse the input string into a number
+  const parsedNumber = parseFloat(input);
+
+  // Check if the parsed number is NaN (not a number)
+  if (isNaN(parsedNumber)) {
+    return undefined; // Return undefined if input is not a valid number
+  } else {
+    return parsedNumber; // Return the parsed number if input is a valid number
+  }
 };

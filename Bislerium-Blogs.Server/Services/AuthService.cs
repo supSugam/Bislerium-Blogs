@@ -27,7 +27,7 @@ namespace Bislerium_Blogs.Server.Services
         }
 
 
-        private string GenerateJwtToken(IdentityUser user)
+        public string GenerateJwtToken(IdentityUser user)
         {
             ArgumentNullException.ThrowIfNull(user, nameof(user));
             var role = _userManager.GetRolesAsync(user).Result.FirstOrDefault();
@@ -96,6 +96,12 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception("Invalid Password");
             }
 
+            var IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            if (!IsEmailConfirmed)
+            {
+                throw new Exception("Email is not confirmed");
+            }
+
             string accessToken = GenerateJwtToken(user);
 
             return new
@@ -105,17 +111,23 @@ namespace Bislerium_Blogs.Server.Services
 
         }
 
-        public async Task<bool> VerifyOtpAsync(VerifyOtpDto verifyOtpDto)
+        public async Task<bool> VerifyOTP(VerifyOtpDto verifyOtpDto)
         {
             ArgumentNullException.ThrowIfNull(verifyOtpDto, nameof(verifyOtpDto));
-
-            bool IsCorrect = _emailService.VerifyOTP(verifyOtpDto.Email, verifyOtpDto.Otp.ToString());
-            if (!IsCorrect)
+            bool IsCorrect = await _emailService.VerifyOTP(verifyOtpDto.Email, verifyOtpDto.Otp);
+            if (IsCorrect)
             {
-                throw new Exception("Invalid OTP");
-            }
+                var existingUser = await _userManager.FindByEmailAsync(verifyOtpDto.Email);
 
-            return true;
+                if(existingUser == null)
+                {
+                    var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(existingUser);
+
+                    await _userManager.ConfirmEmailAsync(existingUser, emailConfirmationToken);
+                }
+                ;
+            }
+            return IsCorrect;
 
         }
 

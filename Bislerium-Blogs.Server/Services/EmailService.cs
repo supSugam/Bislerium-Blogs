@@ -4,63 +4,64 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
+using System.Linq;
 namespace Bislerium_Blogs.Server.Services
 {
 
 public class EmailService: IEmailService
 {
         private readonly EmailSettings _emailSettings;
-        private readonly Dictionary<string, string> otpStorage;
+        private readonly OtpService _otpService;
 
-        public EmailService(IOptions<EmailSettings> emailSettings)
+        public EmailService(IOptions<EmailSettings> emailSettings, OtpService otpService)
         {
             _emailSettings = emailSettings.Value;
-            otpStorage = new Dictionary<string, string>();
+            _otpService = otpService;
         }
 
         public Task<string> SendEmailAsync(MailData mailData)
         {
             try
             {
-                using (MimeMessage emailMessage = new())
+                using MimeMessage emailMessage = new();
+                MailboxAddress emailFrom = new(
+                    "Bislerium Blogs",
+                    _emailSettings.MailUser
+                );
+                emailMessage.From.Add(emailFrom);
+                MailboxAddress emailTo = new(mailData.EmailToName, mailData.EmailToId);
+                emailMessage.To.Add(emailTo);
+
+                emailMessage.Cc.Add(new MailboxAddress(
+                    "Bislerium Blogs",
+                    _emailSettings.MailUser
+                ));
+                emailMessage.Bcc.Add(new MailboxAddress(
+                                           "Bislerium Blogs",
+                                                                  _emailSettings.MailUser
+                                                                                     ));
+                emailMessage.Subject = mailData.EmailSubject;
+
+                BodyBuilder emailBodyBuilder = new()
                 {
-                    MailboxAddress emailFrom = new(
-                        "Bislerium Blogs",
-                        _emailSettings.MailUser
+                    HtmlBody = mailData.EmailBody
+                };
+                emailMessage.Body = emailBodyBuilder.ToMessageBody();
+                using (SmtpClient mailClient = new())
+                {
+                    mailClient.Connect(
+                        _emailSettings.MailHost,
+                        _emailSettings.MailPort,
+                        SecureSocketOptions.StartTls
                     );
-                    emailMessage.From.Add(emailFrom);
-                    MailboxAddress emailTo = new(mailData.EmailToName, mailData.EmailToId);
-                    emailMessage.To.Add(emailTo);
-
-                    emailMessage.Cc.Add(new MailboxAddress(
-                        "Bislerium Blogs",
-                        _emailSettings.MailUser
-                    ));
-                    emailMessage.Bcc.Add(new MailboxAddress(
-                                               "Bislerium Blogs",
-                                                                      _emailSettings.MailUser
-                                                                                         ));
-                    emailMessage.Subject = mailData.EmailSubject;
-
-                    BodyBuilder emailBodyBuilder = new();
-                    emailBodyBuilder.HtmlBody = mailData.EmailBody;
-                    emailMessage.Body = emailBodyBuilder.ToMessageBody();
-                    using (SmtpClient mailClient = new())
-                    {
-                        mailClient.Connect(
-                            _emailSettings.MailHost,
-                            _emailSettings.MailPort,
-                            SecureSocketOptions.StartTls
-                        );
-                        mailClient.Authenticate(
-                            _emailSettings.MailUser,
-                            _emailSettings.MailPass
-                        );
-                        mailClient.Send(emailMessage);
-                        mailClient.Disconnect(true);
-                    }
-                    return Task.FromResult("Mail sent successfully");
+                    mailClient.Authenticate(
+                        _emailSettings.MailUser,
+                        _emailSettings.MailPass
+                    );
+                    mailClient.Send(emailMessage);
+                    mailClient.Disconnect(true);
                 }
+                return Task.FromResult("Mail sent successfully");
             }
             catch (Exception ex)
             {
@@ -69,40 +70,28 @@ public class EmailService: IEmailService
             }
         }
 
-        public async Task<string> SendOTP(string email, string name)
+        public async Task SendOTP(string email, string name, string? subject =null)
         {
-            var otp = Number.GenerateRandomNumbers(6);
+            var otp = await _otpService.GenerateOtpAsync(email);
             var mailData = new MailData
             {
                 EmailToId = email,
                 EmailToName = name,
-                EmailSubject = "Account Verification",
+                EmailSubject = subject ?? "Account Verification",
                 EmailBody = GetOtpVerificationEmailBody(name, otp)
             };
-            StoreOTP(email, otp);
-
-            return await SendEmailAsync(mailData);
+            await SendEmailAsync(mailData);
         }
 
-        public void StoreOTP(string email, int[] otp)
+
+        public async Task<bool> VerifyOTP(string email, int otp)
         {
-            var otpString = string.Join("", otp);
-            otpStorage[email] = otpString;
+            return await _otpService.VerifyOtpAsync(email, otp.ToString());
         }
 
-        public bool VerifyOTP(string email, string otp)
-        {
-            if (!otpStorage.TryGetValue(email, out string? value))
-            {
-                return false;
-            }
 
-            return value == otp;
-        }
-
-        public string GetOtpVerificationEmailBody(string name, int[] otp)
+        public string GetOtpVerificationEmailBody(string name, string otpDigits)
     {
-        var otpDigits = string.Join("", otp);
 
         return $@"
 <!DOCTYPE html>

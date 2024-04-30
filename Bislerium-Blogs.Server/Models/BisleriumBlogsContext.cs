@@ -43,6 +43,8 @@ public partial class BisleriumBlogsContext : IdentityDbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<Otp> Otps { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<BlogPost>(entity =>

@@ -43,7 +43,7 @@ const AuthModal = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ type: 'spring', damping: 10, stiffness: 100 }}
-        className="flex flex-col items-center w-full my-2 mt-6"
+        className="flex flex-col items-center w-full mt-6"
         key={authModalActiveSection}
       >
         {
@@ -53,11 +53,18 @@ const AuthModal = () => {
             'verify-otp': (
               <OTPVerification
                 code={otpCode}
-                onCodeChange={setOtpCode}
+                onCodeChange={(code) => setOtpCode(code)}
                 sentTo={authSession.email ?? 'Your email'}
-                onVerify={() => {
+                onVerify={async () => {
                   if (!authSession.email || !otpCode) return;
-                  verifyOtp.mutate({ otp: otpCode, email: authSession.email });
+                  await verifyOtp.mutateAsync(
+                    { otp: otpCode, email: authSession.email },
+                    {
+                      onError: () => {
+                        setOtpCode(undefined);
+                      },
+                    }
+                  );
                 }}
                 onResend={async () => {
                   if (!authSession.email) return;

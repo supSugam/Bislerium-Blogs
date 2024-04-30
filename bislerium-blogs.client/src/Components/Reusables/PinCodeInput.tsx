@@ -1,6 +1,7 @@
-import { createRef, useEffect, useState } from 'react';
+import { createRef, useEffect } from 'react';
 import {
   addToPosition,
+  parseStringToNumber,
   removeFromPosition,
   seekValue,
 } from '../../utils/string';
@@ -41,28 +42,26 @@ const PinCodeInput = ({
       });
       return;
     }
-
-    if (value === undefined) {
-      const el = allInputRefs[0]?.current;
-      if (el) {
-        el.disabled = false;
-        el.focus();
-      }
-      onChange(undefined);
-    }
+    console.log('key pressed', e.key);
     const enteredKey = e.key.toLowerCase();
-    if (!enteredKey.match(/[0-9]|(backspace)|(control)|(v)/g)) {
-      toast.error('Only Number, L/R Arrow & Backspace Allowed.');
+    if (!enteredKey.match(/[0-9]|Backspace|Control|v/gi)) {
       return;
     }
 
     if (enteredKey === 'backspace') {
+      console.log('backspace');
       if (value !== undefined) {
         const valueOnThatPositionExists = seekValue(value, position);
+        console.log(
+          valueOnThatPositionExists,
+          position,
+          'valueOnThatPositionExists'
+        );
         const newValue = removeFromPosition(
           value,
-          valueOnThatPositionExists ? position : position - 1
+          valueOnThatPositionExists !== undefined ? position : position - 1
         );
+        console.log(newValue, 'new value');
         onChange(newValue);
         if (position !== 0) {
           const el = allInputRefs[position - 1]?.current;
@@ -76,20 +75,19 @@ const PinCodeInput = ({
 
     if (value?.toString().length === length) return;
 
-    if (enteredKey.match(/[0-9]/)) {
+    if (parseStringToNumber(enteredKey) !== undefined) {
       if (value === undefined) {
         onChange(+enteredKey);
       } else {
         const newValue = addToPosition(value, position, +enteredKey) as number;
+        console.log(newValue, 'new value now');
         onChange(newValue);
       }
 
-      if (value !== undefined && position !== value?.toString().length - 1) {
-        const el = allInputRefs[position + 1]?.current;
-        if (el) {
-          el.disabled = false;
-          el.focus();
-        }
+      const el = allInputRefs[position + 1]?.current;
+      if (el) {
+        el.disabled = false;
+        el.focus();
       }
     }
   };
@@ -128,6 +126,14 @@ const PinCodeInput = ({
 
     return () => document.removeEventListener('keydown', onKeydown);
   }, [allInputRefs, length, onChange]);
+
+  useEffect(() => {
+    console.log(value, 'VALUE');
+  }, [value]);
+
+  useEffect(() => {
+    allInputRefs?.[0]?.current?.focus();
+  }, []);
   return (
     <div
       className={cn(

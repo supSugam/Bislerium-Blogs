@@ -20,20 +20,22 @@
             var originalBodyStream = context.Response.Body;
             using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
+            context.Response.ContentType = "application/json";
 
             try
             {
                 await _next(context);
-                context.Response.ContentType = "application/json";
                 responseBody.Seek(0, SeekOrigin.Begin);
                 string jsonResponse = await new StreamReader(responseBody).ReadToEndAsync();
 
                 if (context.Response.StatusCode >= 400)
                 {
+                    Console.WriteLine("Errorrr");
                     List<string> allErrors = new();
-
                     if (JSON.IsValidJSON(jsonResponse))
                     {
+                        Console.WriteLine("ISVALIDJSON");
+                        Console.WriteLine(jsonResponse);
                         var resJson = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
 
                         foreach (var key in resJson.Keys)
@@ -68,27 +70,30 @@
 
                     var errorResponseJson = JsonSerializer.Serialize(errorResponse);
                     responseBody.SetLength(0); // Clear the response body
-                    await responseBody.WriteAsync(Encoding.UTF8.GetBytes(errorResponseJson)); // Write the custom error response
+                    await responseBody.WriteAsync(Encoding.UTF8.GetBytes(errorResponseJson)); 
                 }
                 else
                 {
-                        var successResponse = new
+                    var successResponse = new
                     {
                         path = context.Request.Path.Value,
                         statusCode = context.Response.StatusCode,
-                        
                         success = true,
-                        result = JSON.ParseJSON(jsonResponse)
-                        };
+                        result = jsonResponse
+                    };
+                    Console.WriteLine(jsonResponse);
+
                     var successResponseJson = JsonSerializer.Serialize(successResponse);
                     responseBody.SetLength(0); // Clear the response body
-                    await responseBody.WriteAsync(Encoding.UTF8.GetBytes(successResponseJson)); // Write the custom success response
+                    await responseBody.WriteAsync(Encoding.UTF8.GetBytes(successResponseJson));
 
                 }
             } catch (Exception ex)
             {
+                Console.WriteLine("Error from Middleware");
+                Console.WriteLine(ex.Message);
+
                 responseBody.Seek(0, SeekOrigin.Begin);
-                context.Response.ContentType = "application/json";
                 var errorList = new List<string> { ex.Message };
                 var errorResponse = new
                 {
