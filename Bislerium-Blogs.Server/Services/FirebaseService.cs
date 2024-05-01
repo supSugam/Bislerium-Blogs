@@ -12,7 +12,7 @@ namespace Bislerium_Blogs.Server.Services
         public FirebaseService()
         {
 
-            var auth = new FirebaseAuthProvider(new FirebaseConfig("AIzaSyBhncP-sleaWNBvIdL-FS624oxWw1xIn68"));
+            var auth = new FirebaseAuthProvider(new FirebaseConfig("AIzaSyDBmA6-cqDjLYIXCiC6QpO9yrLm5kvKxTo"));
             var firebaseToken = auth.SignInWithEmailAndPasswordAsync(Constants.ADMIN_EMAIL, Constants.ADMIN_PASSWORD).Result.FirebaseToken;
             var options = new FirebaseStorageOptions
             {
@@ -20,7 +20,7 @@ namespace Bislerium_Blogs.Server.Services
                 ThrowOnCancel = true,
             };
 
-            _firebaseStorage = new FirebaseStorage("bislerium-blogs.appspot.com", options);
+            _firebaseStorage = new FirebaseStorage("bisleriumblogs.appspot.com", options);
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, string folderName, string fileName)
