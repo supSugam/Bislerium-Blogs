@@ -14,6 +14,7 @@ const useAuthQuery = () => {
     closeAuthModal,
     setAuthModalActiveSection,
     setAuthSession,
+    logout,
   } = useAuthStore();
 
   // Sign Up
@@ -31,7 +32,7 @@ const useAuthQuery = () => {
       }),
     onSuccess: (data) => {
       toast.success(data.data.result);
-      setAuthModalActiveSection('verify-otp');
+      setAuthModalActiveSection('verify-account');
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -63,7 +64,7 @@ const useAuthQuery = () => {
           email: data.data.result.email,
           fullName: data.data.result.username,
         });
-        setAuthModalActiveSection('verify-otp');
+        setAuthModalActiveSection('verify-account');
       }
     },
     onError: (error) => {
@@ -90,13 +91,13 @@ const useAuthQuery = () => {
     },
   });
 
-  const resendOtp = useMutation<
+  const sendOtp = useMutation<
     AxiosResponse<ISuccessResponse<string>>,
     AxiosError<IFailedResponse>,
-    { email: string; fullName: string },
+    { email: string; fullName: string; subject: string | null },
     string
   >({
-    mutationFn: async (data) => await api.post('/auth/resend-otp', data),
+    mutationFn: async (data) => await api.post('/auth/send-otp', data),
     onSuccess: (data) => {
       toast.success(data.data.result);
     },
@@ -105,7 +106,24 @@ const useAuthQuery = () => {
     },
   });
 
-  return { signUp, verifyOtp, logIn, resendOtp };
+  const resetPassword = useMutation<
+    AxiosResponse<ISuccessResponse<string>>,
+    AxiosError<IFailedResponse>,
+    { email: string; password: string; otp: number },
+    string
+  >({
+    mutationFn: async (data) => await api.post('/auth/reset-password', data),
+    onSuccess: (data) => {
+      toast.success(data.data.result);
+      logout();
+      setAuthModalActiveSection('login');
+    },
+    onError: (error) => {
+      toastWithInterval({ error });
+    },
+  });
+
+  return { signUp, verifyOtp, logIn, sendOtp, resetPassword };
 };
 
 export default useAuthQuery;

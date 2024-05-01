@@ -91,7 +91,7 @@ namespace Bislerium_Blogs.Server.Controllers
             }
         }
 
-        [HttpPost("resend-otp")]
+        [HttpPost("send-otp")]
         public async Task<IActionResult> ResendOTP([FromBody] ResendOtpDto resendOtpDto)
         {
             if (!ModelState.IsValid)
@@ -100,8 +100,26 @@ namespace Bislerium_Blogs.Server.Controllers
             }
             try
             {
-                await _emailService.SendOTP(resendOtpDto.Email, resendOtpDto.FullName);
+                await _emailService.SendOTP(resendOtpDto.Email, resendOtpDto.FullName,resendOtpDto.Subject);
                 return Ok("OTP Sent");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _authService.ResetPassword(resetPasswordDto);
+                return Ok("Password Reset Successful");
             }
             catch (Exception ex)
             {

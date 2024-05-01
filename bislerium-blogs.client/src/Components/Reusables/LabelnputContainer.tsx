@@ -21,9 +21,13 @@ const LabelInputContainer = ({
 
         {children}
         <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: errorMessage ? 1 : 0 }}
-          className="text-red-500 text-sm"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{
+            opacity: errorMessage ? 1 : 0,
+            y: errorMessage ? -5 : -10,
+          }}
+          className="text-red-500 text-sm pb-1"
+          key={errorMessage}
         >
           {errorMessage}
         </motion.span>

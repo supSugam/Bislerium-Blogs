@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UserRole } from '../../enums/UserRole';
 import { capitalizeFirstLetter } from '../../utils/string';
 import StyledInput from '../Elements/StyledInput';
@@ -25,7 +25,11 @@ import useAuthQuery from '../../hooks/react-query/useAuthQuery';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import StyledButton from '../Elements/StyledButton';
 
-export function SignupForm() {
+export function SignupForm({
+  mode = 'signup',
+}: {
+  mode?: 'signup' | 'update-profile';
+}) {
   const {
     register,
     handleSubmit,
@@ -50,6 +54,8 @@ export function SignupForm() {
 
   const [avatar, setAvatar] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole>(UserRole.USER);
+
+  useEffect(() => {}, []);
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
@@ -160,7 +166,7 @@ export function SignupForm() {
             }}
             onDelete={() => setAvatar(null)}
             allowDnd
-            maxSize={2 * 1024 * 1024}
+            maxSize={6 * 1024 * 1024}
           />
         </div>
       </div>
@@ -172,7 +178,7 @@ export function SignupForm() {
         className="mt-4"
       />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
-
+      {/* 
       <ButtonWithIcon
         icon={<GoogleIcon size={20} />}
         onClick={async () => {
@@ -181,7 +187,7 @@ export function SignupForm() {
         }}
       >
         Continue with Google
-      </ButtonWithIcon>
+      </ButtonWithIcon> */}
 
       <StyledButton
         onClick={() => setAuthModalActiveSection('login')}

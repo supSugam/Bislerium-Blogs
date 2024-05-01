@@ -9,6 +9,8 @@ interface ModalProps {
   children: ReactNode;
   className?: string;
   backdropClassName?: string;
+  closeOnBackdropClick?: boolean;
+  closeOnEscapeKey?: boolean;
 }
 
 const Modal: FC<ModalProps> = ({
@@ -17,6 +19,8 @@ const Modal: FC<ModalProps> = ({
   children,
   className,
   backdropClassName,
+  closeOnBackdropClick = true,
+  closeOnEscapeKey = true,
 }) => {
   const [mounted, setMounted] = useState(false);
 
@@ -32,11 +36,11 @@ const Modal: FC<ModalProps> = ({
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
+      if (e.target === e.currentTarget && closeOnBackdropClick) {
         onClose?.();
       }
     },
-    [onClose]
+    [onClose, closeOnBackdropClick]
   );
 
   const modalContent = (
@@ -52,6 +56,9 @@ const Modal: FC<ModalProps> = ({
             'fixed inset-0 z-[999] flex items-center justify-center',
             backdropClassName
           )}
+          onKeyDown={(e: React.KeyboardEvent) =>
+            e.key === 'Escape' && closeOnEscapeKey && onClose?.()
+          }
         >
           {/* White transculent glass background */}
           <motion.div

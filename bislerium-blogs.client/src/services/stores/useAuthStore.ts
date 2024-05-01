@@ -7,7 +7,18 @@ interface AuthSessionData {
   email?: string;
   fullName?: string;
 }
-type ActiveSection = 'signup' | 'login' | 'verify-otp';
+
+type PasswordSessionData = {
+  email: string;
+  password: string;
+} | null;
+type ActiveSection =
+  | 'signup'
+  | 'login'
+  | 'verify-account'
+  | 'update-profile'
+  | 'reset-password'
+  | 'verify-reset-password';
 
 interface AuthStore {
   api: AxiosInstance;
@@ -23,6 +34,8 @@ interface AuthStore {
   logout: () => void;
   authSession: AuthSessionData;
   setAuthSession: (data: AuthSessionData) => void;
+  passwordSession: PasswordSessionData;
+  setPasswordSession: (data: PasswordSessionData) => void;
 }
 
 export const useAuthStore = create<AuthStore>(
@@ -41,7 +54,12 @@ export const useAuthStore = create<AuthStore>(
       set(() => ({ authModalOpen: true }));
     },
     closeAuthModal: () => {
-      set(() => ({ authModalOpen: false }));
+      set(() => ({
+        authModalOpen: false,
+        authModalActiveSection: 'login',
+        authSession: {},
+        passwordSession: null,
+      }));
     },
     onInitialize: () => {
       const { openAuthModal } = get();
@@ -75,6 +93,10 @@ export const useAuthStore = create<AuthStore>(
     setAuthSession: (data) => {
       const { authSession } = get();
       set(() => ({ authSession: { ...authSession, ...data } }));
+    },
+    passwordSession: null,
+    setPasswordSession: (data) => {
+      set(() => ({ passwordSession: data }));
     },
   })
 );

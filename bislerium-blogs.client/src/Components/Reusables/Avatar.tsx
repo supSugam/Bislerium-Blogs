@@ -14,14 +14,14 @@ const Avatar = ({
     'w-14': size === 'large',
   });
   return (
-    <button className={classes}>
+    <div className={classes}>
       <img
         src={src}
         alt="avatar"
         className="rounded-full"
         style={{ width: size, height: size }}
       />
-    </button>
+    </div>
   );
 };
 

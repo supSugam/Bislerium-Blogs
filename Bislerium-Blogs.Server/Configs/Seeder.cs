@@ -39,15 +39,15 @@ namespace Bislerium_Blogs.Server.Configs
         private async Task SeedAdminUserAndRole(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // Check if the admin user already exists
-            var adminUser = await userManager.FindByEmailAsync("super.admin@bislerium.com");
+            var adminUser = await userManager.FindByEmailAsync(Constants.ADMIN_EMAIL);
 
             if (adminUser == null)
             {
                 // Create the admin user
                 adminUser = new IdentityUser
                 {
-                    UserName = "SuperAdmin",
-                    Email = "super.admin@bislerium.com",
+                    UserName = Constants.ADMIN_USERNAME,
+                    Email = Constants.ADMIN_EMAIL,
                     EmailConfirmed = true,
                 };
 

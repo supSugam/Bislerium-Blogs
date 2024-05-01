@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import Modal from './Modal';
 import { SignupForm } from '../Forms/SignUpForm';
@@ -6,23 +6,52 @@ import OTPVerification from '../OTPVerification';
 import { motion } from 'framer-motion';
 import LoginForm from '../Forms/LoginForm';
 import useAuthQuery from '../../hooks/react-query/useAuthQuery';
+import ResetPassword from '../Forms/ResetPassword';
+import { nameFromEmail } from '../../utils/string';
 
 const AuthModal = () => {
-  const { authModalOpen, closeAuthModal, authSession, authModalActiveSection } =
-    useAuthStore();
+  const {
+    authModalOpen,
+    closeAuthModal,
+    authSession,
+    authModalActiveSection,
+    passwordSession,
+  } = useAuthStore();
   const [otpCode, setOtpCode] = useState<number>();
 
   const sectionTitle = useMemo(() => {
-    if (authModalActiveSection === 'signup') {
-      return 'Join Bislerium Blogs.';
-    } else if (authModalActiveSection === 'login') {
-      return 'Welcome back.';
-    } else if (authModalActiveSection === 'verify-otp') {
-      return 'Verify OTP';
+    let title = '';
+    switch (authModalActiveSection) {
+      case 'signup':
+        title = 'Join Bislerium Blogs.';
+        break;
+      case 'login':
+        title = 'Welcome back.';
+        break;
+      case 'verify-account':
+        title = 'Verify Account';
+        break;
+      case 'update-profile':
+        title = 'Update Profile';
+        break;
+      case 'reset-password':
+        title = 'Reset Password';
+        break;
+      case 'verify-reset-password':
+        title = 'Verify Reset Password OTP';
+        break;
+      default:
+        title = '';
+        break;
     }
+    return title;
   }, [authModalActiveSection]);
 
-  const { verifyOtp, resendOtp } = useAuthQuery();
+  const { verifyOtp, sendOtp, resetPassword } = useAuthQuery();
+
+  useEffect(() => {
+    setOtpCode(undefined);
+  }, [authModalActiveSection]);
 
   return (
     <Modal
@@ -48,9 +77,51 @@ const AuthModal = () => {
       >
         {
           {
-            signup: <SignupForm />,
+            signup: <SignupForm mode="signup" />,
             login: <LoginForm />,
-            'verify-otp': (
+            'reset-password': <ResetPassword />,
+            'update-profile': <SignupForm mode="update-profile" />,
+            'verify-reset-password': (
+              <OTPVerification
+                code={otpCode}
+                onCodeChange={(code) => setOtpCode(code)}
+                sentTo={authSession.email ?? 'Your email'}
+                onVerify={async () => {
+                  if (!passwordSession?.email || !otpCode) return;
+                  await resetPassword.mutateAsync(
+                    {
+                      otp: otpCode,
+                      email: passwordSession.email,
+                      password: passwordSession.password,
+                    },
+                    {
+                      onError: () => {
+                        setOtpCode(undefined);
+                      },
+                    }
+                  );
+                }}
+                onResend={async () => {
+                  if (!authSession.email) return;
+                  await sendOtp.mutateAsync(
+                    {
+                      email: passwordSession?.email || 'Email',
+                      fullName: nameFromEmail(
+                        passwordSession?.email || 'Email'
+                      ),
+                      subject: 'Verify Reset Password (Resend)',
+                    },
+                    {
+                      onError: () => {
+                        setOtpCode(undefined);
+                      },
+                    }
+                  );
+                }}
+                resendInterval={60}
+              />
+            ),
+            'verify-account': (
               <OTPVerification
                 code={otpCode}
                 onCodeChange={(code) => setOtpCode(code)}
@@ -68,10 +139,11 @@ const AuthModal = () => {
                 }}
                 onResend={async () => {
                   if (!authSession.email) return;
-                  await resendOtp.mutateAsync(
+                  await sendOtp.mutateAsync(
                     {
                       email: authSession.email,
                       fullName: authSession.fullName || authSession.email,
+                      subject: 'Verify Account',
                     },
                     {
                       onError: () => {

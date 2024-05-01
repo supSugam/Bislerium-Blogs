@@ -7,7 +7,7 @@ public partial class Image
 {
     public Guid ImageId { get; set; }
 
-    public byte[] ImageData { get; set; } = null!;
+    public required string ImageUrl { get; set; }
 
     public Guid BlogPostId { get; set; }
 

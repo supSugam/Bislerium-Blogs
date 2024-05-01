@@ -1,36 +1,43 @@
 import StyledInput from '../Elements/StyledInput';
-import ButtonWithIcon from '../Helpers/ButtonWithIcon';
-import GoogleIcon from '../../lib/SVGs/GoogleIcon';
 import { LabelInputContainer } from '../Reusables/LabelnputContainer';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-
 import { useForm } from 'react-hook-form';
 import useAuthQuery from '../../hooks/react-query/useAuthQuery';
 import StyledButton from '../Elements/StyledButton';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import StyledText from '../Elements/StyledText';
+import { nameFromEmail } from '../../utils/string';
 
-const loginFormSchema = yup.object().shape({
+const resetPasswordSchema = yup.object().shape({
   email: yup.string().email('Invalid email').required('Email is required'),
   password: yup.string().required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match'),
 });
 
-export function LoginForm() {
+export function ResetPassword() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<yup.InferType<typeof loginFormSchema>>({
-    resolver: yupResolver(loginFormSchema),
+  } = useForm<yup.InferType<typeof resetPasswordSchema>>({
+    resolver: yupResolver(resetPasswordSchema),
     mode: 'onChange',
   });
 
-  const { logIn } = useAuthQuery();
-  const { setAuthModalActiveSection } = useAuthStore();
+  const { sendOtp } = useAuthQuery();
+  const { setAuthModalActiveSection, isApiAuthorized, setPasswordSession } =
+    useAuthStore();
 
-  const onSubmit = (data: yup.InferType<typeof loginFormSchema>) => {
-    logIn.mutate(data);
+  const onSubmit = async (data: yup.InferType<typeof resetPasswordSchema>) => {
+    await sendOtp.mutateAsync({
+      email: data.email,
+      fullName: nameFromEmail(data.email) || data.email,
+      subject: 'Verify Reset Password',
+    });
+    setPasswordSession({ email: data.email, password: data.password });
   };
 
   return (
@@ -46,13 +53,14 @@ export function LoginForm() {
             placeholder="sugam.subedi@example.com"
             type="email"
             {...register('email')}
+            disabled={isApiAuthorized()}
           />
         </LabelInputContainer>
 
         <LabelInputContainer
           className="mb-4"
           htmlFor="password"
-          label="Password"
+          label="New Password"
           errorMessage={errors.password?.message}
         >
           <StyledInput
@@ -61,46 +69,46 @@ export function LoginForm() {
             type="password"
             {...register('password')}
           />
-          <StyledText
-            onClick={() => setAuthModalActiveSection('reset-password')}
-            className="text-right text-xs mt-1 text-blue-700 cursor-pointer"
-          >
-            Forgot Password?
-          </StyledText>
+        </LabelInputContainer>
+        <LabelInputContainer
+          className="mb-4"
+          htmlFor="confirmPassword"
+          label="Confirm Password"
+          errorMessage={errors.confirmPassword?.message}
+        >
+          <StyledInput
+            id="confirmPassword"
+            placeholder="••••••••"
+            type="password"
+            {...register('confirmPassword')}
+          />
         </LabelInputContainer>
       </div>
 
       <StyledButton
         type="submit"
-        text="Log In"
+        text="Reset Password"
         variant="dark"
         className="mt-4"
       />
 
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
 
-      <ButtonWithIcon
-        icon={<GoogleIcon size={20} />}
-        onClick={async () => {
-          // await signInWithGoogle();
-          // setModalOpen(false);
-        }}
-      >
-        Continue with Google
-      </ButtonWithIcon>
       <StyledButton
-        onClick={() => setAuthModalActiveSection('signup')}
+        onClick={() => setAuthModalActiveSection('login')}
         text={
           <StyledText className="text-center">
-            {`Don't have an account?`}{' '}
-            <StyledText className="font-medium">Sign Up</StyledText>
+            {`Cancel Password Reset? `}
+            <StyledText className="font-medium text-blue-500">
+              Log In
+            </StyledText>
           </StyledText>
         }
         variant="secondary"
-        className="mt-3 w-full border-none"
+        className="w-full border-none p-0"
       />
     </form>
   );
 }
 
-export default LoginForm;
+export default ResetPassword;

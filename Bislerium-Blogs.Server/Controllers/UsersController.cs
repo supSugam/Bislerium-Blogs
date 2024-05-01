@@ -4,6 +4,7 @@ using Bislerium_Blogs.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Bislerium_Blogs.Server.Helpers;
+using Microsoft.AspNetCore.Identity;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -12,10 +13,12 @@ namespace Bislerium_Blogs.Server.Controllers
     public class UsersController : ControllerBase
     {
         private readonly BisleriumBlogsContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public UsersController(BisleriumBlogsContext context)
+        public UsersController(BisleriumBlogsContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+           _userManager = userManager;
         }
 
         // GET: api/Users
@@ -116,7 +119,45 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 return NotFound("User not found");
             }
-            return user;
+
+            var userData = new User
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                FullName = user.FullName,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt
+            };
+            return userData;
+        }
+
+        [AuthorizedOnly]
+        [HttpDelete("me")]
+        public async Task<ActionResult<string>> DeleteMe()
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var identityUser = await _userManager.FindByIdAsync(userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
+
+            if (user == null && identityUser == null)
+            {
+                return NotFound("User not found");
+            }
+
+            if(user is not null)
+            {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            }
+
+            if(identityUser is not null)
+            {
+
+            await _userManager.DeleteAsync(identityUser);
+            }
+
+            return $"Goodbye {user?.FullName??identityUser?.UserName}, your account has been deleted";
         }
     }
 

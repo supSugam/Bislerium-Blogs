@@ -10,8 +10,6 @@ import {
   useMotionValueEvent,
 } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import Dropdown from '../Reusables/Dropdown';
-import Avatar from '../Reusables/Avatar';
 import SearchInput from '../SearchInput';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import { NavbarAvatar } from './Avatar.navbar';

@@ -21,7 +21,7 @@ namespace Bislerium_Blogs.Server.DTOs
         [Required]
         public string FullName { get; set; }
 
-        public byte[]? Avatar { get; set; }
+        public IFormFile? Avatar { get; set; }
 
         public string? Role { get; set; } = Enum.GetName(typeof(UserRole), UserRole.USER);
 

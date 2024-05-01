@@ -1,9 +1,11 @@
 ﻿using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Enums;
+using Bislerium_Blogs.Server.Helpers;
 using Bislerium_Blogs.Server.Interfaces;
 using Bislerium_Blogs.Server.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,20 +19,23 @@ namespace Bislerium_Blogs.Server.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly BisleriumBlogsContext _context;
+        private readonly IFirebaseService _firebaseService;
+
 
 
         public AuthService(UserManager<IdentityUser> userManager,
             IEmailService emailService,
+            IFirebaseService firebaseService,
             IConfiguration configuration,
             BisleriumBlogsContext context
             )
         {
             _userManager = userManager;
             _emailService = emailService;
+            _firebaseService = firebaseService;
             _configuration = configuration;
             _context = context;
         }
-
 
         public string GenerateJwtToken(IdentityUser user)
         {
@@ -63,6 +68,36 @@ namespace Bislerium_Blogs.Server.Services
         {
             ArgumentNullException.ThrowIfNull(registerUserDto, nameof(registerUserDto));
 
+            // Check if Avatar is larger than 3MB
+            if (registerUserDto.Avatar is not null && registerUserDto.Avatar.Length > 3 * 1024 * 1024)
+            {
+                throw new Exception("Avatar size should not exceed 3MB");
+            }
+
+            if (registerUserDto.Avatar is not null)
+            {
+                var bruh = await _firebaseService.UploadFileAsync(registerUserDto.Avatar,Constants.USER_AVATARS_DIRECTORY, FileHelper.GetFileName(
+                   "bruh", FileHelper.GetFileExtension(registerUserDto.Avatar)
+                    ));
+                return bruh;
+            }
+
+
+            // check if user with same email or username exists
+
+            var existingUserWithSameEmail = await _userManager.FindByEmailAsync(registerUserDto.Email);
+            if (existingUserWithSameEmail != null)
+            {
+                throw new Exception("User with this email already exists");
+            }
+
+            var existingUserWithSameUsername = await _context.Users.FirstOrDefaultAsync(x => x.Username == registerUserDto.Username);
+
+            if (existingUserWithSameUsername != null)
+            {
+                throw new Exception("User with this username already exists");
+            }
+
             var user = new IdentityUser
             {
                 UserName = registerUserDto.Email,
@@ -78,16 +113,22 @@ namespace Bislerium_Blogs.Server.Services
             }
 
             var existingUser = await _userManager.FindByEmailAsync(registerUserDto.Email);
+            string? imageUrl = null;
+            if (registerUserDto.Avatar is not null)
+            {
+                imageUrl = await _firebaseService.UploadFileAsync(registerUserDto.Avatar, existingUser.Id, Constants.USER_AVATARS_DIRECTORY);
+                Console.WriteLine(imageUrl);
+            }
 
             _context.Users.Add(new User
             {
                 UserId = new Guid(existingUser.Id),
                 Email = existingUser.Email,
                 Username = existingUser.UserName,
-                Avatar=registerUserDto.Avatar,
                 FullName = registerUserDto.FullName,
                 CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                UpdatedAt = DateTime.Now,
+                AvatarUrl = imageUrl
             });
 
             await _context.SaveChangesAsync();
@@ -121,7 +162,11 @@ namespace Bislerium_Blogs.Server.Services
             if (IsEmailConfirmed)
             {
             accessToken = GenerateJwtToken(user);
-            await _emailService.SendOTP(user.Email, user.UserName);
+            }
+            else
+            {
+                await _emailService.SendOTP(user.Email, user.UserName);
+
             }
 
 
@@ -153,6 +198,31 @@ namespace Bislerium_Blogs.Server.Services
                 ;
             }
             return IsCorrect;
+
+        }
+
+        public async Task ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            ArgumentNullException.ThrowIfNull(resetPasswordDto, nameof(resetPasswordDto));
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+            if (user == null)
+            {
+                throw new Exception("User with this email does not exist");
+            }
+
+            var IsCorrect = await _emailService.VerifyOTP(resetPasswordDto.Email, resetPasswordDto.Otp);
+            if (!IsCorrect)
+            {
+                throw new Exception("Invalid OTP");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, resetPasswordDto.Password);
+
+            if (!result.Succeeded)
+            {
+                throw new Exception("Password Reset Failed");
+            }
 
         }
 

@@ -11,5 +11,7 @@ namespace Bislerium_Blogs.Server.Interfaces
         Task<object> LoginUserAsync(LoginUserDto loginUserDto);
         Task<bool> VerifyOTP(VerifyOtpDto verifyOtpDto);
 
+        Task ResetPassword(ResetPasswordDto resetPasswordDto);
+
     }
 }

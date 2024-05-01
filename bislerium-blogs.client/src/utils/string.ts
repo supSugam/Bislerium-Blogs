@@ -83,3 +83,6 @@ export const parseStringToNumber = (input: string): number | undefined => {
     return parsedNumber; // Return the parsed number if input is a valid number
   }
 };
+
+export const nameFromEmail = (email: string): string =>
+  email.split('@')[0] ?? '';

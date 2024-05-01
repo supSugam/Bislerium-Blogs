@@ -13,7 +13,7 @@ public partial class User
 
     public string FullName { get; set; } = null!;
 
-    public byte[]? Avatar { get; set; }
+    public string AvatarUrl { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 

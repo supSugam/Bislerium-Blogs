@@ -10,7 +10,7 @@ interface ImageInputDisplayProps {
   src?: string | null;
   maxSize?: number;
   className?: string;
-  onChange?: (file: File) => void;
+  onChange?: (file: Blob) => void;
   onDelete?: () => void;
 }
 
@@ -31,7 +31,8 @@ const ImageInputDisplay = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.size <= maxSize) {
+    if (!file) return;
+    if (file.size <= maxSize) {
       onChange?.(file);
     } else {
       toast('Image size exceeds the maximum limit', {
