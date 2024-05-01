@@ -1,9 +1,7 @@
 ﻿using Bislerium_Blogs.Server.Configs;
-using Bislerium_Blogs.Server.Helpers;
 using Bislerium_Blogs.Server.Interfaces;
 using Firebase.Auth;
 using Firebase.Storage;
-using Microsoft.Identity.Client.Extensions.Msal;
 
 namespace Bislerium_Blogs.Server.Services
 {
@@ -27,23 +25,20 @@ namespace Bislerium_Blogs.Server.Services
 
         public async Task<string> UploadFileAsync(IFormFile file, string folderName, string fileName)
         {
- 
-            using (var stream = new MemoryStream())
-            {
-                await file.CopyToAsync(stream);
-                stream.Seek(0, SeekOrigin.Begin);
+            var newStream = new MemoryStream();
+            await file.CopyToAsync(newStream);
+            newStream.Position = 0;
 
             CancellationToken cancellationToken = new();
-                string mimeType = $"image/{FileHelper.GetFileExtensionFromFileName(fileName)}";
-                Console.WriteLine(mimeType);
-                var imageUrl = await _firebaseStorage
+            string mimeType = file.ContentType;
+            var imageUrl = await _firebaseStorage
                 .Child(folderName)
                 .Child(fileName)
-                .PutAsync(stream, cancellationToken, mimeType);
+                .PutAsync(newStream, cancellationToken, mimeType);
             return imageUrl;
-            }
 
         }
+
 
         public async Task DeleteFileAsync(string folderName, string fileName)
         {
