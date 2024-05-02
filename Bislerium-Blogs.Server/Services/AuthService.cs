@@ -19,20 +19,20 @@ namespace Bislerium_Blogs.Server.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly BisleriumBlogsContext _context;
-        private readonly IFirebaseService _firebaseService;
+        private readonly IS3Service _s3Service;
 
 
 
         public AuthService(UserManager<IdentityUser> userManager,
             IEmailService emailService,
-            IFirebaseService firebaseService,
+            IS3Service firebaseService,
             IConfiguration configuration,
             BisleriumBlogsContext context
             )
         {
             _userManager = userManager;
             _emailService = emailService;
-            _firebaseService = firebaseService;
+            _s3Service = firebaseService;
             _configuration = configuration;
             _context = context;
         }
@@ -76,7 +76,7 @@ namespace Bislerium_Blogs.Server.Services
 
             if (registerUserDto.Avatar is not null)
             {
-                var bruh = await _firebaseService.UploadFileAsync(registerUserDto.Avatar,Constants.USER_AVATARS_DIRECTORY, FileHelper.GetFileName(
+                var bruh = await _s3Service.UploadFileToS3(registerUserDto.Avatar,Constants.USER_AVATARS_DIRECTORY, FileHelper.GetFileName(
                    "bruh", FileHelper.GetFileExtension(registerUserDto.Avatar)
                     ));
                 return bruh;
@@ -116,7 +116,7 @@ namespace Bislerium_Blogs.Server.Services
             string? imageUrl = null;
             if (registerUserDto.Avatar is not null)
             {
-                imageUrl = await _firebaseService.UploadFileAsync(registerUserDto.Avatar, existingUser.Id, Constants.USER_AVATARS_DIRECTORY);
+                imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, existingUser.Id, Constants.USER_AVATARS_DIRECTORY);
                 Console.WriteLine(imageUrl);
             }
 
