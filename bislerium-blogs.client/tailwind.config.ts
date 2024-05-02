@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import { COLORS } from './src/utils/constants';
 import type { Config } from 'tailwindcss';
-import lineClamp from '@tailwindcss/line-clamp';
 import typography from '@tailwindcss/typography';
 import * as fcp from 'tailwindcss/lib/util/flattenColorPalette';
 const { default: flattenColorPalette } = fcp;
@@ -28,7 +27,7 @@ export default {
       },
     },
   },
-  plugins: [lineClamp, typography, addVariablesForColors],
+  plugins: [typography, addVariablesForColors],
 } as Config;
 
 function addVariablesForColors({ addBase, theme }: any) {

@@ -6,7 +6,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      {children}
+      <div className="py-8 w-full flex flex-col">{children}</div>
       <AuthModal />
     </>
   );

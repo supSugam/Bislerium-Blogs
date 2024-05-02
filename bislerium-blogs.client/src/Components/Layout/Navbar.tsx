@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Heart, UserRound } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import WriteIcon from '../../lib/SVGs/WriteIcon';
 import NotificationIcon from '../../lib/SVGs/NotificationIcon';
@@ -13,26 +13,36 @@ import { cn } from '../../utils/cn';
 import SearchInput from '../SearchInput';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import { NavbarAvatar } from './Avatar.navbar';
+import { useScreenDimensions } from '../../hooks/useScreenDimensions';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
   const { openAuthModal } = useAuthStore();
 
-  const [visible, setVisible] = useState<boolean>(true);
+  const [navbarHeight, setNavbarHeight] = useState<number>(0);
+  const [navbarTranslateY, setNavbarTranslateY] = useState<number>(0);
+
+  const navbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const { current } = navbarRef;
+    if (current) {
+      setNavbarHeight(current.offsetHeight);
+    }
+  }, []);
+
+  const { height } = useScreenDimensions();
 
   useMotionValueEvent(scrollYProgress, 'change', (current) => {
-    // Check if current is not undefined and is a number
     if (typeof current === 'number') {
       const direction = current! - scrollYProgress.getPrevious()!;
-
-      if (scrollYProgress.get() < 0.05) {
-        setVisible(true);
+      if (direction < 0) {
+        if (navbarTranslateY * height <= 0) return;
+        setNavbarTranslateY(0);
       } else {
-        if (direction < 0) {
-          setVisible(true);
-        } else {
-          setVisible(true);
-        }
+        console.log(navbarTranslateY);
+        if (navbarTranslateY * height > navbarHeight) return;
+        setNavbarTranslateY((prev) => prev + direction);
       }
     }
   });
@@ -40,19 +50,10 @@ const Navbar = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{
-          opacity: 1,
-          y: -100,
-        }}
-        animate={{
-          y: visible ? 0 : -100,
-          opacity: visible ? 1 : 0,
-        }}
-        transition={{
-          duration: 0.2,
-        }}
+        ref={navbarRef}
+        style={{ y: -(navbarTranslateY * height) }}
         className={cn(
-          'flex w-full justify-between fixed top-0 inset-x-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111] pr-2 pl-8 py-2 items-center border-b-black'
+          'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111] pr-2 pl-8 py-2 items-center transition-all duration-300 ease-in'
         )}
       >
         <div className="flex items-center space-x-3">
