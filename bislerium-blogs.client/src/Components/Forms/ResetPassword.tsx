@@ -8,6 +8,7 @@ import StyledButton from '../Elements/StyledButton';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import StyledText from '../Elements/StyledText';
 import { nameFromEmail } from '../../utils/string';
+import { useEffect } from 'react';
 
 const resetPasswordSchema = yup.object().shape({
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -22,23 +23,34 @@ export function ResetPassword() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<yup.InferType<typeof resetPasswordSchema>>({
     resolver: yupResolver(resetPasswordSchema),
     mode: 'onChange',
   });
 
   const { sendOtp } = useAuthQuery();
-  const { setAuthModalActiveSection, isApiAuthorized, setPasswordSession } =
-    useAuthStore();
+  const {
+    setAuthModalActiveSection,
+    isApiAuthorized,
+    setPasswordSession,
+    currentUser,
+  } = useAuthStore();
 
   const onSubmit = async (data: yup.InferType<typeof resetPasswordSchema>) => {
     await sendOtp.mutateAsync({
-      email: data.email,
-      fullName: nameFromEmail(data.email) || data.email,
+      email: currentUser?.email || data.email,
+      fullName: nameFromEmail(currentUser?.email || data.email),
       subject: 'Verify Reset Password',
     });
     setPasswordSession({ email: data.email, password: data.password });
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      setValue('email', currentUser.email);
+    }
+  }, [currentUser, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -91,22 +103,25 @@ export function ResetPassword() {
         variant="dark"
         className="mt-4"
       />
+      {!currentUser && (
+        <>
+          <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
 
-      <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
-
-      <StyledButton
-        onClick={() => setAuthModalActiveSection('login')}
-        text={
-          <StyledText className="text-center">
-            {`Cancel Password Reset? `}
-            <StyledText className="font-medium text-blue-500">
-              Log In
-            </StyledText>
-          </StyledText>
-        }
-        variant="secondary"
-        className="w-full border-none p-0"
-      />
+          <StyledButton
+            onClick={() => setAuthModalActiveSection('login')}
+            text={
+              <StyledText className="text-center">
+                {`Cancel Password Reset? `}
+                <StyledText className="font-medium text-blue-500">
+                  Log In
+                </StyledText>
+              </StyledText>
+            }
+            variant="secondary"
+            className="w-full border-none p-0"
+          />
+        </>
+      )}
     </form>
   );
 }

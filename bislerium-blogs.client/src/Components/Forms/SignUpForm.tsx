@@ -3,8 +3,6 @@ import { UserRole } from '../../enums/UserRole';
 import { capitalizeFirstLetter } from '../../utils/string';
 import StyledInput from '../Elements/StyledInput';
 import StyledText from '../Elements/StyledText';
-import ButtonWithIcon from '../Helpers/ButtonWithIcon';
-import GoogleIcon from '../../lib/SVGs/GoogleIcon';
 import ImageInputDisplay from '../Reusables/ImageInput';
 import Dropdown from '../Reusables/Dropdown';
 import { LabelInputContainer } from '../Reusables/LabelnputContainer';
@@ -24,6 +22,7 @@ import { objectToFormData } from '../../utils/object';
 import useAuthQuery from '../../hooks/react-query/useAuthQuery';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import StyledButton from '../Elements/StyledButton';
+import useUsersQuery from '../../hooks/react-query/useUsersQuery';
 
 export function SignupForm({
   mode = 'signup',
@@ -34,28 +33,68 @@ export function SignupForm({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<yup.InferType<typeof signUpFormSchema>>({
     resolver: yupResolver(signUpFormSchema),
     mode: 'onChange',
   });
 
-  const { signUp } = useAuthQuery();
+  const {
+    signUp: { isPending: isSignupPending, mutate: signUpMutation },
+  } = useAuthQuery();
+
+  const {
+    updateMe: {
+      isPending: isUpdateProfilePending,
+      mutate: updateProfileMutation,
+    },
+  } = useUsersQuery();
   const { setAuthSession, setAuthModalActiveSection } = useAuthStore();
+
+  const isPending = isSignupPending || isUpdateProfilePending;
+  // On Submit
   const onSubmit = (data: yup.InferType<typeof signUpFormSchema>) => {
-    const payload = {
-      ...data,
-      role,
-      avatar: avatar ? new File([avatar], 'avatar.png') : null,
-    };
-    const formData = objectToFormData(payload);
-    signUp.mutate(formData);
-    setAuthSession({ email: data.email, fullName: data.fullName });
+    if (mode === 'signup') {
+      const payload = {
+        ...data,
+        role,
+        avatar,
+      };
+      const formData = objectToFormData(payload);
+      signUpMutation(formData);
+      setAuthSession({ email: data.email, fullName: data.fullName });
+    } else {
+      const payload = {
+        ...(currentUser?.role !== role && { role }),
+        ...(avatar && { avatar }),
+        deleteAvatar: !avatar && !currentAvatar,
+        ...(data.fullName !== currentUser?.fullName && {
+          fullName: data.fullName,
+        }),
+        ...(data.email !== currentUser?.email && { email: data.email }),
+      };
+      const formData = objectToFormData(payload);
+      updateProfileMutation(formData);
+    }
   };
 
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole>(UserRole.USER);
 
-  useEffect(() => {}, []);
+  const { currentUser } = useAuthStore();
+  useEffect(() => {
+    if (mode === 'update-profile' && currentUser) {
+      setRole(currentUser.role ?? UserRole.USER);
+      setAvatar(null);
+      setCurrentAvatar(currentUser.avatarUrl);
+      setValue('fullName', currentUser.fullName);
+      setValue('email', currentUser.email);
+      setValue('username', currentUser.username);
+      setValue('password', 'Pa$$w0rd');
+      setValue('confirmPassword', 'Pa$$w0rd');
+    }
+  }, [mode, currentUser, setValue]);
   return (
     <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
@@ -69,6 +108,7 @@ export function SignupForm({
             placeholder="Sugam Subedi"
             type="text"
             {...register('fullName')}
+            disabled={isPending}
           />
         </LabelInputContainer>
         <LabelInputContainer
@@ -82,6 +122,7 @@ export function SignupForm({
             placeholder="sugam.subedi@example.com"
             type="email"
             {...register('email')}
+            disabled={isPending || mode === 'update-profile'}
           />
         </LabelInputContainer>
       </div>
@@ -97,6 +138,7 @@ export function SignupForm({
             placeholder="supSugam"
             type="text"
             {...register('username')}
+            disabled={isPending}
           />
         </LabelInputContainer>
 
@@ -137,6 +179,8 @@ export function SignupForm({
               placeholder="••••••••"
               type="password"
               {...register('password')}
+              disabled={isPending || mode === 'update-profile'}
+              readOnly={mode === 'update-profile'}
             />
           </LabelInputContainer>
           <LabelInputContainer
@@ -150,32 +194,34 @@ export function SignupForm({
               placeholder="••••••••"
               type="password"
               {...register('confirmPassword')}
+              disabled={isPending || mode === 'update-profile'}
+              readOnly={mode === 'update-profile'}
             />
           </LabelInputContainer>
         </div>
 
         <div className="w-36 h-36">
           <ImageInputDisplay
-            src={avatar}
+            src={avatar ? URL.createObjectURL(avatar) : currentAvatar}
             onChange={(file) => {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                setAvatar(e.target?.result as string);
-              };
-              reader.readAsDataURL(file);
+              if (file) setAvatar(file);
             }}
-            onDelete={() => setAvatar(null)}
+            onDelete={() => {
+              setAvatar(null);
+              setCurrentAvatar(null);
+            }}
             allowDnd
             maxSize={6 * 1024 * 1024}
+            disabled={isPending}
           />
         </div>
       </div>
 
       <StyledButton
         type="submit"
-        text="Sign Up"
+        text={mode === 'update-profile' ? 'Update Profile' : 'Sign Up'}
         variant="dark"
-        className="mt-4"
+        isLoading={isPending}
       />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
       {/* 
@@ -188,18 +234,19 @@ export function SignupForm({
       >
         Continue with Google
       </ButtonWithIcon> */}
-
-      <StyledButton
-        onClick={() => setAuthModalActiveSection('login')}
-        text={
-          <StyledText className="text-center">
-            {`Already have an account?`}{' '}
-            <StyledText className="font-medium">Log In</StyledText>
-          </StyledText>
-        }
-        variant="secondary"
-        className="mt-3 w-full border-none"
-      />
+      {!currentUser && (
+        <StyledButton
+          onClick={() => setAuthModalActiveSection('login')}
+          text={
+            <StyledText className="text-center">
+              {`Already have an account?`}{' '}
+              <StyledText className="font-medium">Log In</StyledText>
+            </StyledText>
+          }
+          variant="secondary"
+          className="mt-3 w-full border-none"
+        />
+      )}
     </form>
   );
 }

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { AxiosInstance } from 'axios';
 import { api } from '../../utils/constants';
 import { jwtDecode } from 'jwt-decode';
+import { IUser } from '../../Interfaces/Models/IUser';
 
 interface AuthSessionData {
   email?: string;
@@ -36,6 +37,8 @@ interface AuthStore {
   setAuthSession: (data: AuthSessionData) => void;
   passwordSession: PasswordSessionData;
   setPasswordSession: (data: PasswordSessionData) => void;
+  currentUser: IUser | null;
+  setCurrentUser: (user: IUser | null) => void;
 }
 
 export const useAuthStore = create<AuthStore>(
@@ -97,6 +100,10 @@ export const useAuthStore = create<AuthStore>(
     passwordSession: null,
     setPasswordSession: (data) => {
       set(() => ({ passwordSession: data }));
+    },
+    currentUser: null,
+    setCurrentUser: (user) => {
+      set(() => ({ currentUser: user }));
     },
   })
 );

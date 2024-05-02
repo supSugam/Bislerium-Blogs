@@ -53,7 +53,6 @@ const useAuthQuery = () => {
   >({
     mutationFn: async (data) => await api.post('/auth/login', data),
     onSuccess: (data) => {
-      console.log(data.data.result);
       if (data.data.result.isEmailConfirmed && data.data.result.accessToken) {
         updateAccessToken(data.data.result.accessToken);
         toast.success('Logged in successfully');
@@ -82,7 +81,6 @@ const useAuthQuery = () => {
   >({
     mutationFn: async (data) => await api.post('/auth/verify-otp', data),
     onSuccess: (data) => {
-      console.log(data);
       toast.success('Account Verified, You may login now.');
       setAuthModalActiveSection('login');
     },

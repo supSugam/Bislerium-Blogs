@@ -29,7 +29,6 @@ export const objectToFormData = (obj: any): FormData => {
 
   for (const key in cleanedObj) {
     if (Object.prototype.hasOwnProperty.call(cleanedObj, key)) {
-      console.log(key);
       const value = cleanedObj[key];
       if (value instanceof File) {
         formData.append(key, value);

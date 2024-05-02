@@ -10,6 +10,7 @@ interface IOTPVerificationProps {
   onResend?: () => void;
   resendInterval?: number;
   onVerify: () => void;
+  isPending?: boolean;
 }
 
 const OTPVerification = ({
@@ -19,6 +20,7 @@ const OTPVerification = ({
   onResend,
   resendInterval,
   onVerify,
+  isPending = false,
 }: IOTPVerificationProps) => {
   const [resendIn, setResendIn] = useState<number>(resendInterval || 0);
 
@@ -61,7 +63,8 @@ const OTPVerification = ({
               {`${resendIn > 0 ? `Resend in ${resendIn} seconds` : 'Resend'}`}
             </StyledText>
           }
-          disabled={resendIn > 0}
+          disabled={resendIn > 0 || isPending}
+          isLoading={isPending}
           variant="secondary"
           className="w-full mt-3"
         />

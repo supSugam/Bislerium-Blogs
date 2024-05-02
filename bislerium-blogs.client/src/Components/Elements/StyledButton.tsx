@@ -1,12 +1,16 @@
+import Spinner from '../../lib/SVGs/Spinner';
 import { cn } from '../../utils/cn';
 import { BottomGradient } from '../Reusables/LabelnputContainer';
 import StyledText from './StyledText';
+import { AnimatePresence, motion } from 'framer-motion';
+
 interface IStyledButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'dark';
   size?: 'small' | 'medium' | 'large';
   className?: string;
   text: React.ReactNode;
+  isLoading?: boolean;
 }
 
 const StyledButton = ({
@@ -14,10 +18,11 @@ const StyledButton = ({
   variant,
   size,
   text,
+  isLoading = false,
   ...props
 }: IStyledButtonProps) => {
   const buttonClassnames = cn(
-    'px-4 py-2 rounded-sm',
+    'px-4 py-2 rounded-smr relative',
     {
       'bg-primary text-white': variant === 'primary',
       'bg-white text-primary border border-primary': variant === 'secondary',
@@ -25,7 +30,7 @@ const StyledButton = ({
         variant === 'dark',
     },
     className,
-    'cursor-pointer '
+    'cursor-pointer'
   );
 
   const textStyles = cn({
@@ -36,10 +41,31 @@ const StyledButton = ({
   });
 
   return (
-    <button className={buttonClassnames} {...props}>
-      <StyledText children={text} className={textStyles} />
-      <BottomGradient />
-    </button>
+    <AnimatePresence>
+      <button
+        className={buttonClassnames}
+        {...props}
+        disabled={props.disabled || isLoading}
+      >
+        {!isLoading && <StyledText children={text} className={textStyles} />}
+
+        <BottomGradient />
+        <motion.div
+          initial={{ opacity: 0, scale: 0, x: '-50%', y: '-50%' }}
+          animate={{
+            opacity: isLoading ? 1 : 0,
+            scale: isLoading ? 1 : 0,
+            x: '-50%',
+            y: '-50%',
+          }}
+          transition={{ duration: 0.2 }}
+          className="absolute top-1/2 left-1/2"
+          key={isLoading}
+        >
+          <Spinner size={20} fill="#fff" />
+        </motion.div>
+      </button>
+    </AnimatePresence>
   );
 };
 

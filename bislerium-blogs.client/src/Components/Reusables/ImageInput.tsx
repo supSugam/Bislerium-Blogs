@@ -10,8 +10,9 @@ interface ImageInputDisplayProps {
   src?: string | null;
   maxSize?: number;
   className?: string;
-  onChange?: (file: Blob) => void;
+  onChange?: (file: File) => void;
   onDelete?: () => void;
+  disabled?: boolean;
 }
 
 const ImageInputDisplay = ({
@@ -21,6 +22,7 @@ const ImageInputDisplay = ({
   onChange,
   src,
   onDelete,
+  disabled = false,
 }: ImageInputDisplayProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +32,7 @@ const ImageInputDisplay = ({
   const mouseY = useMotionValue(0);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const file = event.target.files?.[0];
     if (!file) return;
     if (file.size <= maxSize) {

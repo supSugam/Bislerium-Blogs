@@ -1,22 +1,28 @@
-import { LogOutIcon, Trash2, UserRound } from 'lucide-react';
+import { KeyIcon, LogOutIcon, Trash2, UserRound } from 'lucide-react';
 import Dropdown from '../Reusables/Dropdown';
 import Avatar from '../Reusables/Avatar';
 import useUsersQuery from '../../hooks/react-query/useUsersQuery';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import AlterModal from '../Modal/AlertModal';
+import ProfileWithName from '../Profile/ProfileWithName';
 
 export const NavbarAvatar = () => {
   const {
     getMe: { data },
     deleteMe,
   } = useUsersQuery();
+  const {
+    logout,
+    setCurrentUser,
+    currentUser,
+    setAuthModalActiveSection,
+    openAuthModal,
+  } = useAuthStore();
 
   useEffect(() => {
-    console.log(data);
-  }, [data]);
-
-  const { logout } = useAuthStore();
+    setCurrentUser(data?.data?.result ?? null);
+  }, [data, setCurrentUser]);
 
   const [isLogOutModalOpen, setIsLogOutModalOpen] = useState<boolean>(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
@@ -49,14 +55,42 @@ export const NavbarAvatar = () => {
       />
 
       <Dropdown
-        targetComponent={<Avatar />}
+        closeOnClick
+        targetComponent={<Avatar src={currentUser?.avatarUrl} />}
         items={[
           {
-            label: 'Profile',
-            onClick: () => console.log('Profile'),
+            onClick: () => {
+              setAuthModalActiveSection('update-profile');
+              openAuthModal();
+            },
+            bordered: true,
+            element: (
+              <ProfileWithName
+                name={currentUser?.fullName}
+                avatar={currentUser?.avatarUrl ?? ''}
+                role={currentUser?.role}
+              />
+            ),
+          },
+          {
+            onClick: () => {
+              setAuthModalActiveSection('update-profile');
+              openAuthModal();
+            },
             icon: <UserRound size={20} />,
             bordered: true,
+            label: 'Update Profile',
           },
+          {
+            label: 'Reset Password',
+            onClick: () => {
+              setAuthModalActiveSection('reset-password');
+              openAuthModal();
+            },
+            icon: <KeyIcon size={20} />,
+            bordered: true,
+          },
+
           {
             label: 'Log Out',
             onClick: () => setIsLogOutModalOpen(true),

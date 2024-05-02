@@ -7,10 +7,11 @@
  * @return {*}  {string}
  */
 export const capitalizeFirstLetter = (
-  str: string,
+  str?: string,
   all: boolean = false,
   separator: string = ' '
 ): string => {
+  if (!str) return '';
   if (all) {
     return str
       .split(separator)

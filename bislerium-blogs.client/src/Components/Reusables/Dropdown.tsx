@@ -5,10 +5,19 @@ import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
 import StyledText from '../Elements/StyledText';
 
 type DropdownItem = {
-  label: string;
   icon?: React.ReactNode;
   bordered?: boolean;
-} & React.HTMLProps<HTMLButtonElement>;
+} & React.HTMLProps<HTMLButtonElement> &
+  (
+    | {
+        label: string;
+        element?: never;
+      }
+    | {
+        element: React.ReactNode;
+        label?: never;
+      }
+  );
 
 interface IDropdownProps extends React.HTMLProps<HTMLButtonElement> {
   targetComponent: React.ReactNode;
@@ -30,7 +39,7 @@ const Dropdown = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const onClick = () => {
-    if (typeof open === 'boolean' || !items.length) return;
+    if (typeof open === 'boolean') return;
     setIsOpen((prev) => !prev);
   };
 
@@ -82,51 +91,69 @@ const Dropdown = ({
             )}
           >
             <div className="flex flex-col">
-              {items.map((item, index) => {
-                const { label, icon, bordered, className, type, ...rest } =
-                  item;
-                return (
-                  <motion.button
-                    key={index}
-                    type={type}
-                    onClick={(
-                      e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-                    ) => {
-                      if (closeOnClick) {
-                        setIsOpen(false);
-                      }
-                      item.onClick?.(e);
-                    }}
-                    initial={{
-                      opacity: 0,
-                      x: 10,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      x: 0,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      x: 10,
-                    }}
-                    transition={{
-                      duration: (index + 1) * 0.1,
-                    }}
-                    className={cn(
-                      'flex items-center gap-x-2 px-3 py-2 w-full text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100',
-                      {
-                        'border-b border-gray-200':
-                          bordered && index !== items.length - 1,
-                      },
-                      className
-                    )}
-                    {...rest}
-                  >
-                    {icon}
-                    <StyledText children={label} animate />
-                  </motion.button>
-                );
-              })}
+              {items.map(
+                (
+                  {
+                    label,
+                    icon,
+                    bordered,
+                    className,
+                    type,
+                    element,
+                    onClick,
+                    ...rest
+                  },
+                  index
+                ) => {
+                  return (
+                    <motion.button
+                      key={index}
+                      type={type}
+                      initial={{
+                        opacity: 0,
+                        x: 10,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        x: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        x: 10,
+                      }}
+                      transition={{
+                        duration: (index + 1) * 0.1,
+                      }}
+                      className={cn(
+                        'flex items-center gap-x-2 px-3 py-2 w-full text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100',
+                        {
+                          'border-b border-gray-200':
+                            bordered && index !== items.length - 1,
+                        },
+                        className
+                      )}
+                      onClick={(
+                        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+                      ) => {
+                        if (closeOnClick) {
+                          setIsOpen(false);
+                        }
+                        onClick?.(e);
+                      }}
+                      // {...rest}
+                    >
+                      {label ? (
+                        <>
+                          {icon}
+                          <StyledText children={label} animate />
+                        </>
+                      ) : (
+                        element
+                      )}
+                    </motion.button>
+                  );
+                }
+              )}
             </div>
           </motion.div>
         )}

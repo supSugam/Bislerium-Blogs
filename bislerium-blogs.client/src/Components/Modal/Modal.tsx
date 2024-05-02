@@ -65,7 +65,7 @@ const Modal: FC<ModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ duration: 0.1, ease: 'easeInOut' }}
             className="fixed inset-0 bg-white bg-opacity-10 backdrop-filter backdrop-blur-sm"
             onClick={handleBackdropClick}
           />
@@ -73,7 +73,7 @@ const Modal: FC<ModalProps> = ({
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
             className={cn(
               'relative max-w-xl mx-auto bg-white bg-opacity-50 backdrop-filter backdrop-blur-lg rounded-lg shadow-lg p-8',
               className

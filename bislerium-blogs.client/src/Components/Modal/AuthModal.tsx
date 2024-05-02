@@ -84,6 +84,7 @@ const AuthModal = () => {
             'verify-reset-password': (
               <OTPVerification
                 code={otpCode}
+                isPending={resetPassword.isPending}
                 onCodeChange={(code) => setOtpCode(code)}
                 sentTo={authSession.email ?? 'Your email'}
                 onVerify={async () => {
@@ -124,6 +125,7 @@ const AuthModal = () => {
             'verify-account': (
               <OTPVerification
                 code={otpCode}
+                isPending={verifyOtp.isPending}
                 onCodeChange={(code) => setOtpCode(code)}
                 sentTo={authSession.email ?? 'Your email'}
                 onVerify={async () => {

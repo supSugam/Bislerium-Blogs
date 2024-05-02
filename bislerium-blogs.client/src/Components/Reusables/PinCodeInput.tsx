@@ -42,26 +42,18 @@ const PinCodeInput = ({
       });
       return;
     }
-    console.log('key pressed', e.key);
     const enteredKey = e.key.toLowerCase();
     if (!enteredKey.match(/[0-9]|Backspace|Control|v/gi)) {
       return;
     }
 
     if (enteredKey === 'backspace') {
-      console.log('backspace');
       if (value !== undefined) {
         const valueOnThatPositionExists = seekValue(value, position);
-        console.log(
-          valueOnThatPositionExists,
-          position,
-          'valueOnThatPositionExists'
-        );
         const newValue = removeFromPosition(
           value,
           valueOnThatPositionExists !== undefined ? position : position - 1
         );
-        console.log(newValue, 'new value');
         onChange(newValue);
         if (position !== 0) {
           const el = allInputRefs[position - 1]?.current;
@@ -80,7 +72,6 @@ const PinCodeInput = ({
         onChange(+enteredKey);
       } else {
         const newValue = addToPosition(value, position, +enteredKey) as number;
-        console.log(newValue, 'new value now');
         onChange(newValue);
       }
 
@@ -126,10 +117,6 @@ const PinCodeInput = ({
 
     return () => document.removeEventListener('keydown', onKeydown);
   }, [allInputRefs, length, onChange]);
-
-  useEffect(() => {
-    console.log(value, 'VALUE');
-  }, [value]);
 
   useEffect(() => {
     allInputRefs?.[0]?.current?.focus();

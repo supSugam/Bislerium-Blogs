@@ -30,8 +30,8 @@ namespace Bislerium_Blogs.Server.Services
                         Console.WriteLine("Maybe the file does not exist yet. Continuing...");
                     }
                         var fileTransferUtility = new TransferUtility(_s3Client);
-                    var fileStream = file.OpenReadStream();
-                    var fileTransferUtilityRequest = new TransferUtilityUploadRequest
+                    using var fileStream = file.OpenReadStream();
+                var fileTransferUtilityRequest = new TransferUtilityUploadRequest
                     {
                         InputStream = fileStream,
                         Key = $"{directory}/{fileName}",
@@ -44,7 +44,7 @@ namespace Bislerium_Blogs.Server.Services
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("An error occurred while uploading the file to S3", ex);
+                    throw new Exception(ex.Message);
                 }
             }   
 
@@ -59,6 +59,7 @@ namespace Bislerium_Blogs.Server.Services
                 }
                 catch (Exception ex)
                 {
+                Console.WriteLine(ex.Message);
                     throw new Exception("An error occurred while deleting the file from S3", ex);
                 }
             }

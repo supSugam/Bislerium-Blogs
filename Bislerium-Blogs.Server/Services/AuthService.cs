@@ -74,15 +74,6 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception("Avatar size should not exceed 3MB");
             }
 
-            if (registerUserDto.Avatar is not null)
-            {
-                var bruh = await _s3Service.UploadFileToS3(registerUserDto.Avatar,Constants.USER_AVATARS_DIRECTORY, FileHelper.GetFileName(
-                   "bruh", FileHelper.GetFileExtension(registerUserDto.Avatar)
-                    ));
-                return bruh;
-            }
-
-
             // check if user with same email or username exists
 
             var existingUserWithSameEmail = await _userManager.FindByEmailAsync(registerUserDto.Email);
@@ -116,8 +107,7 @@ namespace Bislerium_Blogs.Server.Services
             string? imageUrl = null;
             if (registerUserDto.Avatar is not null)
             {
-                imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, existingUser.Id, Constants.USER_AVATARS_DIRECTORY);
-                Console.WriteLine(imageUrl);
+                imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY, existingUser.Id);
             }
 
             _context.Users.Add(new User
@@ -132,7 +122,6 @@ namespace Bislerium_Blogs.Server.Services
             });
 
             await _context.SaveChangesAsync();
-
 
             await _emailService.SendOTP(registerUserDto.Email, registerUserDto.FullName);
 
