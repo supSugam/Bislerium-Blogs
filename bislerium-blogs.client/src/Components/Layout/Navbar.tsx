@@ -43,20 +43,19 @@ const Navbar = () => {
         console.log(navbarTranslateY);
         if (navbarTranslateY * height > navbarHeight) return;
         setNavbarTranslateY((prev) => prev + direction);
+        // setNavbarTranslateY((prev) =>
+        //   (prev + direction) * height > navbarHeight ? prev : prev + direction
+        // );
       }
     }
   });
-
-  useEffect(() => {
-    console.log(Math.min(Math.max(0, -(navbarTranslateY * height)), 0));
-  }, [navbarTranslateY, height]);
 
   return (
     <AnimatePresence>
       <motion.div
         ref={navbarRef}
         style={{
-          y: -(navbarTranslateY * height),
+          y: Math.max(-(navbarTranslateY * height), -navbarHeight),
         }}
         className={cn(
           'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111] pr-2 pl-8 py-2 items-center transition-all duration-300 ease-in'
@@ -69,10 +68,13 @@ const Navbar = () => {
           <SearchInput />
         </div>
         <div className="flex items-center space-x-7">
-          <span className="flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer">
+          <Link
+            to={'/blogs/publish'}
+            className="flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer"
+          >
             <WriteIcon size={24} />
-            <p className="font-light text-sm">Write</p>
-          </span>
+            <span className="text-sm font-medium">Write</span>
+          </Link>
           <NotificationIcon size={24} onClick={openAuthModal} />
           <NavbarAvatar />
         </div>

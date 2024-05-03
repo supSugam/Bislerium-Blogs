@@ -2,5 +2,7 @@
 {
     public interface IUserService
     {
+        public Task<string?> GetRoleByUserId(Guid userId);
+
     }
 }

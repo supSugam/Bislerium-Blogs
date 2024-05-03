@@ -122,12 +122,11 @@ const MultiSelect = ({
       ]}
       closeOnClick={false}
       targetComponent={
-        <HoverEffect>
+        <HoverEffect className={className}>
           <motion.button
             className={cn(
-              `flex bg-neutral-100 h-10 w-full border-none shadow-input rounded-md px-2 py-4 text-sm placeholder:text-neutral-400 dark:placeholder-text-neutral-600 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none transition duration-400 gap-1 items-center overflow-x-auto no-scrollbar
-         `,
-              className
+              `flex bg-neutral-100 w-full border-none shadow-input rounded-md px-2 py-2 text-sm placeholder:text-neutral-400 dark:placeholder-text-neutral-600 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 group-hover/input:shadow-none transition duration-400 gap-1 items-center overflow-x-auto overflow-y-hidden no-scrollbar
+         `
             )}
             key={selected.length}
             transition={{ duration: 0.3 }}

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Bislerium_Blogs.Server.Models;
+﻿namespace Bislerium_Blogs.Server.Models;
 
 public partial class User
 {

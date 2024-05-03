@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Bislerium_Blogs.Server.Models;
-using Bislerium_Blogs.Server.Helpers;
-using Microsoft.AspNetCore.Authorization;
-using System.Reflection.Metadata;
-using Bislerium_Blogs.Server.Enums;
 using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Interfaces;
 using System.Security.Claims;
+using Bislerium_Blogs.Server.Payload;
+using Bislerium_Blogs.Server.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -23,11 +22,16 @@ namespace Bislerium_Blogs.Server.Controllers
     {
         private readonly BisleriumBlogsContext _context;
         private readonly IS3Service _s3Service;
+        private readonly IUserService _userService;
+        private readonly IBlogService _blogService;
 
-        public BlogsController(BisleriumBlogsContext context,IS3Service s3Service)
+        public BlogsController(BisleriumBlogsContext context,IS3Service s3Service, IUserService userService, IBlogService blogService)
         {
             _context = context;
             _s3Service = s3Service;
+            _userService = userService;
+            _blogService = blogService;
+
         }
 
         // GET: api/Blogs
@@ -39,8 +43,11 @@ namespace Bislerium_Blogs.Server.Controllers
 
         // GET: api/Blogs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BlogPost>> GetBlogPost(Guid id)
+        public async Task<ActionResult<BlogPayload>> GetBlogPostById(Guid id)
         {
+            try
+            {
+
             var blogPost = await _context.BlogPosts.FindAsync(id);
 
             if (blogPost == null)
@@ -48,7 +55,37 @@ namespace Bislerium_Blogs.Server.Controllers
                 return NotFound();
             }
 
-            return blogPost;
+            string role = await _userService.GetRoleByUserId(blogPost.AuthorId) ?? Constants.EnumToString(UserRole.USER);
+
+            var blogPayload = new BlogPayload
+            {
+                BlogPostId = blogPost.BlogPostId,
+                Title = blogPost.Title,
+                Body = blogPost.Body,
+                Thumbnail = blogPost.Thumbnail,
+                CreatedAt = blogPost.CreatedAt,
+                UpdatedAt = blogPost.UpdatedAt,
+                Author = new UserPayload
+                {
+                    UserId = blogPost.Author.UserId,
+                    Email = blogPost.Author.Email,
+                    Username = blogPost.Author.Username,
+                    FullName = blogPost.Author.FullName,
+                    CreatedAt = blogPost.Author.CreatedAt,
+                    UpdatedAt = blogPost.Author.UpdatedAt,
+                    AvatarUrl = blogPost.Author.AvatarUrl,
+                    Role = role
+                },
+                Popularity = blogPost.Popularity,
+                Tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId)
+            };
+
+            return blogPayload;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPatch("{blogPostId}")]
@@ -98,24 +135,15 @@ namespace Bislerium_Blogs.Server.Controllers
                     blogPost.BlogPostTags.Clear();
 
                     // Add new tags
-                    foreach (var tagName in updateBlogDto.Tags)
+                    foreach (var tagId in updateBlogDto.Tags)
                     {
-                        var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                        var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagId.ToString() == tagId);
 
                         if (tag == null)
                         {
-                            // Create new tag if it doesn't exist
-                            tag = new Tag
-                            {
-                                TagName = tagName,
-                                CreatedAt = DateTime.Now,
-                                UpdatedAt = DateTime.Now
-                            };
-
-                            _context.Tags.Add(tag);
+                            return NotFound("Tag Not Found");
                         }
 
-                        // Connect the tag to the blog post
                         blogPost.BlogPostTags.Add(new BlogPostTag { Tag = tag });
                     }
                 }
@@ -165,7 +193,6 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 var blogPost = new BlogPost
                 {
-                    BlogPostId = Guid.NewGuid(),
                     Title = publishBlogDto.Title,
                     Body = publishBlogDto.Body,
                     Thumbnail = publishBlogDto.Thumbnail.FileName,
@@ -177,28 +204,21 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 // Upload thumbnail to S3
                 string thumbnailUrl = await _s3Service.UploadFileToS3(publishBlogDto.Thumbnail, Constants.BLOG_THUMBNAILS_DIRECTORY, blogPost.BlogPostId.ToString());
+                blogPost.Thumbnail = thumbnailUrl;
 
                 // Add tags to the blog post if tags are provided
                 if (publishBlogDto.Tags != null && publishBlogDto.Tags.Length > 0)
                 {
-                    foreach (var tagName in publishBlogDto.Tags)
+                    foreach (var tagId in publishBlogDto.Tags)
                     {
-                        var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+                        var tag = await _context.Tags.
+                            FirstOrDefaultAsync(t => t.TagId.ToString() == tagId); 
 
                         if (tag == null)
                         {
-                            // Create new tag if it doesn't exist
-                            tag = new Tag
-                            {
-                                TagName = tagName,
-                                CreatedAt = DateTime.Now,
-                                UpdatedAt = DateTime.Now
-                            };
-
-                            _context.Tags.Add(tag);
+                            return NotFound("Tag Not Found");
                         }
 
-                        // Connect the tag to the blog post
                         blogPost.BlogPostTags.Add(new BlogPostTag { Tag = tag });
                     }
                 }
@@ -207,7 +227,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 _context.BlogPosts.Add(blogPost);
                 await _context.SaveChangesAsync();
 
-                return "Blog Published, Redirecting to your blog post...";
+                return blogPost.BlogPostId.ToString();
             }
             catch (Exception ex)
             {

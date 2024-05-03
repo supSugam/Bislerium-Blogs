@@ -30,7 +30,8 @@ const Modal: FC<ModalProps> = ({
       document.body.style.overflow = 'hidden';
     } else {
       onClose?.();
-      document.body.style.overflow = 'auto';
+      document.body.style.overflowY = 'auto';
+      document.body.style.overflowX = 'hidden';
     }
   }, [isOpen, onClose]);
 

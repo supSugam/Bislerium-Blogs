@@ -71,6 +71,8 @@ builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IS3Service,S3Service>();
+builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IBlogService,BlogService>();
 
 var app = builder.Build();
 app.UseSwagger();

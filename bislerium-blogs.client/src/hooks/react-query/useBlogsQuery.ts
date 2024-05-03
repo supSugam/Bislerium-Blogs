@@ -13,6 +13,7 @@ import {
 import { toastWithInterval } from '../../utils/toast';
 import { IBlog } from '../../Interfaces/Models/IBlog';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface IBlogsQueryParams {
   search?: string;
@@ -27,11 +28,13 @@ interface IUseBlogsQueryProps {
       >
     >;
   };
+  id?: string;
 }
-const useBlogsQuery = ({ getAllBlogsConfig }: IUseBlogsQueryProps) => {
+const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
   const { api, isApiAuthorized } = useAuthStore();
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const publishBlog = useMutation<
     AxiosResponse<ISuccessResponse<string>>,
@@ -44,6 +47,7 @@ const useBlogsQuery = ({ getAllBlogsConfig }: IUseBlogsQueryProps) => {
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });
+      navigate(`/blogs/${data.data.result}`);
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -61,7 +65,15 @@ const useBlogsQuery = ({ getAllBlogsConfig }: IUseBlogsQueryProps) => {
     ...getAllBlogsConfig?.queryOptions,
   });
 
-  return { getBlogs, publishBlog };
+  const getBlogById = useQuery<
+    AxiosResponse<ISuccessResponse<IBlog>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryFn: async () => await api.get(`/blogs/${id}`),
+    queryKey: ['blogs', id],
+    enabled: typeof id === 'string',
+  });
+  return { getBlogs, publishBlog, getBlogById };
 };
 
 export default useBlogsQuery;

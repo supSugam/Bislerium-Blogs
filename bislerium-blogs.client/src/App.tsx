@@ -7,6 +7,7 @@ import { useAuthStore } from './services/stores/useAuthStore';
 import { useEffect } from 'react';
 import WriteBlog from './pages/WriteBlog';
 import Layout from './Components/Layout/_layout';
+import SingleBlogPage from './pages/SingleBlogPage';
 function App() {
   const queryClient = new QueryClient();
   const { onInitialize } = useAuthStore();
@@ -25,7 +26,8 @@ function App() {
               <Route path="blogs" element={<></>} />
               <Route path="contact" element={<></>} />
             </Route>
-            <Route path="/write" element={<WriteBlog />} />
+            <Route path="/blogs/publish" element={<WriteBlog />} />
+            <Route path="/blogs/:id" element={<SingleBlogPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>

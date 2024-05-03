@@ -1,7 +1,14 @@
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import { ReactNode, useState } from 'react';
+import { cn } from '../../utils/cn';
 
-const HoverEffect = ({ children }: { children: ReactNode }) => {
+const HoverEffect = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
   const radius = 100; // change this to increase the rdaius of the hover effect
   const [visible, setVisible] = useState<boolean>(false);
 
@@ -29,7 +36,11 @@ const HoverEffect = ({ children }: { children: ReactNode }) => {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
-      className="p-[2px] rounded-md transition duration-300 group/input relative h-full w-full"
+      // className="p-[2px] rounded-md transition duration-300 group/input relative h-full w-full"
+      className={cn(
+        'p-[2px] rounded-md transition duration-300 group/input relative h-full w-full',
+        className
+      )}
     >
       {children}
     </motion.div>
