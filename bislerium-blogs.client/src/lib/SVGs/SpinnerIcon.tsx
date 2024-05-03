@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Spinner: React.FC<ISVGIconProps> = ({
+const SpinnerIcon: React.FC<ISVGIconProps> = ({
   size = 24,
   ...rest
 }: ISVGIconProps) => {
@@ -23,4 +23,4 @@ const Spinner: React.FC<ISVGIconProps> = ({
   );
 };
 
-export default Spinner;
+export default SpinnerIcon;

@@ -5,10 +5,11 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   fullHeight?: boolean;
+  rightIcon?: React.ReactNode;
 }
 
 const StyledInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, fullHeight, ...props }, ref) => {
+  ({ className, type, fullHeight, rightIcon, ...props }, ref) => {
     const radius = 100; // change this to increase the rdaius of the hover effect
     const [visible, setVisible] = useState<boolean>(false);
 
@@ -56,6 +57,7 @@ const StyledInput = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
           />
+          {rightIcon && rightIcon}
 
           <motion.div
             className="absolute top-1/2 right-2 cursor-pointer"

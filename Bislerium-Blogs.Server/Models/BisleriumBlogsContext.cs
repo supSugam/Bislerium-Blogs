@@ -47,6 +47,21 @@ public partial class BisleriumBlogsContext : IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<BlogPostTag>()
+            .HasKey(bt => new { bt.BlogPostId, bt.TagId });
+
+        modelBuilder.Entity<BlogPostTag>()
+            .HasOne(bt => bt.BlogPost)
+            .WithMany(b => b.BlogPostTags)
+            .HasForeignKey(bt => bt.BlogPostId);
+
+        modelBuilder.Entity<BlogPostTag>()
+            .HasOne(bt => bt.Tag)
+            .WithMany(t => t.BlogPostTags)
+            .HasForeignKey(bt => bt.TagId);
+
+
         modelBuilder.Entity<BlogPost>(entity =>
         {
             entity.HasKey(e => e.BlogPostId).HasName("PK__BlogPost__3217416967EE6FB5");

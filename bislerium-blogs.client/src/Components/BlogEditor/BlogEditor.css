@@ -14,3 +14,19 @@
   font-size: 20px;
   font-style: inherit !important;
 }
+
+.ql-size-small {
+  font-size: 0.75em !important;
+}
+
+.ql-size-normal {
+  font-size: 1em !important;
+}
+
+.ql-size-large {
+  font-size: 1.5em !important;
+}
+
+.ql-size-huge {
+  font-size: 2.5em !important;
+}

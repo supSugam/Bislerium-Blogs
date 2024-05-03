@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Bislerium_Blogs.Server.Models;
 
@@ -9,6 +8,7 @@ public partial class BlogPost
 
     public string Title { get; set; } = null!;
 
+    [Column(TypeName = "VARCHAR(MAX)")]
     public string Body { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
@@ -32,4 +32,5 @@ public partial class BlogPost
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+    public virtual ICollection<BlogPostTag> BlogPostTags { get; set; } = new List<BlogPostTag>();
 }

@@ -1,4 +1,4 @@
-import Spinner from '../../lib/SVGs/Spinner';
+import SpinnerIcon from '../../lib/SVGs/SpinnerIcon';
 import { cn } from '../../utils/cn';
 import { BottomGradient } from '../Reusables/LabelnputContainer';
 import StyledText from './StyledText';
@@ -60,9 +60,9 @@ const StyledButton = ({
           }}
           transition={{ duration: 0.2 }}
           className="absolute top-1/2 left-1/2"
-          key={isLoading}
+          key={isLoading ? 'spinner' : 'text'}
         >
-          <Spinner size={20} fill="#fff" />
+          <SpinnerIcon size={20} fill="#fff" />
         </motion.div>
       </button>
     </AnimatePresence>
