@@ -5,49 +5,92 @@ import ImageInputDisplay from '../Reusables/ImageInput';
 import './BlogEditor.css';
 import MultiSelect, { ISelectOption } from '../Elements/MultiSelect';
 import useTagsQuery from '../../hooks/react-query/useTagsQuery';
-import { ITag } from '../../Interfaces/Models/ITag';
+import StyledButton from '../Elements/StyledButton';
+import useBlogsQuery from '../../hooks/react-query/useBlogsQuery';
+import toast from 'react-hot-toast';
+import { objectToFormData } from '../../utils/object';
 
 const BlogEditor = () => {
-  const [value, setValue] = useState<string>('');
+  const [blogBodyContent, setBlogBodyContent] = useState<string>('');
   const [title, setTitle] = useState<string>('');
-
+  const [selectedTags, setSelectedTags] = useState<ISelectOption[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   useEffect(() => {
     document.title = 'Bislerium | Publish a blog';
   }, []);
 
-  useEffect(() => {
-    console.log('value', JSON.stringify(value));
-  }, [value]);
-
   // Tags
 
   const {
-    getTags: { data: tags, isLoading: isTagsLoading },
+    getTags: {
+      data: tags,
+      isLoading: isTagsLoading,
+      isRefetching: isTagsRefetching,
+    },
     createTag: { mutate: createTagMutation },
   } = useTagsQuery({
     getAllTagsConfig: {
+      params: {
+        search: searchQuery,
+      },
       queryOptions: {
         refetchOnWindowFocus: false,
       },
     },
   });
 
-  const [selectedTags, setSelectedTags] = useState<ISelectOption[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
   useEffect(() => {
     console.log('tags', tags);
   }, [tags]);
+
+  // Blog Publish
+
+  const {
+    publishBlog: {
+      mutate: pubishBlogMutation,
+      isPending: isBlogBeingPublished,
+    },
+  } = useBlogsQuery({});
+
+  const onPublishBlog = () => {
+    if (!title) {
+      toast.error('Title is required');
+    }
+    if (!blogBodyContent) {
+      toast.error('Content is required');
+    }
+
+    if (blogBodyContent.length < 100) {
+      toast.error('Content should be atleast 100 characters');
+    }
+
+    if (!thumbnail) {
+      toast.error('Thumbnail is required');
+    }
+
+    const payload = objectToFormData({
+      title,
+      body: blogBodyContent,
+      tags: selectedTags.map((tag) => tag.id),
+      thumbnail,
+    });
+    pubishBlogMutation(payload);
+  };
   return (
     <main
       id="editor-container"
       className="mx-auto flex flex-col items-center justify-center w-[90%] xl:w-[65%]"
     >
       <div className="flex justify-between items-center p-4 w-full">
-        <button className="text-gray-600 font-semibold text-xl">Cancel</button>
-        <button className="text-gray-600 font-semibold text-xl">Publish</button>
+        <h1 className="text-4xl font-bold">Publish a blog</h1>
+        <StyledButton
+          onClick={onPublishBlog}
+          text="Publish"
+          variant="primary"
+          isLoading={isBlogBeingPublished}
+        />
       </div>
       <div
         id="editor-wrapper"
@@ -62,24 +105,10 @@ const BlogEditor = () => {
           className="w-full font-serif text-[42px] leading-[52.5px] outline-none resize-none p-4"
         />
         <MultiSelect
-          options={[
-            {
-              id: '1',
-              label: 'React',
-            },
-            {
-              id: '2',
-              label: 'Node',
-            },
-            {
-              id: '3',
-              label: 'Express',
-            },
-            {
-              id: '4',
-              label: 'MongoDB',
-            },
-          ]}
+          options={(tags?.data?.result ?? [])?.map((tag) => ({
+            id: tag.tagId,
+            label: tag.tagName,
+          }))}
           selected={selectedTags}
           onSelect={(option) => {
             setSelectedTags([...selectedTags, option]);
@@ -88,13 +117,13 @@ const BlogEditor = () => {
             setSelectedTags(selectedTags.filter((tag) => tag.id !== option.id));
           }}
           placeholder="Select tags (Max 3)"
-          minSelection={1}
+          minSelection={0}
           maxSelection={3}
           onSearchChange={setSearchQuery}
           onCreate={() => {
             createTagMutation({ name: searchQuery });
           }}
-          isLoading={isTagsLoading}
+          isLoading={isTagsLoading || isTagsRefetching}
         />
         <ImageInputDisplay
           className="aspect-[1200/630]"
@@ -110,8 +139,8 @@ const BlogEditor = () => {
         />
         <ReactQuill
           theme="snow"
-          value={value}
-          onChange={setValue}
+          value={blogBodyContent}
+          onChange={setBlogBodyContent}
           className="w-full border-1 border-gray-200 rounded-lg h-full"
           formats={[
             'header',
@@ -150,7 +179,6 @@ const BlogEditor = () => {
           }}
           placeholder="Start typing here..."
           style={{ height: 'calc(100vh - 300px)' }}
-          defaultValue={value}
         />
       </div>
     </main>

@@ -9,7 +9,9 @@ public partial class BlogPost
     public string Title { get; set; } = null!;
 
     [Column(TypeName = "VARCHAR(MAX)")]
-    public string Body { get; set; } = null!;
+    public required string Body { get; set; } = null!;
+
+    public required string Thumbnail { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -26,8 +28,6 @@ public partial class BlogPost
     public virtual ICollection<Bookmark> Bookmarks { get; set; } = new List<Bookmark>();
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
-
-    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 

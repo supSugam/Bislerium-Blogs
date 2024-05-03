@@ -11,41 +11,38 @@ import {
   ISuccessResponse,
 } from '../../Interfaces/IApiResponse';
 import { toastWithInterval } from '../../utils/toast';
-import { ITag } from '../../Interfaces/Models/ITag';
+import { IBlog } from '../../Interfaces/Models/IBlog';
 import toast from 'react-hot-toast';
 
-interface ITagsQueryParams {
+interface IBlogsQueryParams {
   search?: string;
 }
-interface IUseTagsQueryProps {
-  getAllTagsConfig?: {
-    params?: ITagsQueryParams;
+interface IUseBlogsQueryProps {
+  getAllBlogsConfig?: {
+    params?: IBlogsQueryParams;
     queryOptions?: Partial<
       UseQueryOptions<
-        AxiosResponse<ISuccessResponse<ITag[]>, IFailedResponse>,
+        AxiosResponse<ISuccessResponse<IBlog[]>, IFailedResponse>,
         AxiosError<IFailedResponse>
       >
     >;
   };
 }
-const useTagsQuery = ({ getAllTagsConfig }: IUseTagsQueryProps) => {
+const useBlogsQuery = ({ getAllBlogsConfig }: IUseBlogsQueryProps) => {
   const { api, isApiAuthorized } = useAuthStore();
 
   const queryClient = useQueryClient();
 
-  const createTag = useMutation<
+  const publishBlog = useMutation<
     AxiosResponse<ISuccessResponse<string>>,
     AxiosError<IFailedResponse>,
-    { name: string }
+    FormData
   >({
-    mutationFn: async (data) => await api.post(`/tags/${data.name}`),
+    mutationFn: async (data) => await api.post(`/blogs`, data),
     onSuccess: (data) => {
-      toast.success(data.data.result ?? 'Tag Created');
+      toast.success(data.data.result ?? 'Blog Published, Redirecting...');
       queryClient.invalidateQueries({
-        queryKey: ['tags'],
-      });
-      queryClient.refetchQueries({
-        queryKey: ['tags', getAllTagsConfig?.params],
+        queryKey: ['blogs'],
       });
     },
     onError: (error) => {
@@ -53,18 +50,18 @@ const useTagsQuery = ({ getAllTagsConfig }: IUseTagsQueryProps) => {
     },
   });
 
-  const getTags = useQuery<
-    AxiosResponse<ISuccessResponse<ITag[]>>,
+  const getBlogs = useQuery<
+    AxiosResponse<ISuccessResponse<IBlog[]>>,
     AxiosError<IFailedResponse>
   >({
     queryFn: async () =>
-      await api.get('/tags', { params: getAllTagsConfig?.params }),
-    queryKey: ['tags', getAllTagsConfig?.params],
+      await api.get('/blogs', { params: getAllBlogsConfig?.params }),
+    queryKey: ['blogs', getAllBlogsConfig?.params],
     enabled: isApiAuthorized(),
-    ...getAllTagsConfig?.queryOptions,
+    ...getAllBlogsConfig?.queryOptions,
   });
 
-  return { getTags, createTag };
+  return { getBlogs, publishBlog };
 };
 
-export default useTagsQuery;
+export default useBlogsQuery;

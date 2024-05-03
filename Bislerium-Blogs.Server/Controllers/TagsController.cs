@@ -24,19 +24,20 @@ namespace Bislerium_Blogs.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tag>>> GetTags([FromQuery] string? search)
         {
-            if(search == null || search.Length == 0)
+            if (search == null || search.Length == 0)
             {
-                return await  _context.Tags
-        .OrderByDescending(tag => tag.BlogPostTags.Count)
-        .Take(10)
-        .ToListAsync();
+                return await _context.Tags
+                    .OrderByDescending(tag => tag.BlogPostTags.Count)
+                    .Take(10)
+                    .ToListAsync();
             }
 
             return await _context.Tags
-                .Where(tag => tag.TagName.Contains(search, StringComparison.CurrentCultureIgnoreCase))
+                .Where(tag => tag.TagName.ToUpper().Contains(search.ToUpper()))
                 .Take(20)
                 .ToListAsync();
         }
+
 
 
         // GET: api/Tags/5
@@ -85,22 +86,25 @@ namespace Bislerium_Blogs.Server.Controllers
         }
 
         // POST: api/Tags
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("{name}")]
         public async Task<ActionResult<string>> PostTag(string name)
         {
-            // check if tag already exists
-            var tag = await _context.Tags
-                .Where(tag => tag.TagName.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-                .FirstOrDefaultAsync();
 
-            if (tag != null)
+            try
             {
-                return BadRequest("Tag already exists");
-            }
 
-            // create new tag
-            tag = new Tag
+            // check if tag already exists
+            var tagExists = await _context.Tags.AnyAsync(tag => tag.TagName == name);
+
+                if (tagExists)
+                {
+
+                    throw new Exception("Tag already exists");
+                }
+
+
+                    // create new tag
+                   var tag = new Tag
             {
                 TagName = name,
                 CreatedAt = DateTime.Now,
@@ -109,6 +113,11 @@ namespace Bislerium_Blogs.Server.Controllers
             _context.Tags .Add(tag);
             await _context.SaveChangesAsync();
             return "Tag Created";
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
 
         }
 

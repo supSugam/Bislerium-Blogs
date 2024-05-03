@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import Dropdown from '../Reusables/Dropdown';
 import HoverEffect from '../Reusables/HoverEffect';
 import { cn } from '../../utils/cn';
-import { PlusIcon, TagIcon, X } from 'lucide-react';
+import { HashIcon, PlusIcon, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import StyledInput from './StyledInput';
 import Spinner from '../Reusables/Spinner';
@@ -20,6 +20,7 @@ type MultiSelectProps<T extends ISelectOption> = {
   onSelect: (option: T) => void;
   onRemove: (option: T) => void;
   placeholder?: string;
+  searchPlaceholder?: string;
   minSelection?: number;
   maxSelection?: number;
   disabled?: boolean;
@@ -33,7 +34,8 @@ const MultiSelect = ({
   selected,
   onSelect,
   onRemove,
-  placeholder,
+  placeholder = 'Select tags',
+  searchPlaceholder = 'Search for tags..',
   minSelection = 0,
   maxSelection = 3,
   disabled,
@@ -57,7 +59,7 @@ const MultiSelect = ({
                 ref={searchInput}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 className="w-full text-base border-none"
-                placeholder={placeholder}
+                placeholder={searchPlaceholder}
                 rightIcon={
                   <Spinner
                     isLoading={isLoading}
@@ -88,13 +90,16 @@ const MultiSelect = ({
                         }
                         onSelect(option);
                       }}
-                      icon={<TagIcon size={14} />}
+                      icon={<HashIcon size={14} />}
                       label={option.label}
                     />
                   ))}
                 <div
                   className={cn('hidden justify-center items-center py-4', {
-                    flex: options.length === 0 && searchQuery.length > 0,
+                    flex:
+                      options.length === 0 &&
+                      searchQuery.length > 0 &&
+                      onCreate,
                   })}
                 >
                   <Option
@@ -102,8 +107,10 @@ const MultiSelect = ({
                     icon={<PlusIcon size={16} color="var(--blue-500)" />}
                     label={
                       <span>
-                        {`No tags found for '${searchQuery}'`}
-                        <span className="text-blue-500">Create it</span>
+                        No results found, Create tag{' '}
+                        <span className="text-blue-500">
+                          {`#${searchQuery}`}
+                        </span>
                       </span>
                     }
                   />
@@ -125,11 +132,11 @@ const MultiSelect = ({
             key={selected.length}
             transition={{ duration: 0.3 }}
           >
-            {/* {selected.length === 0 && (
+            {selected.length === 0 && (
               <span className="text-neutral-400 dark:text-neutral-600 text-base font-medium">
                 {placeholder}
               </span>
-            )} */}
+            )}
             {selected.map((option) => (
               <Capsule
                 key={option.id}
@@ -191,7 +198,10 @@ const Capsule = ({
       <span className="text-sm font-medium">{label}</span>
       <X
         className="cursor-pointer transition-all hover:scale-110 ease-linear duration-150"
-        onClick={onRemove}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
         size={16}
         color="var(--red-500)"
       />

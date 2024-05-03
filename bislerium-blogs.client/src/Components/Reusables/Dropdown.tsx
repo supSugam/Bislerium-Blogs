@@ -44,7 +44,7 @@ const Dropdown = ({
 
   const onClick = () => {
     if (typeof open === 'boolean') return;
-    setIsOpen(true);
+    setIsOpen((prev) => !prev);
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);

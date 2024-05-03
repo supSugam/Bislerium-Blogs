@@ -33,7 +33,6 @@ public partial class BisleriumBlogsContext : IdentityDbContext
 
     public virtual DbSet<CommentHistory> CommentHistories { get; set; }
 
-    public virtual DbSet<Image> Images { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -156,18 +155,6 @@ public partial class BisleriumBlogsContext : IdentityDbContext
                 .HasForeignKey(d => d.CommentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__CommentHi__Comme__52593CB8");
-        });
-
-        modelBuilder.Entity<Image>(entity =>
-        {
-            entity.HasKey(e => e.ImageId).HasName("PK__Images__7516F70CE6D39443");
-
-            entity.Property(e => e.ImageId).HasDefaultValueSql("(newid())");
-
-            entity.HasOne(d => d.BlogPost).WithMany(p => p.Images)
-                .HasForeignKey(d => d.BlogPostId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Images__BlogPost__571DF1D5");
         });
 
         modelBuilder.Entity<Notification>(entity =>
