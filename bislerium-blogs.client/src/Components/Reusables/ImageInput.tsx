@@ -4,6 +4,7 @@ import { cn } from '../../utils/cn';
 import { ImageUp, XCircleIcon } from 'lucide-react';
 import StyledText from '../Elements/StyledText';
 import toast from 'react-hot-toast';
+import StyledInput from '../Elements/StyledInput';
 
 interface ImageInputDisplayProps {
   allowDnd?: boolean;
@@ -13,16 +14,26 @@ interface ImageInputDisplayProps {
   onChange?: (file: File) => void;
   onDelete?: () => void;
   disabled?: boolean;
+  placeholder?: {
+    text: string;
+    classNames: string;
+    iconSize?: number;
+  };
 }
 
 const ImageInputDisplay = ({
   allowDnd = true,
-  maxSize = 5 * 1024 * 1024, // 5MB
+  maxSize = 3 * 1024 * 1024,
   className,
   onChange,
   src,
   onDelete,
   disabled = false,
+  placeholder = {
+    text: 'Drag and drop or click to upload',
+    classNames: 'font-medium text-sm leading-1 text-center',
+    iconSize: 32,
+  },
 }: ImageInputDisplayProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,13 +104,13 @@ const ImageInputDisplay = ({
       onClick={() => fileInputRef.current?.click()}
     >
       <div className="relative w-full h-full">
-        <input
+        {/* <input
           type="file"
           accept="image/*"
           className="hidden"
           ref={fileInputRef}
           onChange={handleFileChange}
-        />
+        /> */}
         {src ? (
           <>
             <img
@@ -123,14 +134,24 @@ const ImageInputDisplay = ({
             className=" relative w-full h-full flex flex-col items-center justify-center px-4 py-2 bg-radial-gradient gap-y-2"
             onDragOver={allowDnd ? handleDragOver : undefined}
           >
-            <ImageUp size={32} />
+            <div className="w-full absolute top-0 left-0 h-full bg-white bg-opacity-25 opacity-75">
+              <StyledInput
+                type="file"
+                accept="image/*"
+                className="hidden h-full"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+            </div>
+            <ImageUp size={placeholder.iconSize} />
             <StyledText
               children={
-                isDragging && allowDnd
-                  ? 'Release to upload'
-                  : 'Drag and drop or click to upload'
+                isDragging && allowDnd ? 'Release to upload' : placeholder.text
               }
-              className="font-medium text-sm leading-1 text-center"
+              className={cn(
+                placeholder.classNames,
+                isDragging && allowDnd ? 'text-white' : 'text-gray-500'
+              )}
             />
           </div>
         )}
