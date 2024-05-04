@@ -14,6 +14,7 @@ import SearchInput from '../SearchInput';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import { NavbarAvatar } from './Avatar.navbar';
 import { useScreenDimensions } from '../../hooks/useScreenDimensions';
+import { useMousePosition } from '../../hooks/useMousePosition';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
@@ -50,6 +51,14 @@ const Navbar = () => {
       }
     }
   });
+
+  const { y } = useMousePosition();
+
+  useEffect(() => {
+    if (y <= navbarHeight) {
+      setNavbarTranslateY(0);
+    }
+  }, [y, navbarHeight]);
 
   return (
     <AnimatePresence>

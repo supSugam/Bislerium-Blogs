@@ -2,8 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'sohne';
+  src: url('./../public/fonts/sohne-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'sohne';
+  src: url('./../public/fonts/sohne-700-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'sohne';
+  src: url('./../public/fonts/sohne-500-normal.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: sohne, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   line-height: 1.5;
   font-weight: 400;
   --color-primary: #242424;

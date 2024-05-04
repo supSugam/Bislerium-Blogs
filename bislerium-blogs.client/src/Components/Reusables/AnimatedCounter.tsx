@@ -7,23 +7,36 @@ import {
 } from 'framer-motion';
 import { Minus } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
+import { cn } from '../../utils/cn';
 
 const fontSize = 30;
 const padding = 15;
 const height = fontSize + padding;
 
-function AnimatedCounter({ value }: { value: number }) {
+function AnimatedCounter({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
   const isNegative = value < 0;
   const absValue = Math.abs(value);
 
   return (
-    <div className="flex overflow-hidden leading-none text-xl items-center justify-center px-1">
+    <div
+      className={cn(
+        'flex overflow-hidden leading-none text-lg items-center justify-center px-1',
+        className
+      )}
+    >
       {isNegative && (
         <motion.div
           initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: isNegative ? 1 : 0, scale: isNegative ? 1 : 0 }}
+          animate={{ opacity: isNegative ? 0.7 : 0, scale: isNegative ? 1 : 0 }}
           exit={{ opacity: 0, scale: 0 }}
           className="mt-1"
+          whileHover={{ opacity: 0.9 }}
         >
           <Minus size={12} strokeWidth={3} />
         </motion.div>
@@ -39,16 +52,6 @@ function AnimatedCounter({ value }: { value: number }) {
       }, [absValue])}
     </div>
   );
-}
-
-function NegativeSign() {
-  const mv = useMotionValue(0);
-  useEffect(() => {
-    const controls = animate(mv, 11, { type: 'spring' });
-    return controls.stop;
-  }, [mv]);
-
-  return <Number mv={mv} number={11} />;
 }
 
 function Digit({ place, value }: { place: number; value: number }) {

@@ -4,7 +4,7 @@ import VoteIcon from '../lib/SVGs/VoteIcon';
 import useBlogsQuery from '../hooks/react-query/useBlogsQuery';
 import { AnimatePresence } from 'framer-motion';
 import AnimatedCounter from './Reusables/AnimatedCounter';
-
+import { motion } from 'framer-motion';
 interface IVoteProps {
   initialVoteCounts: IVotePayload;
   id: string;
@@ -58,7 +58,11 @@ const Vote = ({ initialVoteCounts, id }: IVoteProps) => {
 
   return (
     <AnimatePresence>
-      <div className="flex space-x-1 items-center">
+      <motion.div
+        className="flex space-x-1 items-center"
+        whileHover={{ opacity: 0.9 }}
+        animate={{ opacity: 0.7 }}
+      >
         <VoteIcon
           isVoted={voteDetails.isVotedUp}
           type="up"
@@ -72,7 +76,7 @@ const Vote = ({ initialVoteCounts, id }: IVoteProps) => {
           onClick={onDownvote}
           disabled={blogUpvotePending || blogDownvotePending}
         />
-      </div>
+      </motion.div>
     </AnimatePresence>
   );
 };

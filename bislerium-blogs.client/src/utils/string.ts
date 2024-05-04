@@ -116,3 +116,7 @@ export const getFormattedDate = (date?: Date | string | number): string => {
     day: 'numeric',
   });
 };
+
+export const getRidOfWhiteSpace = (str: string): string => {
+  return str.replace(/<p[^>]*>(\s|&nbsp;|<br[^>]*>)*<\/p>/g, '');
+};
