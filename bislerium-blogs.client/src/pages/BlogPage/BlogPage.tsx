@@ -11,6 +11,7 @@ import {
   getFormattedDate,
 } from '../../utils/string';
 import { Capsule } from '../../Components/Elements/MultiSelect';
+import Vote from '../../Components/Vote';
 const SingleBlogPage = () => {
   const [blogData, setBlogData] = useState<IBlog>();
   const { id } = useParams();
@@ -75,7 +76,12 @@ const SingleBlogPage = () => {
               </div>
             </div>
 
-            <div className="flex justify-between items-center px-2 py-3 w-full border-y border-neutral-200 my-6"></div>
+            <div className="flex justify-between items-center px-2 py-3 w-full border-y border-neutral-200 my-6">
+              <Vote
+                id={blogData.blogPostId}
+                initialVoteCounts={blogData?.votePayload}
+              />
+            </div>
           </article>
         </>
       )}

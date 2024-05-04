@@ -14,7 +14,7 @@ namespace Bislerium_Blogs.Server.Interfaces
 
         //public Task<VotePayload> ReactToCommentAsync(Guid commentId, Guid userId, bool isUpvote);
 
-        public Task<int> CalculatePopularityOfBlog(Guid blogPostId);
+        public Task<int> UpdatePopularityOfABlog(Guid blogPostId);
 
         public Task<VotePayload> GetBlogReactionDetails(Guid blogPostId, Guid? userId);
     }

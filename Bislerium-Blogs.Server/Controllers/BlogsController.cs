@@ -48,8 +48,15 @@ namespace Bislerium_Blogs.Server.Controllers
         {
             try
             {
-
-                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                string? userId = null;
+                try
+                {
+                    userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                }
+                catch (Exception)
+                {
+                    userId = null;
+                }
 
                 var blogPost = await _context.BlogPosts.FindAsync(id);
 

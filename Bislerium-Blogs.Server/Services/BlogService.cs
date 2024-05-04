@@ -59,24 +59,27 @@ namespace Bislerium_Blogs.Server.Services
                 ArgumentNullException.ThrowIfNull(blogPostId, nameof(blogPostId));
                 ArgumentNullException.ThrowIfNull(userId, nameof(userId));
 
-                bool ShouldRemoveVote = await _context.Reactions.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
+                var existingVote = await _context.Reactions.FirstOrDefaultAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
 
-                if(ShouldRemoveVote)
+                if (existingVote is not null)
                 {
-                    var reaction = await _context.Reactions.FirstOrDefaultAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
-                    _context.Reactions.Remove(reaction);
+                    if (existingVote.IsUpvote == isUpvote)
+                    {
+                        _context.Reactions.Remove(existingVote);
+                    }
+                    else
+                    {
+                        existingVote.IsUpvote = isUpvote;
+                    }
                 }
                 else
                 {
-                    var reaction = new Reaction
+                    await _context.Reactions.AddAsync(new Reaction
                     {
                         BlogPostId = blogPostId,
                         UserId = userId,
-                        IsUpvote = isUpvote,
-                        CreatedAt = DateTime.Now
-                    };
-
-                    await _context.Reactions.AddAsync(reaction);
+                        IsUpvote = isUpvote
+                    });
                 }
 
                 await _context.SaveChangesAsync();
@@ -88,7 +91,7 @@ namespace Bislerium_Blogs.Server.Services
             }
         }
 
-        public async Task<int> CalculatePopularityOfBlog(Guid blogPostId)
+        public async Task<int> UpdatePopularityOfABlog(Guid blogPostId)
         {
             try
             {
@@ -98,6 +101,9 @@ namespace Bislerium_Blogs.Server.Services
                 var totalComments = await _context.Comments.CountAsync(x => x.BlogPostId == blogPostId);
 
                 int popularity = totalUpvotes * Constants.UPVOTE_WEIGHTAGE + totalDownvotes * Constants.DOWNVOTE_WEIGHTAGE + totalComments * Constants.COMMENT_WEIGHTAGE;
+
+                await _context.BlogPosts.Where(x => x.BlogPostId == blogPostId).ForEachAsync(x => x.Popularity = popularity);
+                await _context.SaveChangesAsync();
                 return popularity;
             }
             catch (Exception ex)
@@ -122,7 +128,7 @@ namespace Bislerium_Blogs.Server.Services
 
                 return new VotePayload
                 {
-                    Popularity = await CalculatePopularityOfBlog(blogPostId),
+                    Popularity = await UpdatePopularityOfABlog(blogPostId),
                     IsVotedUp = isVotedUp,
                     IsVotedDown = isVotedDown,
                     TotalComments = totalComments

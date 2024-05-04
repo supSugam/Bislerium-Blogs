@@ -1,26 +1,79 @@
+import { useState } from 'react';
+import { IVotePayload } from '../Interfaces/Models/IVotePayload';
 import VoteIcon from '../lib/SVGs/VoteIcon';
-import StyledText from './Elements/StyledText';
+import useBlogsQuery from '../hooks/react-query/useBlogsQuery';
+import { AnimatePresence } from 'framer-motion';
+import AnimatedCounter from './Reusables/AnimatedCounter';
 
 interface IVoteProps {
-  voteCount: number;
-  onUpVote: () => void;
-  onDownVote: () => void;
-  isVotedUp: boolean;
-  isVotedDown: boolean;
+  initialVoteCounts: IVotePayload;
+  id: string;
 }
-const Vote = ({
-  voteCount,
-  onUpVote,
-  onDownVote,
-  isVotedUp,
-  isVotedDown,
-}: IVoteProps) => {
+const Vote = ({ initialVoteCounts, id }: IVoteProps) => {
+  const {
+    upvoteVlog: {
+      mutateAsync: upvoteBlogMutation,
+      isPending: blogUpvotePending,
+    },
+    downvoteBlog: {
+      mutateAsync: downBlogMutation,
+      isPending: blogDownvotePending,
+    },
+  } = useBlogsQuery({});
+
+  const [voteDetails, setVoteDetails] =
+    useState<IVotePayload>(initialVoteCounts);
+
+  const onUpvote = async () => {
+    if (blogUpvotePending || blogDownvotePending) return;
+    await upvoteBlogMutation(
+      { id },
+      {
+        onSuccess: (data) => {
+          const payload = data.data.result;
+          setVoteDetails((prev) => ({ ...prev, ...payload }));
+        },
+        onError: (error) => {
+          console.log(error);
+        },
+      }
+    );
+  };
+
+  const onDownvote = async () => {
+    if (blogUpvotePending || blogDownvotePending) return;
+    await downBlogMutation(
+      { id },
+      {
+        onSuccess: (data) => {
+          const payload = data.data.result;
+          setVoteDetails((prev) => ({ ...prev, ...payload }));
+        },
+        onError: (error) => {
+          console.log(error);
+        },
+      }
+    );
+  };
+
   return (
-    <div className="flex space-x-1 items-center">
-      <VoteIcon isVoted={isVotedUp} type="up" onClick={onUpVote} />
-      <StyledText>{voteCount}</StyledText>
-      <VoteIcon isVoted={isVotedDown} type="down" onClick={onDownVote} />
-    </div>
+    <AnimatePresence>
+      <div className="flex space-x-1 items-center">
+        <VoteIcon
+          isVoted={voteDetails.isVotedUp}
+          type="up"
+          onClick={onUpvote}
+          disabled={blogUpvotePending || blogDownvotePending}
+        />
+        <AnimatedCounter value={voteDetails.popularity} />
+        <VoteIcon
+          isVoted={voteDetails.isVotedDown}
+          type="down"
+          onClick={onDownvote}
+          disabled={blogUpvotePending || blogDownvotePending}
+        />
+      </div>
+    </AnimatePresence>
   );
 };
 

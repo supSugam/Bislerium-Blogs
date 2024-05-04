@@ -14,6 +14,7 @@ import { toastWithInterval } from '../../utils/toast';
 import { IBlog } from '../../Interfaces/Models/IBlog';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { IVotePayload } from '../../Interfaces/Models/IVotePayload';
 
 interface IBlogsQueryParams {
   search?: string;
@@ -102,26 +103,35 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     },
   });
 
-  const voteBlog = useMutation<
-    AxiosResponse<
-      ISuccessResponse<{
-        updatedCount: number;
-      }>
-    >,
+  const upvoteVlog = useMutation<
+    AxiosResponse<ISuccessResponse<IVotePayload>>,
     AxiosError<IFailedResponse>,
-    { id: string; type: 'upvote' | 'downvote' }
+    { id: string }
   >({
-    mutationFn: async ({ id, type }) => await api.post(`/blogs/${id}/${type}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['blogs'],
-      });
-    },
+    mutationFn: async ({ id }) => await api.post(`/blogs/${id}/upvote`),
     onError: (error) => {
       toastWithInterval({ error });
     },
   });
-  return { getBlogs, publishBlog, getBlogById, updateBlog, voteBlog };
+
+  const downvoteBlog = useMutation<
+    AxiosResponse<ISuccessResponse<IVotePayload>>,
+    AxiosError<IFailedResponse>,
+    { id: string }
+  >({
+    mutationFn: async ({ id }) => await api.post(`/blogs/${id}/downvote`),
+    onError: (error) => {
+      toastWithInterval({ error });
+    },
+  });
+  return {
+    getBlogs,
+    publishBlog,
+    getBlogById,
+    updateBlog,
+    upvoteVlog,
+    downvoteBlog,
+  };
 };
 
 export default useBlogsQuery;
