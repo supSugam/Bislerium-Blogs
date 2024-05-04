@@ -21,6 +21,7 @@ const Navbar = () => {
 
   const [navbarHeight, setNavbarHeight] = useState<number>(0);
   const [navbarTranslateY, setNavbarTranslateY] = useState<number>(0);
+  const [mounted, setMounted] = useState<boolean>(false);
 
   const navbarRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +29,7 @@ const Navbar = () => {
     const { current } = navbarRef;
     if (current) {
       setNavbarHeight(current.offsetHeight);
+      setMounted(true);
     }
   }, []);
 
@@ -37,10 +39,9 @@ const Navbar = () => {
     if (typeof current === 'number') {
       const direction = current! - scrollYProgress.getPrevious()!;
       if (direction < 0) {
-        if (navbarTranslateY * height === 0) return;
         setNavbarTranslateY(0);
       } else {
-        console.log(navbarTranslateY);
+        if (!mounted) return;
         if (navbarTranslateY * height > navbarHeight) return;
         setNavbarTranslateY((prev) => prev + direction);
         // setNavbarTranslateY((prev) =>
@@ -55,10 +56,12 @@ const Navbar = () => {
       <motion.div
         ref={navbarRef}
         style={{
-          y: Math.max(-(navbarTranslateY * height), -navbarHeight),
+          y: mounted
+            ? Math.max(-(navbarTranslateY * height), -navbarHeight)
+            : 0,
         }}
         className={cn(
-          'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111] pr-2 pl-8 py-2 items-center transition-all duration-300 ease-in'
+          'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111]  px-8 py-2 items-center transition-all duration-300 ease-in'
         )}
       >
         <div className="flex items-center space-x-3">

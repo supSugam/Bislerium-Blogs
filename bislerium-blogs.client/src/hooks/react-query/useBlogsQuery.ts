@@ -31,7 +31,7 @@ interface IUseBlogsQueryProps {
   id?: string;
 }
 const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
-  const { api, isApiAuthorized } = useAuthStore();
+  const { api } = useAuthStore();
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -41,9 +41,14 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     AxiosError<IFailedResponse>,
     FormData
   >({
-    mutationFn: async (data) => await api.post(`/blogs`, data),
+    mutationFn: async (data) =>
+      await api.post(`/blogs`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
     onSuccess: (data) => {
-      toast.success(data.data.result ?? 'Blog Published, Redirecting...');
+      toast.success('Blog Published, Redirecting...');
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });
@@ -61,7 +66,6 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     queryFn: async () =>
       await api.get('/blogs', { params: getAllBlogsConfig?.params }),
     queryKey: ['blogs', getAllBlogsConfig?.params],
-    enabled: isApiAuthorized(),
     ...getAllBlogsConfig?.queryOptions,
   });
 
@@ -73,7 +77,51 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     queryKey: ['blogs', id],
     enabled: typeof id === 'string',
   });
-  return { getBlogs, publishBlog, getBlogById };
+
+  const updateBlog = useMutation<
+    AxiosResponse<ISuccessResponse<string>>,
+    AxiosError<IFailedResponse>,
+    { id: string; data: FormData }
+  >({
+    mutationFn: async ({ data, id }) =>
+      await api.patch(`/blogs/${id}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    onSuccess: () => {
+      toast.success('Blog Updated, Redirecting...');
+      queryClient.invalidateQueries({
+        queryKey: ['blogs'],
+      });
+      navigate(`/blogs/${id}`);
+    },
+    onError: (error) => {
+      console.log(error);
+      toastWithInterval({ error });
+    },
+  });
+
+  const voteBlog = useMutation<
+    AxiosResponse<
+      ISuccessResponse<{
+        updatedCount: number;
+      }>
+    >,
+    AxiosError<IFailedResponse>,
+    { id: string; type: 'upvote' | 'downvote' }
+  >({
+    mutationFn: async ({ id, type }) => await api.post(`/blogs/${id}/${type}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['blogs'],
+      });
+    },
+    onError: (error) => {
+      toastWithInterval({ error });
+    },
+  });
+  return { getBlogs, publishBlog, getBlogById, updateBlog, voteBlog };
 };
 
 export default useBlogsQuery;

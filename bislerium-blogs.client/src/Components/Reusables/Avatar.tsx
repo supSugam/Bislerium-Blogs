@@ -8,11 +8,14 @@ const Avatar = ({ size = 'medium', src }: IAvatarProps) => {
     'w-6': size === 'small',
     'w-10': size === 'medium',
     'w-14': size === 'large',
-    [`w-${size}`]: typeof size === 'number',
-    [`h-${size}`]: typeof size === 'number',
   });
   return (
-    <div className={classes}>
+    <div
+      className={classes}
+      style={{
+        ...((typeof size === 'number' && { width: size, height: size }) || {}),
+      }}
+    >
       <img
         src={src ?? 'https://avatar.iran.liara.run/public/92'}
         alt="avatar"

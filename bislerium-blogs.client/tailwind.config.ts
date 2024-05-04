@@ -15,6 +15,8 @@ export default {
       backgroundImage: {
         'radial-gradient':
           'radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(36,36,36,0.1) 100%)',
+        'radial-black-to-white':
+          'radial-gradient(circle, rgba(255,255,255,1) 30%, rgba(36,36,36,1) 100%)',
       },
       borderColor: {
         primary: COLORS.primary,

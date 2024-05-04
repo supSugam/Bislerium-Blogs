@@ -22,11 +22,11 @@ const StyledButton = ({
   ...props
 }: IStyledButtonProps) => {
   const buttonClassnames = cn(
-    'px-4 py-2 rounded-smr relative',
+    'px-5 py-2 rounded-smr relative rounded-md',
     {
       'bg-primary text-white': variant === 'primary',
       'bg-white text-primary border border-primary': variant === 'secondary',
-      'bg-gradient-to-br relative group/btn from-neutral-700 to-neutral-900 block w-full text-white h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]':
+      'bg-neutral-900 relative group/btn from-neutral-700 to-neutral-900 block w-full text-white h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] hover:bg-neutral-700 transition-colors duration-200 ease-in':
         variant === 'dark',
     },
     className,

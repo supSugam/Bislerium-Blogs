@@ -62,7 +62,7 @@ namespace Bislerium_Blogs.Server.Controllers
         {
             try
             {
-                await _emailService.SendOTP("vafaxin655@buzblox.com", "Bruh Moment");
+                await _emailService.SendOTP("ciwed40966@amankro.com", "Bruh Moment");
                 return Ok("Mail Sent");
             }
             catch (Exception ex)

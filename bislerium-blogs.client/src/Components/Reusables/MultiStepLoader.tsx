@@ -132,9 +132,10 @@ export const MultiStepLoader = ({
             <LoaderCore value={currentState} loadingStates={loadingStates} />
           </div>
 
-          <div className="bg-gradient-to-t inset-x-0 z-20 bottom-0 bg-white dark:bg-black h-full absolute [mask-image:radial-gradient(900px_at_center,transparent_30%,white)]" />
+          <div className="bg-radial-black-to-white inset-x-0 bottom-0 bg-white dark:bg-white h-full absolute -z-[1]" />
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
+// radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(36,36,36,1) 100%)

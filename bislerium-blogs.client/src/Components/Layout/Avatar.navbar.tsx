@@ -68,7 +68,8 @@ export const NavbarAvatar = () => {
               <ProfileWithName
                 name={currentUser?.fullName}
                 avatar={currentUser?.avatarUrl ?? ''}
-                role={currentUser?.role}
+                subtitle={currentUser?.role}
+                showChevron
               />
             ),
           },

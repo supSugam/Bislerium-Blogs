@@ -1,20 +1,23 @@
 import React from 'react';
-import { UserRole } from '../../enums/UserRole';
 import Avatar from '../Reusables/Avatar';
 import StyledText from '../Elements/StyledText';
 import { ChevronRight } from 'lucide-react';
 import { capitalizeFirstLetter } from '../../utils/string';
 
-interface IProfileWithNameProps extends React.HTMLProps<HTMLDivElement> {
-  name?: string;
+interface IProfileWithNameProps {
+  name: string | React.ReactNode;
   avatar?: string | null;
-  role?: UserRole;
+  subtitle: string | React.ReactNode;
+  showChevron?: boolean;
+  avatarSize?: number;
 }
 
 const ProfileWithName = ({
   avatar,
   name,
-  role,
+  subtitle,
+  showChevron = false,
+  avatarSize = 48,
   ...rest
 }: IProfileWithNameProps) => {
   return (
@@ -23,18 +26,19 @@ const ProfileWithName = ({
       {...rest}
     >
       <div className="flex flex-row items-center space-x-2">
-        <Avatar src={avatar} size={10} />
+        <Avatar src={avatar} size={avatarSize} />
         <div className="flex flex-col ml-2">
           <StyledText className="text-sm font-semibold text-neutral-800">
             {name}
           </StyledText>
           <StyledText className="text-xs text-neutral-500">
-            {capitalizeFirstLetter(role) || 'User'}
+            {typeof subtitle === 'string'
+              ? capitalizeFirstLetter(subtitle)
+              : subtitle}
           </StyledText>
         </div>
       </div>
-
-      <ChevronRight size={20} />
+      {showChevron && <ChevronRight size={20} />}
     </div>
   );
 };

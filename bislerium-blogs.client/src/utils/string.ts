@@ -21,6 +21,10 @@ export const capitalizeFirstLetter = (
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
+export const joinStrings = (strings: string[], separator = ' '): string => {
+  return strings.join(separator);
+};
+
 export const seekValue = <T extends number | string>(
   value: T,
   position: number
@@ -87,3 +91,28 @@ export const parseStringToNumber = (input: string): number | undefined => {
 
 export const nameFromEmail = (email: string): string =>
   email.split('@')[0] ?? '';
+
+export const estimateReadingTime = (content: string): number => {
+  // Average reading speed in words per minute (WPM)
+  const averageReadingSpeed = 200;
+
+  // Remove HTML tags and convert entities to readable characters
+  const cleanContent = content.replace(/<[^>]+>/g, '').replace(/&\w+;/g, '');
+
+  // Split the content into words
+  const words = cleanContent.split(/\s+/);
+
+  // Calculate the reading time in minutes
+  const readingTime = Math.ceil(words.length / averageReadingSpeed);
+
+  return readingTime;
+};
+
+export const getFormattedDate = (date?: Date | string | number): string => {
+  if (!date) return '';
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};

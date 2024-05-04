@@ -22,5 +22,7 @@ namespace Bislerium_Blogs.Server.Payload
 
         public List<Tag> Tags { get; set; } = [];
 
-}
+        public VotePayload VotePayload { get; set; }
+
+    }
 }

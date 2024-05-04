@@ -112,7 +112,7 @@ namespace Bislerium_Blogs.Server.Controllers
             };
             _context.Tags .Add(tag);
             await _context.SaveChangesAsync();
-            return "Tag Created";
+                return Ok("Tag Created");
             }
             catch (Exception e)
             {

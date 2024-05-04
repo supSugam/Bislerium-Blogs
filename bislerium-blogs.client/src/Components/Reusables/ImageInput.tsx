@@ -119,15 +119,17 @@ const ImageInputDisplay = ({
               className="w-full h-full object-cover object-center"
               draggable={false}
             />
-            <button
-              className="shadow-xl absolute z-10 top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-200 transition-colors duration-300"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.();
-              }}
-            >
-              <XCircleIcon size={20} className="text-gray-500" />
-            </button>
+            {onDelete && (
+              <button
+                className="shadow-xl absolute z-10 top-2 right-2 p-2 bg-white rounded-full hover:bg-gray-200 transition-colors duration-300"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <XCircleIcon size={20} className="text-gray-500" />
+              </button>
+            )}
           </>
         ) : (
           <div

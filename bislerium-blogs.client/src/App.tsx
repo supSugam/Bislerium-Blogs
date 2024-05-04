@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './services/stores/useAuthStore';
 import { useEffect } from 'react';
-import WriteBlog from './pages/WriteBlog';
 import Layout from './Components/Layout/_layout';
-import SingleBlogPage from './pages/SingleBlogPage';
+import BlogPage from './pages/BlogPage/BlogPage';
+import BlogEditor from './pages/BlogEditor/BlogEditor';
 function App() {
   const queryClient = new QueryClient();
   const { onInitialize } = useAuthStore();
@@ -18,7 +18,11 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          className: 'toast-wrapper',
+        }}
+      />
       <BrowserRouter>
         <Layout>
           <Routes>
@@ -26,8 +30,15 @@ function App() {
               <Route path="blogs" element={<></>} />
               <Route path="contact" element={<></>} />
             </Route>
-            <Route path="/blogs/publish" element={<WriteBlog />} />
-            <Route path="/blogs/:id" element={<SingleBlogPage />} />
+            <Route
+              path="/blogs/publish"
+              element={<BlogEditor mode="publish" />}
+            />
+            <Route
+              path="/blogs/update/:id"
+              element={<BlogEditor mode="update" />}
+            />
+            <Route path="/blogs/:id" element={<BlogPage />} />
           </Routes>
         </Layout>
       </BrowserRouter>

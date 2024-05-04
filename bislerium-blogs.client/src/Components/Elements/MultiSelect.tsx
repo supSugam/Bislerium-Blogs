@@ -140,7 +140,7 @@ const MultiSelect = ({
               <Capsule
                 key={option.id}
                 label={option.label}
-                onRemove={() => {
+                onClick={() => {
                   if (selected.length === minSelection) {
                     toast.error(`You must select atleast ${minSelection} tag`);
                     return;
@@ -160,16 +160,18 @@ const MultiSelect = ({
   );
 };
 
-const Capsule = ({
+export const Capsule = ({
   label,
-  onRemove,
+  onClick,
   disabled = false,
   index = 1,
+  showIcon = true,
 }: {
   label: string;
-  onRemove: () => void;
+  onClick: () => void;
   disabled?: boolean;
   index?: number;
+  showIcon?: boolean;
 }) => {
   return (
     <motion.button
@@ -195,20 +197,22 @@ const Capsule = ({
       className="flex items-center bg-white rounded-full px-2 py-1 gap-1 shadow-sm hover:shadow-md transition-all"
     >
       <span className="text-sm font-medium">{label}</span>
-      <X
-        className="cursor-pointer transition-all hover:scale-110 ease-linear duration-150"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        size={16}
-        color="var(--red-500)"
-      />
+      {showIcon && (
+        <X
+          className="cursor-pointer transition-all hover:scale-110 ease-linear duration-150"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          size={16}
+          color="var(--red-500)"
+        />
+      )}
     </motion.button>
   );
 };
 
-const Option = ({
+export const Option = ({
   onClick,
   icon,
   label,

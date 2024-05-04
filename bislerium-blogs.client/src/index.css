@@ -10,7 +10,6 @@
   --color-background: #fafafa;
   scroll-behavior: smooth;
   box-sizing: border-box;
-  color-scheme: light;
 }
 
 *,
@@ -61,4 +60,12 @@ input[type='number'] {
 .no-scrollbar {
   -ms-overflow-style: none !important; /* IE and Edge */
   scrollbar-width: none !important; /* Firefox */
+}
+
+.toast-wrapper div[role='status'] {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }

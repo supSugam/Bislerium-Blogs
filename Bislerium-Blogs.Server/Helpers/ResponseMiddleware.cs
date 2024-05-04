@@ -4,6 +4,7 @@
     using System.IO;
     using System.Text;
     using System.Text.Json;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     public class ResponseMiddleware
@@ -73,12 +74,16 @@
                 }
                 else
                 {
+                    Console.WriteLine("jsonResponse");
+                    Console.WriteLine(jsonResponse.GetType());
+                    Console.WriteLine(jsonResponse);
+                    string pattern = @"[""']([^""']+?)[""']";
                     var successResponse = new
                     {
                         path = context.Request.Path.Value,
                         statusCode = context.Response.StatusCode,
                         success = true,
-                        result = JSON.IsValidJSON(jsonResponse) ? JsonSerializer.Deserialize<dynamic>(jsonResponse) : jsonResponse
+                        result = JSON.IsValidJSON(jsonResponse) ? JsonSerializer.Deserialize<dynamic>(jsonResponse) : Regex.Replace(jsonResponse, pattern, m => m.Groups[1].Value) ?? jsonResponse
                     };
 
                     var successResponseJson = JsonSerializer.Serialize(successResponse);

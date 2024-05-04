@@ -13,6 +13,7 @@ using System.Security.Claims;
 using Bislerium_Blogs.Server.Payload;
 using Bislerium_Blogs.Server.Enums;
 using Microsoft.AspNetCore.Identity;
+using Bislerium_Blogs.Server.Helpers;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -48,7 +49,9 @@ namespace Bislerium_Blogs.Server.Controllers
             try
             {
 
-            var blogPost = await _context.BlogPosts.FindAsync(id);
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                var blogPost = await _context.BlogPosts.FindAsync(id);
 
             if (blogPost == null)
             {
@@ -77,10 +80,11 @@ namespace Bislerium_Blogs.Server.Controllers
                     Role = role
                 },
                 Popularity = blogPost.Popularity,
-                Tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId)
+                Tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId),
+                VotePayload = await _blogService.GetBlogReactionDetails(blogPost.BlogPostId, userId is not null ? Guid.Parse(userId):null)
             };
 
-            return blogPayload;
+                return Ok(blogPayload);
             }
             catch (Exception ex)
             {
@@ -90,7 +94,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
         [HttpPatch("{blogPostId}")]
         [Consumes("multipart/form-data")]
-        public async Task<ActionResult<string>> UpdateBlogPost(Guid blogPostId, [FromBody] UpdateBlogDto updateBlogDto)
+        public async Task<ActionResult<string>> UpdateBlogPost(Guid blogPostId, [FromForm] UpdateBlogDto updateBlogDto)
         {
             try
             {
@@ -105,11 +109,23 @@ namespace Bislerium_Blogs.Server.Controllers
                     return NotFound("Blog Not Found");
                 }
 
+
                 // Check if the user is the author of the blog post
                 if (blogPost.AuthorId != Guid.Parse(userId))
                 {
                     return Unauthorized("Only the author can update the blog post");
                 }
+
+                // Add BlogPostHistory
+                var blogPostHistory = new BlogPostHistory
+                {
+                    BlogPostId = blogPost.BlogPostId,
+                    Title = blogPost.Title,
+                    Body = blogPost.Body,
+                    UpdatedAt = blogPost.UpdatedAt
+                };
+
+                await _blogService.CreateBlogHistoryAsync(blogPostHistory);
 
                 // Update blog post properties
                 blogPost.Title = updateBlogDto.Title ?? blogPost.Title; // Only update if not null
@@ -151,7 +167,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 // Save changes to the database
                 await _context.SaveChangesAsync();
 
-                return "Blog Updated";
+                return Ok("Blog Updated");
             }
             catch (Exception ex)
             {
@@ -252,9 +268,43 @@ namespace Bislerium_Blogs.Server.Controllers
             return NoContent();
         }
 
-        private bool BlogPostExists(Guid id)
+
+        [HttpPost("{blogPostId}/upvote")]
+        [AuthorizedOnly]
+        public async Task<ActionResult<VotePayload>> UpvoteBlogPost(Guid blogPostId)
         {
-            return _context.BlogPosts.Any(e => e.BlogPostId == id);
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                VotePayload votePayload = await _blogService.ReactToBlogPostAsync(blogPostId, Guid.Parse(userId), true);
+
+                return Ok(votePayload);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
+        [HttpPost("{blogPostId}/downvote")]
+        [AuthorizedOnly]
+        public async Task<ActionResult<VotePayload>> DownvoteBlogPost(Guid blogPostId)
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                VotePayload votePayload = await _blogService.ReactToBlogPostAsync(blogPostId, Guid.Parse(userId), false);
+
+                return Ok(votePayload);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }   
     }
 }
