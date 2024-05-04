@@ -6,8 +6,10 @@ namespace Bislerium_Blogs.Server.Interfaces
     {
         public Task<List<CommentPayload>> GetCommentsAsync(Guid blogPostId);
 
-        public Task<CommentPayload> GetCommentByIdAsync(Guid commentId);
+        public Task<CommentPayload> GetCommentByIdAsync(Guid commentId, bool includeReplies);
 
-        public Task<List<CommentPayload>> GetRepliesAsync(Guid commentId);
+        public Task<List<CommentPayload>> GetRepliesAsync(Guid commentId, bool includeReplies);
+
+
     }
 }
