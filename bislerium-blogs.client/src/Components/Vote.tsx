@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IVotePayload } from '../Interfaces/Models/IVotePayload';
 import VoteIcon from '../lib/SVGs/VoteIcon';
 import useBlogsQuery from '../hooks/react-query/useBlogsQuery';
@@ -36,15 +36,7 @@ const Vote = ({
       mutateAsync: downBlogMutation,
       isPending: downvoteBlogPending,
     },
-    getBlogVotes: { data: blogVotes },
-  } = useBlogsQuery({
-    ...(type === 'blog' && id && { id }),
-    getAllBlogsConfig: {
-      queryOptions: {
-        enabled: false,
-      },
-    },
-  });
+  } = useBlogsQuery({});
 
   const {
     upvoteComment: {
@@ -55,24 +47,7 @@ const Vote = ({
       mutateAsync: downCommentMutation,
       isPending: downvoteCommentPending,
     },
-    getCommentReactions: { data: commentReactions },
-  } = useCommentsQuery({
-    ...(type === 'comment' && id && { id }),
-    getAllCommentsConfig: {
-      queryOptions: {
-        enabled: false,
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (type === 'blog' && blogVotes) {
-      setVoteDetails(blogVotes.data.result);
-    }
-    if (type === 'comment' && commentReactions) {
-      setVoteDetails(commentReactions.data.result);
-    }
-  }, [blogVotes, commentReactions, type]);
+  } = useCommentsQuery({});
 
   const upvotePending =
     type === 'blog' ? upvoteBlogPending : upvoteCommentPending;

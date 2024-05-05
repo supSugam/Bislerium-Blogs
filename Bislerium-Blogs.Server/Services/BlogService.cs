@@ -17,11 +17,21 @@ namespace Bislerium_Blogs.Server.Services
 
         public async Task<List<Tag>> GetAllTagsOfABlog(Guid blogPostId)
         {
+            try
+            {
+
             var blogPostTags = await _context.Tags
                 .Where(tag => tag.BlogPostTags.Any(blogPostTag => blogPostTag.BlogPostId == blogPostId))
                 .ToListAsync();
+                return blogPostTags;
 
-            return blogPostTags;
+            }
+
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
 
         public async Task<bool> CreateBlogHistoryAsync(BlogPostHistory blogPostHistory)

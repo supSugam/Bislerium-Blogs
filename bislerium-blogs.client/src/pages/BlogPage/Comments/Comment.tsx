@@ -3,12 +3,14 @@ import { IComment } from '../../../Interfaces/Models/IComment';
 import { whenDidItHappen } from '../../../utils/string';
 import Vote from '../../../Components/Vote';
 import CommentIcon from '../../../Components/Smol/CommentIcon';
-import StyledButton from '../../../Components/Elements/StyledButton';
 import { cn } from '../../../utils/cn';
 import CommentInput from './CommentInput';
 import { useRef, useState } from 'react';
 import { AnimateHeight } from '../../../Components/Reusables/AnimatedHeight';
 import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
+import Dropdown from '../../../Components/Reusables/Dropdown';
+import toast from 'react-hot-toast';
+import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
 
 interface ICommentProps {
   comment: IComment;
@@ -41,6 +43,8 @@ const Comment = ({ comment }: ICommentProps) => {
     });
   };
 
+  const { deleteComment, updateComment } = useCommentsQuery({});
+
   return (
     <div
       className={cn(' flex flex-col gap-y-3', {
@@ -68,9 +72,32 @@ const Comment = ({ comment }: ICommentProps) => {
             </p>
           </div>
         </div>
-        <button className="flex items-center justify-center">
-          <MoreHorizontal size={20} />
-        </button>
+        <Dropdown
+          targetComponent={
+            <button className="flex items-center justify-center">
+              <MoreHorizontal size={20} />
+            </button>
+          }
+          items={[
+            {
+              label: 'Edit',
+              onClick: () => console.log('Edit'),
+            },
+            {
+              label: 'Delete',
+              onClick: () => {
+                deleteComment.mutate({ id: commentId });
+              },
+            },
+            {
+              label: 'Report',
+              onClick: () => {
+                toast('Maybe Next Update !?', { icon: '🚀' });
+              },
+            },
+          ]}
+          closeOnClick={true}
+        />
       </div>
 
       <span
@@ -116,6 +143,7 @@ const Comment = ({ comment }: ICommentProps) => {
           <CommentInput
             blogPostId={comment.blogPostId}
             parentCommentId={commentId}
+            onCommentSubmit={() => setIsReplying(false)}
           />
         </div>
       </AnimateHeight>

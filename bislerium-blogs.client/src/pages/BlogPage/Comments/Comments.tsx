@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import Modal from '../../../Components/Modal/Modal';
-import { IComment } from '../../../Interfaces/Models/IComment';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
 import Comment from './Comment';
 import CommentInput from './CommentInput';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { countTotalComments } from '../../../utils/array';
 import { useCommentsStore } from '../../../services/stores/useCommentsStore';
 interface ICommentsProps {
   id?: string;

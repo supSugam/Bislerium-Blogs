@@ -9,8 +9,13 @@ interface ICommentInputProps {
   blogPostId?: string;
   parentCommentId?: string;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onCommentSubmit?: () => void;
 }
-const CommentInput = ({ blogPostId, parentCommentId }: ICommentInputProps) => {
+const CommentInput = ({
+  blogPostId,
+  parentCommentId,
+  onCommentSubmit,
+}: ICommentInputProps) => {
   const { currentUser, openAuthModal } = useAuthStore();
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
   const commentInputRef = createRef<HTMLDivElement>();
@@ -25,7 +30,7 @@ const CommentInput = ({ blogPostId, parentCommentId }: ICommentInputProps) => {
     }
     const body = commentInputRef.current?.innerHTML;
     if (!body) return;
-    console.log(body);
+    onCommentSubmit?.();
     await publishCommentMutation(
       {
         body,

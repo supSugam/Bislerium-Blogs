@@ -48,10 +48,10 @@ const useCommentsQuery = ({
   >({
     mutationFn: async (data) => await api.post(`/comments`, data),
     onSuccess: (data) => {
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [keyFactory.blogVotes],
       });
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [keyFactory.commentReactions],
       });
       const newComment = data.data.result;

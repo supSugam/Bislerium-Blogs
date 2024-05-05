@@ -115,7 +115,7 @@ export const useCommentsStore = create<CommentsStore>((set, get) => ({
     set((state) => {
       const comments = state.comments[blogId] || [];
 
-      if (parentCommentId === null) {
+      if (!parentCommentId) {
         return {
           comments: {
             ...state.comments,
@@ -124,6 +124,7 @@ export const useCommentsStore = create<CommentsStore>((set, get) => ({
         };
       }
 
+      // Find the parent comment and add the new comment to its replies
       const newComments = comments.map((comment) => {
         if (comment.commentId === parentCommentId) {
           return {
