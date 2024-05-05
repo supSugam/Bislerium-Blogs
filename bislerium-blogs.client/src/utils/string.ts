@@ -120,3 +120,34 @@ export const getFormattedDate = (date?: Date | string | number): string => {
 export const getRidOfWhiteSpace = (str: string): string => {
   return str.replace(/<p[^>]*>(\s|&nbsp;|<br[^>]*>)*<\/p>/g, '');
 };
+
+export const whenDidItHappen = (date: Date | string | number): string => {
+  const currentDate = new Date();
+  const eventDate = new Date(date);
+
+  const timeDifference = currentDate.getTime() - eventDate.getTime();
+
+  const seconds = Math.floor(timeDifference / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(weeks / 4);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return getFormattedDate(date);
+  } else if (months > 0) {
+    return `${months > 1 ? months : 'a'} month${months > 1 ? 's' : ''} ago`;
+  } else if (weeks > 0) {
+    return `${weeks > 1 ? weeks : 'a'} week${weeks > 1 ? 's' : ''} ago`;
+  } else if (days > 0) {
+    return `${days > 1 ? days : 'a'} day${days > 1 ? 's' : ''} ago`;
+  } else if (hours > 0) {
+    return `${hours > 1 ? hours : 'an'} hour${hours > 1 ? 's' : ''} ago`;
+  } else if (minutes > 0) {
+    return `${minutes > 1 ? minutes : 'a'} minute${minutes > 1 ? 's' : ''} ago`;
+  } else {
+    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+  }
+};

@@ -11,12 +11,14 @@ namespace Bislerium_Blogs.Server.Services
     {
         private readonly BisleriumBlogsContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserService _userService;
 
         public CommentService(BisleriumBlogsContext context
-            , UserManager<IdentityUser> userManager)
+            , UserManager<IdentityUser> userManager, IUserService userService)
         {
             _context = context;
             _userManager = userManager;
+            _userService = userService;
         }
 
 
@@ -25,16 +27,19 @@ namespace Bislerium_Blogs.Server.Services
         {
             try
             {
-                var comment = await _context.Comments.FindAsync(commentId);
+                var comment = await _context.Comments.FirstOrDefaultAsync(c => c.CommentId == commentId);
                 if (comment == null)
                 {
-                    return null;
+                    throw new Exception("Comment not found");
                 }
 
-                var author = await _userManager.FindByIdAsync(comment.Author.UserId.ToString());
-                var authorRoles = await _userManager.GetRolesAsync(author);
+                var authorRole = await _userService.GetRoleByUserId(comment.Author.UserId);
 
-                    var replies = await GetRepliesAsync(comment.CommentId, includeReplies);
+                if (comment.Author == null)
+                {
+                    Console.WriteLine(comment?.Author?.FullName);
+                    throw new Exception("Author not found");
+                }
                     return new CommentPayload
                     {
                         CommentId = comment.CommentId,
@@ -50,12 +55,13 @@ namespace Bislerium_Blogs.Server.Services
                             CreatedAt = comment.Author.CreatedAt,
                             UpdatedAt = comment.Author.UpdatedAt,
                             AvatarUrl = comment.Author.AvatarUrl,
-                            Role = authorRoles[0]
+                            Role = authorRole
                         },
                         BlogPostId = comment.BlogPostId,
                         ParentCommentId = comment.ParentCommentId,
                         Replies = includeReplies == true ? await GetRepliesAsync(comment.CommentId, true): []
                     };
+
 
             }
             catch (Exception e)
@@ -70,14 +76,29 @@ namespace Bislerium_Blogs.Server.Services
             {
                 var comments = await _context.Comments
                     .Where(c => c.BlogPostId == blogPostId && c.ParentCommentId == null)
+                    .Include(c => c.Author)
+                    .OrderByDescending(c => c.CreatedAt)
                     .ToListAsync();
+
+                if (comments.Count == 0)
+                {
+                    return new List<CommentPayload>();
+                }
 
                 var commentPayloads = new List<CommentPayload>();
 
                 foreach (var comment in comments)
                 {
-                    var author = await _userManager.FindByIdAsync(comment.Author.UserId.ToString());
-                    var authorRoles = await _userManager.GetRolesAsync(author);
+                    if(comment == null || comment.Author == null)
+                    {
+                        continue;
+                    }
+                    UserPayload? commentator = await _userService.GetUserById(comment.Author.UserId);
+
+                    if(commentator == null)
+                    {
+                        continue;
+                    }
 
                     var commentPayload = new CommentPayload
                     {
@@ -85,17 +106,7 @@ namespace Bislerium_Blogs.Server.Services
                         Body = comment.Body,
                         CreatedAt = comment.CreatedAt,
                         UpdatedAt = comment.UpdatedAt,
-                        Author = new UserPayload
-                        {
-                            UserId = comment.Author.UserId,
-                            FullName = comment.Author.FullName,
-                            Username = comment.Author.Username,
-                            Email = comment.Author.Email,
-                            CreatedAt = comment.Author.CreatedAt,
-                            UpdatedAt = comment.Author.UpdatedAt,
-                            AvatarUrl = comment.Author.AvatarUrl,
-                            Role = authorRoles[0]
-                        },
+                        Author = commentator,
                         BlogPostId = comment.BlogPostId,
                         ParentCommentId = comment.ParentCommentId
                     };

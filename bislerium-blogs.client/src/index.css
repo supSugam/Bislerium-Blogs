@@ -4,27 +4,48 @@
 
 @font-face {
   font-family: 'sohne';
-  src: url('./../public/fonts/sohne-400-normal.woff') format('woff');
+  src: url('/fonts/sohne-300-normal.woff2') format('woff2'),
+    url('/fonts/sohne-300-normal.woff') format('woff'),
+    url('/fonts/sohne-300-normal.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'sohne';
+  src: url('/fonts/sohne-400-normal.woff2') format('woff2'),
+    url('/fonts/sohne-400-normal.woff') format('woff');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'sohne';
-  src: url('./../public/fonts/sohne-700-bold.woff') format('woff');
-  font-weight: 700;
+  src: url('/fonts/sohne-500-normal.woff2') format('woff2'),
+    url('/fonts/sohne-500-normal.woff') format('woff');
+  font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'sohne';
-  src: url('./../public/fonts/sohne-500-normal.woff') format('woff');
-  font-weight: 500;
+  src: url('/fonts/sohne-600-normal.woff2') format('woff2'),
+    url('/fonts/sohne-600-normal.woff') format('woff'),
+    url('/fonts/sohne-600-normal.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'sohne';
+  src: url('/fonts/sohne-700-bold.woff2') format('woff2'),
+    url('/fonts/sohne-700-bold.woff') format('woff');
+  font-weight: 700;
   font-style: normal;
 }
 
 :root {
-  font-family: sohne, 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-family: 'sohne', sans-serif;
   line-height: 1.5;
   font-weight: 400;
   --color-primary: #242424;
@@ -37,7 +58,7 @@
 *::before,
 *::after {
   box-sizing: inherit;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
 body {

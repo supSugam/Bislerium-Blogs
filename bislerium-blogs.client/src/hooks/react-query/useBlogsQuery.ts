@@ -15,6 +15,7 @@ import { IBlog } from '../../Interfaces/Models/IBlog';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { IVotePayload } from '../../Interfaces/Models/IVotePayload';
+import { keyFactory } from '../../utils/constants';
 
 interface IBlogsQueryParams {
   search?: string;
@@ -124,6 +125,16 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
       toastWithInterval({ error });
     },
   });
+
+  const getBlogVotes = useQuery<
+    AxiosResponse<ISuccessResponse<IVotePayload>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryFn: async () => await api.get(`/blogs/${id}/reactions`),
+    queryKey: [keyFactory.blogVotes],
+    enabled: typeof id === 'string',
+  });
+
   return {
     getBlogs,
     publishBlog,
@@ -131,6 +142,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     updateBlog,
     upvoteVlog,
     downvoteBlog,
+    getBlogVotes,
   };
 };
 

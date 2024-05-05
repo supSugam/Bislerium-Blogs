@@ -58,6 +58,7 @@ const AuthModal = () => {
       isOpen={authModalOpen}
       onClose={closeAuthModal}
       className="flex flex-col sm:w-10/12 xl:max-w-xl w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-6 shadow-input border"
+      backdropClassName="z-[444]"
     >
       <motion.h2
         initial={{ opacity: 0, x: -20 }}

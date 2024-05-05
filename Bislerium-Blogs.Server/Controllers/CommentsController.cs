@@ -23,12 +23,16 @@ namespace Bislerium_Blogs.Server.Controllers
     {
         private readonly BisleriumBlogsContext _context;
         private readonly ICommentService _commentService;
+        private readonly IUserService _userService;
 
         public CommentsController(BisleriumBlogsContext context,
-            ICommentService commentService)
+            ICommentService commentService,
+            IUserService userService)
         {
             _context = context;
             _commentService = commentService;
+            _userService = userService;
+
         }
 
         // GET: api/Comments
@@ -46,8 +50,7 @@ namespace Bislerium_Blogs.Server.Controllers
 }
 
 
-        // PUT: api/Comments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PATCH: api/Comments/5
         [HttpPatch("{id}")]
         public async Task<ActionResult<CommentPayload>> UpdateAComment(Guid id,
             [FromBody] UpdateACommentDto updateACommentDto)
@@ -90,7 +93,6 @@ namespace Bislerium_Blogs.Server.Controllers
 
 
         // POST: api/Comments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [AuthorizedOnly]
         public async Task<ActionResult<CommentPayload>> PostComment([FromBody] PostACommentDto? postACommentDto)
@@ -112,7 +114,11 @@ namespace Bislerium_Blogs.Server.Controllers
                     return NotFound("Blog Post Not Found");
                 }
 
-                Guid authorId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                if (!Guid.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out Guid authorId))
+                {
+                    return Unauthorized("You are not permitted to post a comment");
+                }
+
 
                 var comment = new Comment
                 {
@@ -136,26 +142,23 @@ namespace Bislerium_Blogs.Server.Controllers
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
 
+                UserPayload? userPayload = await _userService.GetUserById(authorId);
+
+                if(userPayload == null)
+                {
+                    return NotFound("User Not Found");
+                }
+
                 return new CommentPayload
                 {
                     CommentId = comment.CommentId,
                     Body = comment.Body,
                     CreatedAt = comment.CreatedAt,
                     UpdatedAt = comment.UpdatedAt,
-                    Author = new UserPayload
-                    {
-                        UserId = comment.Author.UserId,
-                        Username = comment.Author.Username
-                    },
+                    Author = userPayload,
                     BlogPostId = comment.BlogPostId,
                     ParentCommentId = comment.ParentCommentId,
-                    Reactions = new CommentReactionsPayload
-                    {
-                        IsVotedDown = false,
-                        IsVotedUp = false,
-                        Popularity = 0,
-                        TotalReplies = 0
-                    }
+                    Reactions = new CommentReactionsPayload()
                 };
             }
             catch (Exception ex)

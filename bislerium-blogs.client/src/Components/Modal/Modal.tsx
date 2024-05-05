@@ -6,11 +6,12 @@ import { cn } from '../../utils/cn';
 interface ModalProps {
   isOpen: boolean;
   onClose?: () => void;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   backdropClassName?: string;
   closeOnBackdropClick?: boolean;
   closeOnEscapeKey?: boolean;
+  backgroundClassName?: string;
 }
 
 const Modal: FC<ModalProps> = ({
@@ -19,6 +20,7 @@ const Modal: FC<ModalProps> = ({
   children,
   className,
   backdropClassName,
+  backgroundClassName,
   closeOnBackdropClick = true,
   closeOnEscapeKey = true,
 }) => {
@@ -54,7 +56,7 @@ const Modal: FC<ModalProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className={cn(
-            'fixed inset-0 z-[999] flex items-center justify-center',
+            'fixed inset-0 z-[333] flex items-center justify-center',
             backdropClassName
           )}
           onKeyDown={(e: React.KeyboardEvent) =>
@@ -67,21 +69,26 @@ const Modal: FC<ModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.1, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm"
+            className={cn(
+              'fixed inset-0 bg-white bg-opacity-20 backdrop-filter backdrop-blur-sm',
+              backgroundClassName
+            )}
             onClick={handleBackdropClick}
           />
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className={cn(
-              'relative max-w-xl mx-auto bg-white backdrop-filter backdrop-blur-lg rounded-lg shadow-lg p-8',
-              className
-            )}
-          >
-            {children}
-          </motion.div>
+          {children && (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className={cn(
+                'relative max-w-xl mx-auto bg-white backdrop-filter backdrop-blur-lg rounded-lg shadow-lg p-8',
+                className
+              )}
+            >
+              {children}
+            </motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

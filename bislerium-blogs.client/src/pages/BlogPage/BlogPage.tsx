@@ -27,10 +27,10 @@ const SingleBlogPage = () => {
     document.title = blogResponse?.data?.result?.title || 'Blog';
   }, [blogResponse]);
 
-  // Upvote/Downvote functionality
+  const [commentsExpanded, setCommentsExpanded] = useState<boolean>(false);
 
   return (
-    <main id="blog-page" className="w-full flex justify-end space-x-12">
+    <main id="blog-page" className="w-full flex justify-center">
       {blogData && (
         <article
           id="blog-contents"
@@ -84,10 +84,19 @@ const SingleBlogPage = () => {
               <CommentIcon
                 size={18}
                 count={blogData?.votePayload.totalComments}
+                onClick={() => setCommentsExpanded(true)}
               />
             </div>
           </div>
-
+          {/* Thumbnail */}
+          {blogData?.thumbnail && (
+            <img
+              src={blogData?.thumbnail}
+              alt="Thumbnail"
+              className="w-full h-96 object-cover rounded-lg"
+            />
+          )}
+          {/* Body */}
           <div
             id="blog-body"
             dangerouslySetInnerHTML={{
@@ -96,7 +105,11 @@ const SingleBlogPage = () => {
           />
         </article>
       )}
-      <Comments id={id} />
+      <Comments
+        id={blogData?.blogPostId}
+        isExpanded={commentsExpanded}
+        onClose={() => setCommentsExpanded(false)}
+      />
     </main>
   );
 };

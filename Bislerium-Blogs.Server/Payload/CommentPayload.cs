@@ -9,6 +9,8 @@
         public required UserPayload Author { get; set; }
         public Guid BlogPostId { get; set; }
 
+        public bool? IsEdited { get; set; } = false;
+
         public List<CommentPayload> Replies { get; set; } = new();
         public Guid? ParentCommentId { get; set; }
 
