@@ -13,6 +13,7 @@ using Bislerium_Blogs.Server.Payload;
 using System.Reflection.Metadata;
 using Bislerium_Blogs.Server.Enums;
 using Bislerium_Blogs.Server.Configs;
+using Bislerium_Blogs.Server.Interfaces;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -21,37 +22,34 @@ namespace Bislerium_Blogs.Server.Controllers
     public class CommentsController : ControllerBase
     {
         private readonly BisleriumBlogsContext _context;
+        private readonly ICommentService _commentService;
 
-        public CommentsController(BisleriumBlogsContext context)
+        public CommentsController(BisleriumBlogsContext context,
+            ICommentService commentService)
         {
             _context = context;
+            _commentService = commentService;
         }
 
         // GET: api/Comments
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
-        {
-            return await _context.Comments.ToListAsync();
-        }
-
-        // GET: api/Comments/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Comment>> GetComment(Guid id)
-        {
-            var comment = await _context.Comments.FindAsync(id);
-
-            if (comment == null)
+        [HttpGet("{blogPostId}")]
+        public async Task<ActionResult<List<CommentPayload>>> GetComments(Guid blogPostId, bool includeReplies=true){
+            try
             {
-                return NotFound();
-            }
+                var comments = await _commentService.GetCommentsAsync(blogPostId, includeReplies);
+                return Ok(comments);
+    }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+}
+}
 
-            return comment;
-        }
 
         // PUT: api/Comments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateAComment(Guid id,
+        public async Task<ActionResult<CommentPayload>> UpdateAComment(Guid id,
             [FromBody] UpdateACommentDto updateACommentDto)
         {
             if (!ModelState.IsValid)
@@ -85,7 +83,9 @@ namespace Bislerium_Blogs.Server.Controllers
             comment.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            return Ok(comment);
+
+            var updatedComment = await _commentService.GetCommentByIdAsync(comment.CommentId, true);
+            return Ok(updatedComment);
         }
 
 
@@ -148,7 +148,14 @@ namespace Bislerium_Blogs.Server.Controllers
                         Username = comment.Author.Username
                     },
                     BlogPostId = comment.BlogPostId,
-                    ParentCommentId = comment.ParentCommentId
+                    ParentCommentId = comment.ParentCommentId,
+                    Reactions = new CommentReactionsPayload
+                    {
+                        IsVotedDown = false,
+                        IsVotedUp = false,
+                        Popularity = 0,
+                        TotalReplies = 0
+                    }
                 };
             }
             catch (Exception ex)
@@ -189,6 +196,74 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+
+        [HttpPost("{commentId}/upvote")]
+        [AuthorizedOnly]
+        public async Task<ActionResult<CommentReactionsPayload>> UpvoteAComment(Guid commentId)
+        {
+            try
+            {
+                var userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                var reaction = await _commentService.ReactToACommentAsync(commentId, userId, true);
+                return Ok(reaction);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{commentId}/downvote")]
+        [AuthorizedOnly]
+        public async Task<ActionResult<CommentReactionsPayload>> DownvoteAComment(Guid commentId)
+        {
+            try
+            {
+                var userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+                var reaction = await _commentService.ReactToACommentAsync(commentId, userId, false);
+                return Ok(reaction);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("{commentId}/reactions")]
+        public async Task<ActionResult<CommentReactionsPayload>> GetCommentReactionDetails(Guid commentId)
+        {
+            try
+            {
+                var userId =
+                    User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier) == null ?
+                    (Guid?)null :
+                    Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+                var reaction = await _commentService.GetCommentReactionDetails(commentId, userId);
+                return Ok(reaction);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{commentId}/history")]
+        public async Task<ActionResult<List<CommentHistory>>> GetCommentHistory(Guid commentId)
+        {
+            try
+            {
+                var commentHistory = await _commentService.GetCommentHistoryAsync(commentId);
+                return Ok(commentHistory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
     }

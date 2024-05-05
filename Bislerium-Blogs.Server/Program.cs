@@ -73,6 +73,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IS3Service,S3Service>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IBlogService,BlogService>();
+builder.Services.AddScoped<ICommentService,CommentService>();
 
 var app = builder.Build();
 app.UseSwagger();

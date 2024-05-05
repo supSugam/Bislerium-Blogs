@@ -14,6 +14,7 @@ using Bislerium_Blogs.Server.Payload;
 using Bislerium_Blogs.Server.Enums;
 using Microsoft.AspNetCore.Identity;
 using Bislerium_Blogs.Server.Helpers;
+using Bislerium_Blogs.Server.Services;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -312,6 +313,27 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 return BadRequest(ex.Message);
             }
-        }   
+        }
+
+        [HttpGet("{blogPostId}/reactions")]
+        public async Task<ActionResult<CommentReactionsPayload>> GetCommentReactionDetails(Guid blogPostId)
+        {
+            try
+            {
+                var userId =
+                    User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier) == null ?
+                    (Guid?)null :
+                    Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+                var reaction = await _blogService.GetBlogReactionDetails(blogPostId, userId);
+                return Ok(reaction);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using Bislerium_Blogs.Server.Interfaces;
+﻿using Bislerium_Blogs.Server.Configs;
+using Bislerium_Blogs.Server.Interfaces;
 using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Payload;
 using Microsoft.AspNetCore.Identity;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bislerium_Blogs.Server.Services
 {
-    public class CommentService:ICommentService
+    public class CommentService : ICommentService
     {
         private readonly BisleriumBlogsContext _context;
         private readonly UserManager<IdentityUser> _userManager;
@@ -17,9 +18,10 @@ namespace Bislerium_Blogs.Server.Services
             _context = context;
             _userManager = userManager;
         }
-        
 
-        public async Task<CommentPayload> GetCommentByIdAsync(Guid commentId)
+
+        public async Task<CommentPayload> GetCommentByIdAsync(Guid commentId, bool includeReplies=
+            true)
         {
             try
             {
@@ -32,27 +34,29 @@ namespace Bislerium_Blogs.Server.Services
                 var author = await _userManager.FindByIdAsync(comment.Author.UserId.ToString());
                 var authorRoles = await _userManager.GetRolesAsync(author);
 
-
-                return new CommentPayload
-                {
-                    CommentId = comment.CommentId,
-                    Body = comment.Body,
-                    CreatedAt = comment.CreatedAt,
-                    UpdatedAt = comment.UpdatedAt,
-                    Author = new UserPayload
+                    var replies = await GetRepliesAsync(comment.CommentId, includeReplies);
+                    return new CommentPayload
                     {
-                        UserId = comment.Author.UserId,
-                        FullName = comment.Author.FullName,
-                        Username = comment.Author.Username,
-                        Email = comment.Author.Email,
-                        CreatedAt = comment.Author.CreatedAt,
-                        UpdatedAt = comment.Author.UpdatedAt,
-                        AvatarUrl = comment.Author.AvatarUrl,
-                        Role = authorRoles[0]
-                    },
-                    BlogPostId = comment.BlogPostId,
-                    ParentCommentId = comment.ParentCommentId
-                };
+                        CommentId = comment.CommentId,
+                        Body = comment.Body,
+                        CreatedAt = comment.CreatedAt,
+                        UpdatedAt = comment.UpdatedAt,
+                        Author = new UserPayload
+                        {
+                            UserId = comment.Author.UserId,
+                            FullName = comment.Author.FullName,
+                            Username = comment.Author.Username,
+                            Email = comment.Author.Email,
+                            CreatedAt = comment.Author.CreatedAt,
+                            UpdatedAt = comment.Author.UpdatedAt,
+                            AvatarUrl = comment.Author.AvatarUrl,
+                            Role = authorRoles[0]
+                        },
+                        BlogPostId = comment.BlogPostId,
+                        ParentCommentId = comment.ParentCommentId,
+                        Replies = includeReplies == true ? await GetRepliesAsync(comment.CommentId, true): []
+                    };
+
             }
             catch (Exception e)
             {
@@ -60,7 +64,7 @@ namespace Bislerium_Blogs.Server.Services
             }
         }
 
-        public async Task<List<CommentPayload>> GetCommentsAsync(Guid blogPostId, bool includeReplies)
+        public async Task<List<CommentPayload>> GetCommentsAsync(Guid blogPostId, bool includeReplies=true)
         {
             try
             {
@@ -98,7 +102,7 @@ namespace Bislerium_Blogs.Server.Services
 
                     if (includeReplies)
                     {
-                        var replies = await GetRepliesAsync(comment.CommentId, true);
+                        var replies = await GetRepliesAsync(comment.CommentId, includeReplies);
                         commentPayload.Replies = replies;
                     }
 
@@ -169,17 +173,110 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception(e.Message);
             }
         }
-        // TODO: Implement the GetCommentReactionsAsync method, calculating the popularity of a comment etc
+        
 
-
-        public async Task<CommentReactionsPayload>
-            GetCommentReactionsAsync(Guid commentId, Guid? userId)
+        public async Task<CommentReactionsPayload> ReactToACommentAsync
+            (Guid commentId, Guid userId, bool isUpvote)
         {
             try
             {
+                ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
+                ArgumentNullException.ThrowIfNull(userId, nameof(userId));
 
+                var existingVote = await _context.Reactions.FirstOrDefaultAsync(x => x.CommentId == commentId && x.UserId == userId);
+
+                if (existingVote is not null)
+                {
+                    if (existingVote.IsUpvote == isUpvote)
+                    {
+                        _context.Reactions.Remove(existingVote);
+                    }
+                    else
+                    {
+                        existingVote.IsUpvote = isUpvote;
+                    }
+                }
+                else
+                {
+                    await _context.Reactions.AddAsync(new Reaction
+                    {
+                        CommentId = commentId,
+                        UserId = userId,
+                        IsUpvote = isUpvote
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                return await GetCommentReactionDetails(commentId, userId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 
+        public async Task<int> GetPopularityOfComment(Guid commentId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
+                var totalUpvotes = await _context.Reactions.CountAsync(x => x.CommentId == commentId && x.IsUpvote);
+                var totalDownvotes = await _context.Reactions.CountAsync(x => x.CommentId == commentId && !x.IsUpvote);
+                var totalComments = await _context.Comments.CountAsync(x => x.CommentId == commentId);
+
+                int popularity = totalUpvotes * Constants.UPVOTE_WEIGHTAGE + totalDownvotes * Constants.DOWNVOTE_WEIGHTAGE;
+
+                //await _context.Comments.Where(x => x.CommentId == commentId).ForEachAsync(x => x. = popularity);
+                //await _context.SaveChangesAsync();
+                return popularity;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
+        public async Task<CommentReactionsPayload>
+            GetCommentReactionDetails(Guid commentId, Guid? userId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
+                ArgumentNullException.ThrowIfNull(userId, nameof(userId));
+
+                bool isVotedUp = userId is not null && await _context.Reactions.AnyAsync(x => x.CommentId == commentId && x.UserId == userId && x.IsUpvote);
+                bool isVotedDown =
+                    userId is not null && await _context.Reactions.AnyAsync(x => x.CommentId == commentId && x.UserId == userId && !x.IsUpvote);
+                var totalReplies = await _context.Comments.CountAsync(x => x.ParentCommentId == commentId);
+
+
+                return new CommentReactionsPayload
+                {
+                    Popularity = await GetPopularityOfComment(commentId),
+                    IsVotedUp = isVotedUp,
+                    IsVotedDown = isVotedDown,
+                    TotalReplies = totalReplies
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+        }
+
+        public async Task<List<CommentHistory>> GetCommentHistoryAsync(Guid commentId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
+                return await _context.CommentHistories.Where(x => x.CommentId == commentId).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
