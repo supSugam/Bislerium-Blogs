@@ -12,13 +12,16 @@ namespace Bislerium_Blogs.Server.Services
         private readonly BisleriumBlogsContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserService _userService;
+        private readonly INotificationService _notificationService;
 
         public CommentService(BisleriumBlogsContext context
-            , UserManager<IdentityUser> userManager, IUserService userService)
+            , UserManager<IdentityUser> userManager, IUserService userService,
+            INotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
 
@@ -230,6 +233,7 @@ namespace Bislerium_Blogs.Server.Services
                 }
 
                 await _context.SaveChangesAsync();
+                _notificationService.SendCommentReactionNotification(commentId, userId, isUpvote);
                 return await GetCommentReactionDetails(commentId, userId);
             }
             catch (Exception ex)

@@ -7,6 +7,7 @@ import { getFormattedDate, whenDidItHappen } from '../../../utils/string';
 import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
 import { IUser } from '../../../Interfaces/Models/IUser';
 import XButton from '../../../Components/Smol/XButton';
+import { History } from 'lucide-react';
 
 interface ICommentEditHistoryProps {
   commentId: string;
@@ -42,7 +43,10 @@ const EditHistory = ({
     >
       <div className="flex flex-col gap-y-3 w-full">
         <div className="flex justify-between items-center gap-x-3 border-b border-neutral-300 pb-2">
-          <h1 className="text-xl font-bold">Edit History</h1>
+          <div className="flex gap-x-1 items-center">
+            <History size={21} />
+            <h1 className="text-xl font-bold">Edit History</h1>
+          </div>
           <XButton onClick={onClose} />
         </div>
         <div

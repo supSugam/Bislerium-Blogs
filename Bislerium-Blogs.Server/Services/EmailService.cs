@@ -1,10 +1,8 @@
 ﻿using Bislerium_Blogs.Server.Interfaces;
-using Bislerium_Blogs.Server.Helpers;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
-using System.Linq;
 namespace Bislerium_Blogs.Server.Services
 {
 
@@ -159,6 +157,120 @@ public class EmailService: IEmailService
     }
 
   
+
+
+
+        public async Task SendNotificationEmail(string email, string name, string notificationMessage)
+        {
+            var mailData = new MailData
+            {
+                EmailToId = email,
+                EmailToName = name,
+                EmailSubject = "New Notification - BislreiumBlogs",
+                EmailBody = GetNotificationEmailBody(name, notificationMessage)
+            };
+            await SendEmailAsync(mailData);
+        }
+
+        public string GetNotificationEmailBody(string targetName, string notificationMessage)
+        {
+            return $@"<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Email Notification</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }}
+Copy code    table {{
+        border-collapse: collapse;
+        background-color: #f8f8f8;
+    }}
+
+    .container {{
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }}
+
+    .content {{
+        text-align: center;
+        padding: 8px 20px;
+    }}
+
+    h2 {{
+        margin: 0;
+        color: #333;
+        font-size: 24px;
+        margin-bottom: 24px;
+    }}
+
+    p {{
+        margin: 5px 0;
+        color: #555;
+        font-size: 18px;
+    }}
+
+    .notification-alert {{
+        color: #ffffff;
+        font-weight: bold;
+        background-color: #4CAF50;
+        border-radius: 5px;
+        padding: 15px 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 24px;
+        margin-bottom: 30px;
+    }}
+
+    .emoji {{
+        font-size: 24px;
+        vertical-align: middle;
+        margin-left: 5px;
+    }}
+
+    .footer {{
+        margin-top: 30px;
+        color: #888;
+        font-size: 12px;
+        padding: 10px;
+        background-color: #f2f2f2;
+    }}
+</style>
+</head>
+<body>
+    <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
+        <tbody style=""padding: 40px 0;"">
+            <tr>
+                <td style=""padding: 20px 0;"">
+                    <center>
+                        <div class=""container"">
+                            <div class=""notification-alert"">Notification Alert</div>
+                            <div class=""content"">
+                                <h2>Hi {targetName} 👋</h2>
+                                <p style=""margin-top:18px;"">{notificationMessage}</p>
+                                <p>Check it up on Bislerium Blogs</p>
+                            </div>
+                            <div class=""footer"">
+                                <p>&copy; 2024 Bislerium Blogs. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </center>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>";
+        }
     }
 
 public class EmailSettings

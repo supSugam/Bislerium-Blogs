@@ -11,5 +11,11 @@ namespace Bislerium_Blogs.Server.Interfaces
         public Task SendOTP(string email, string name,string? subject=null);
 
         public Task<bool> VerifyOTP(string email, int otp);
+
+        public Task SendNotificationEmail(string email, string name, string notificationMessage);
+
+        public string GetNotificationEmailBody(string name, string notificationMessage);
+
+
     }
 }

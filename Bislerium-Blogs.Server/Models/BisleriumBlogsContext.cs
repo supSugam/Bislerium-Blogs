@@ -164,16 +164,25 @@ public partial class BisleriumBlogsContext : IdentityDbContext
             entity.Property(e => e.NotificationId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
 
-            entity.HasOne(d => d.BlogPost).WithMany(p => p.Notifications)
+            entity.HasOne(d => d.TriggerUser)  // Change 'User' to 'TriggerUser'
+                .WithMany()  // Assuming 'User' has a collection of notifications
+                .HasForeignKey(d => d.TriggerUserId)  // Match foreign key property
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Notificat__TriggerUser__68487DD7");  // Update constraint name
+
+            entity.HasOne(d => d.BlogPost)
+                .WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.BlogPostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Notificat__BlogP__693CA210");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.Comment)
+                .WithMany()  // Assuming 'Comment' has a collection of notifications
+                .HasForeignKey(d => d.CommentId)  // Match foreign key property
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__UserI__68487DD7");
+                .HasConstraintName("FK__Notificat__Comment__6B24EA82");  // Example of a modified constraint name
         });
+
 
         modelBuilder.Entity<Reaction>(entity =>
         {

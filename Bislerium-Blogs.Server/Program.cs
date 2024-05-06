@@ -71,6 +71,7 @@ builder.Services.AddScoped<IS3Service,S3Service>();
 builder.Services.AddScoped<IUserService,UserService>();
 builder.Services.AddScoped<IBlogService,BlogService>();
 builder.Services.AddScoped<ICommentService,CommentService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 app.UseSwagger();

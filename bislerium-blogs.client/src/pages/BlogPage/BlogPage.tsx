@@ -15,6 +15,8 @@ import { Capsule } from '../../Components/Elements/MultiSelect';
 import Vote from '../../Components/Vote';
 import CommentIcon from '../../Components/Smol/CommentIcon';
 import Comments from './Comments/Comments';
+import { motion } from 'framer-motion';
+
 const SingleBlogPage = () => {
   const [blogData, setBlogData] = useState<IBlog>();
   const { id } = useParams();
@@ -29,12 +31,17 @@ const SingleBlogPage = () => {
 
   const [commentsExpanded, setCommentsExpanded] = useState<boolean>(false);
 
+  const [marginRight, setMarginRight] = useState<number>(0);
+
   return (
     <main id="blog-page" className="w-full flex justify-center">
       {blogData && (
-        <article
+        <motion.article
           id="blog-contents"
           className="flex flex-col px-5 md:px-0 w-full sm:w-10/12 md:w-9/12 lg:w-8/12 xl:w-7/12 mt-8"
+          initial={{ marginRight: 0 }}
+          animate={{ marginRight: commentsExpanded ? marginRight : 0 }}
+          transition={{ duration: 0.3, when: 'beforeChildren' }}
         >
           <h1 className="blog-title">{blogData?.title}</h1>
 
@@ -103,12 +110,13 @@ const SingleBlogPage = () => {
               __html: getRidOfWhiteSpace(blogData?.body),
             }}
           />
-        </article>
+        </motion.article>
       )}
       <Comments
         id={blogData?.blogPostId}
         isExpanded={commentsExpanded}
         onClose={() => setCommentsExpanded(false)}
+        onCommentModalWidthChange={(width) => setMarginRight(width)}
       />
     </main>
   );

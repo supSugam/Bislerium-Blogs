@@ -31,14 +31,26 @@ namespace Bislerium_Blogs.Server.Controllers
             _s3Service = s3Service;
             _userService = userService;
             _blogService = blogService;
-
         }
 
         // GET: api/Blogs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPosts()
+        public async Task<ActionResult<BlogPaginationPayload>> GetBlogPosts(
+            [FromQuery] BlogPaginationDto blogPaginationDto)
         {
-            return await _context.BlogPosts.ToListAsync();
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                var blogPaginationPayload = await _blogService.GetBlogPaginationPayload(blogPaginationDto, userId is not null ? Guid.Parse(userId) : null);
+
+                return Ok(blogPaginationPayload);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         // GET: api/Blogs/5
@@ -339,6 +351,55 @@ namespace Bislerium_Blogs.Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
+        [HttpPost("{blogPostId}/bookmark")]
+        [AuthorizedOnly]
+        public async Task<ActionResult<string>> BookmarkBlogPost(Guid blogPostId)
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                var bookmark = await _blogService.BookmarkBlogPostAsync(blogPostId, Guid.Parse(userId));
+
+                if (bookmark)
+                {
+                    return Ok("Saved to Bookmarks!");
+                }
+
+                return BadRequest("Already Bookmarked!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost("{blogPostId}/remove-bookmark")]
+        public
+            async Task<ActionResult<string>> RemoveBookmark(Guid blogPostId)
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+
+                var bookmark = await _blogService.RemoveBookmarkAsync(blogPostId, Guid.Parse(userId));
+
+                if (bookmark)
+                {
+                    return Ok("Removed from Bookmarks!");
+                }
+
+                return BadRequest("Bookmark Not Found!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
 
     }

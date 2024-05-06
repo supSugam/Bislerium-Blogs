@@ -25,4 +25,15 @@ namespace Bislerium_Blogs.Server.Payload
         public VotePayload VotePayload { get; set; }
 
     }
+
+    public class BlogPaginationPayload
+    {
+        public List<BlogPayload> Blogs { get; set; }
+
+        public int TotalBlogs { get; set; }
+
+        public int CurrentPage { get; set; }
+
+    }
+
 }

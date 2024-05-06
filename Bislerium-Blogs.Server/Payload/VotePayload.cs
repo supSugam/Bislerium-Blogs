@@ -6,6 +6,7 @@
         public bool IsVotedUp { get; set; }
         public bool IsVotedDown { get; set; }
         public int TotalComments { get; set; }
+        public bool IsBookmarked { get; set; } = false;
 
     }
 

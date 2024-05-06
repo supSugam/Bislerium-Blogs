@@ -5,7 +5,6 @@ import {
   Pencil,
   ReplyIcon,
   Trash,
-  Undo,
 } from 'lucide-react';
 import { IComment } from '../../../Interfaces/Models/IComment';
 import { whenDidItHappen } from '../../../utils/string';
@@ -13,7 +12,7 @@ import Vote from '../../../Components/Vote';
 import CommentIcon from '../../../Components/Smol/CommentIcon';
 import { cn } from '../../../utils/cn';
 import CommentInput from './CommentInput';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { AnimateHeight } from '../../../Components/Reusables/AnimatedHeight';
 import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
 import Dropdown, { DropdownItem } from '../../../Components/Reusables/Dropdown';
@@ -50,13 +49,13 @@ const Comment = ({ comment }: ICommentProps) => {
     useState<boolean>(false);
   const replyComponentRef = useRef<HTMLDivElement>(null);
 
-  const onReplyToComment = () => {
+  const onReplyToComment = useCallback(() => {
     mode === 'reply' ? setMode('none') : setMode('reply');
     replyComponentRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'center',
     });
-  };
+  }, [mode]);
 
   const { deleteComment } = useCommentsQuery({});
 
@@ -111,7 +110,14 @@ const Comment = ({ comment }: ICommentProps) => {
     );
 
     return options;
-  }, [commentId, comment.blogPostId, deleteComment, author, currentUser]);
+  }, [
+    commentId,
+    comment.blogPostId,
+    deleteComment,
+    author,
+    currentUser,
+    onReplyToComment,
+  ]);
 
   return (
     <div
@@ -196,6 +202,7 @@ const Comment = ({ comment }: ICommentProps) => {
               mode="edit"
               {...{ comment: body, commentId }}
               onCommentSubmit={() => setMode('none')}
+              onBlur={() => setMode('none')}
             />
           )}
           {mode === 'reply' && (
@@ -206,6 +213,7 @@ const Comment = ({ comment }: ICommentProps) => {
                 blogPostId: comment.blogPostId,
               }}
               onCommentSubmit={() => setMode('none')}
+              onBlur={() => setMode('none')}
             />
           )}
         </div>

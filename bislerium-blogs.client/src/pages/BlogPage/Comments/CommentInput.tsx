@@ -10,6 +10,7 @@ import { isSameInnerHtml } from '../../../utils/string';
 type CommentInputProps = {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onCommentSubmit?: () => void;
+  onBlur?: () => void;
 } & (
   | {
       mode: 'comment';
@@ -41,6 +42,7 @@ const CommentInput = ({
   mode = 'comment',
   commentId,
   comment,
+  onBlur,
 }: CommentInputProps) => {
   const { currentUser, openAuthModal } = useAuthStore();
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
@@ -103,6 +105,7 @@ const CommentInput = ({
 
   useEffect(() => {
     const current = commentInputRef.current;
+    current?.focus();
     const handleInput = () => {
       if (current) {
         setDisabled(isSameInnerHtml(current.innerHTML, comment ?? ''));
@@ -112,14 +115,20 @@ const CommentInput = ({
 
     if (current) {
       current.oninput = handleInput;
+      if (onBlur) {
+        current.addEventListener('blur', onBlur);
+      }
     }
 
     return () => {
       if (current) {
         current.oninput = null;
+        if (onBlur) {
+          current.removeEventListener('blur', onBlur);
+        }
       }
     };
-  }, [commentInputRef, comment]);
+  }, [commentInputRef, comment, onBlur]);
 
   const [disabled, setDisabled] = useState<boolean>(false);
 

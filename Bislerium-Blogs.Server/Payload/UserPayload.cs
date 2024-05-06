@@ -13,5 +13,5 @@ public class UserPayload
     public DateTime UpdatedAt { get; set; }
     public string AvatarUrl { get; set; }
 
-    public string Role { get; set; } = Constants.EnumToString(UserRole.USER);
+    public string Role { get; set; } = Constants.EnumToString(UserRole.BLOGGER);
 }

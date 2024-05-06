@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Helpers;
 using Bislerium_Blogs.Server.DTOs;
 using System.Security.Claims;
 using Bislerium_Blogs.Server.Payload;
-using System.Reflection.Metadata;
 using Bislerium_Blogs.Server.Enums;
 using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.Interfaces;
-
 namespace Bislerium_Blogs.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -24,14 +17,17 @@ namespace Bislerium_Blogs.Server.Controllers
         private readonly BisleriumBlogsContext _context;
         private readonly ICommentService _commentService;
         private readonly IUserService _userService;
+        private readonly INotificationService _notificationService;
 
         public CommentsController(BisleriumBlogsContext context,
             ICommentService commentService,
-            IUserService userService)
+            IUserService userService,
+            INotificationService notificationService)
         {
             _context = context;
             _commentService = commentService;
             _userService = userService;
+            _notificationService = notificationService;
 
         }
 
@@ -162,6 +158,17 @@ namespace Bislerium_Blogs.Server.Controllers
                 if(userPayload == null)
                 {
                     return NotFound("User Not Found");
+                }
+
+                if (postACommentDto.ParentCommentId != null)
+                {
+               _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
+
+                }
+                else
+                {
+               _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
+
                 }
 
                 return new CommentPayload

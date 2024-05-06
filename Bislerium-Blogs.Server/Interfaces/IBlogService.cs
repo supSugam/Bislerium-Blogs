@@ -1,4 +1,5 @@
-﻿using Bislerium_Blogs.Server.Models;
+﻿using Bislerium_Blogs.Server.DTOs;
+using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Payload;
 
 namespace Bislerium_Blogs.Server.Interfaces
@@ -17,5 +18,13 @@ namespace Bislerium_Blogs.Server.Interfaces
         public Task<int> UpdatePopularityOfABlog(Guid blogPostId);
 
         public Task<VotePayload> GetBlogReactionDetails(Guid blogPostId, Guid? userId);
+
+        public Task<List<BlogPayload>> GetAllBookmarksOfAUser(Guid userId);
+
+        public Task<List<BlogPayload>> GetAllBlogsOfAUser(Guid userId);
+
+        public Task<bool> IsBlogBookmarked(Guid blogPostId, Guid userId);
+
+        public Task<BlogPaginationPayload> GetBlogPaginationPayload(BlogPaginationDto blogPaginationDto, Guid? userId);
     }
 }
