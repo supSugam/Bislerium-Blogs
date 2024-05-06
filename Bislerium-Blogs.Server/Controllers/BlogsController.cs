@@ -12,9 +12,7 @@ using Bislerium_Blogs.Server.Interfaces;
 using System.Security.Claims;
 using Bislerium_Blogs.Server.Payload;
 using Bislerium_Blogs.Server.Enums;
-using Microsoft.AspNetCore.Identity;
 using Bislerium_Blogs.Server.Helpers;
-using Bislerium_Blogs.Server.Services;
 
 namespace Bislerium_Blogs.Server.Controllers
 {
@@ -73,7 +71,10 @@ namespace Bislerium_Blogs.Server.Controllers
 
             string role = await _userService.GetRoleByUserId(blogPost.AuthorId) ?? Constants.EnumToString(UserRole.USER);
 
-            var blogPayload = new BlogPayload
+            var tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId);
+            var votePayload = await _blogService.GetBlogReactionDetails(blogPost.BlogPostId, userId is not null ? Guid.Parse(userId) : null);
+
+                var blogPayload = new BlogPayload
             {
                 BlogPostId = blogPost.BlogPostId,
                 Title = blogPost.Title,
@@ -93,9 +94,9 @@ namespace Bislerium_Blogs.Server.Controllers
                     Role = role
                 },
                 Popularity = blogPost.Popularity,
-                Tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId),
-                VotePayload = await _blogService.GetBlogReactionDetails(blogPost.BlogPostId, userId is not null ? Guid.Parse(userId):null)
-            };
+                Tags = tags,
+                VotePayload = votePayload
+                };
 
                 return Ok(blogPayload);
             }

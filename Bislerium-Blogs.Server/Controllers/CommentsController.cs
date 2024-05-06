@@ -40,7 +40,9 @@ namespace Bislerium_Blogs.Server.Controllers
         public async Task<ActionResult<List<CommentPayload>>> GetComments(Guid blogPostId, bool includeReplies=true){
             try
             {
-                var comments = await _commentService.GetCommentsAsync(blogPostId, includeReplies);
+                Guid.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out Guid userId);
+                
+                var comments = await _commentService.GetCommentsAsync(blogPostId, userId, includeReplies);
                 return Ok(comments);
     }
             catch (Exception ex)
@@ -86,9 +88,22 @@ namespace Bislerium_Blogs.Server.Controllers
             comment.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
-
-            var updatedComment = await _commentService.GetCommentByIdAsync(comment.CommentId, true);
-            return Ok(updatedComment);
+            var author = await _userService.GetUserById(comment.AuthorId);
+            var reactions = await _commentService.GetCommentReactionDetails(comment.CommentId, comment.AuthorId);
+            var replies = await _commentService.GetRepliesAsync(comment.CommentId, comment.AuthorId, true);
+            return Ok(new CommentPayload
+            {
+                CommentId = comment.CommentId,
+                Body = comment.Body,
+                CreatedAt = comment.CreatedAt,
+                UpdatedAt = comment.UpdatedAt,
+                Author = author,
+                BlogPostId = comment.BlogPostId,
+                ParentCommentId = comment.ParentCommentId,
+                Reactions = reactions,
+                IsEdited=true,
+                Replies = replies,
+            });
         }
 
 

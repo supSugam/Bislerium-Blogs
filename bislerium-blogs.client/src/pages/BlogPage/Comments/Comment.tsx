@@ -1,16 +1,27 @@
-import { MoreHorizontal } from 'lucide-react';
+import {
+  FlagIcon,
+  History,
+  MoreHorizontal,
+  Pencil,
+  ReplyIcon,
+  Trash,
+  Undo,
+} from 'lucide-react';
 import { IComment } from '../../../Interfaces/Models/IComment';
 import { whenDidItHappen } from '../../../utils/string';
 import Vote from '../../../Components/Vote';
 import CommentIcon from '../../../Components/Smol/CommentIcon';
 import { cn } from '../../../utils/cn';
 import CommentInput from './CommentInput';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { AnimateHeight } from '../../../Components/Reusables/AnimatedHeight';
 import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
-import Dropdown from '../../../Components/Reusables/Dropdown';
+import Dropdown, { DropdownItem } from '../../../Components/Reusables/Dropdown';
 import toast from 'react-hot-toast';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
+import EditHistory from './EditHistory';
+import { useAuthStore } from '../../../services/stores/useAuthStore';
+import { UserRole } from '../../../enums/UserRole';
 
 interface ICommentProps {
   comment: IComment;
@@ -31,9 +42,12 @@ const Comment = ({ comment }: ICommentProps) => {
     setIsRepliesExpanded((prev) => !prev);
   };
 
+  const { currentUser } = useAuthStore();
+
   const [isRepliesExpanded, setIsRepliesExpanded] = useState<boolean>(false);
   const [mode, setMode] = useState<'reply' | 'edit' | 'none'>('none');
-
+  const [editHistoryModalOpen, setEditHistoryModalOpen] =
+    useState<boolean>(false);
   const replyComponentRef = useRef<HTMLDivElement>(null);
 
   const onReplyToComment = () => {
@@ -45,6 +59,59 @@ const Comment = ({ comment }: ICommentProps) => {
   };
 
   const { deleteComment } = useCommentsQuery({});
+
+  const commentOptions = useMemo(() => {
+    const options: DropdownItem[] = [
+      {
+        label: 'Reply',
+        onClick: onReplyToComment,
+        icon: <ReplyIcon size={18} />,
+      },
+    ];
+
+    if (currentUser) {
+      if (currentUser?.userId === author.userId) {
+        options.push({
+          label: 'Edit',
+          onClick: () => setMode('edit'),
+          icon: <Pencil size={18} />,
+        });
+      }
+
+      if (
+        currentUser?.role === UserRole.ADMIN ||
+        currentUser?.userId === author.userId
+      ) {
+        options.push({
+          label: 'Delete Comment',
+          onClick: () => {
+            deleteComment.mutate({
+              id: commentId,
+              blogPostId: comment.blogPostId,
+            });
+          },
+          icon: <Trash size={18} />,
+        });
+      }
+    }
+
+    options.push(
+      {
+        label: 'See Edit History',
+        onClick: () => setEditHistoryModalOpen(true),
+        icon: <History size={18} />,
+      },
+      {
+        label: 'Report',
+        onClick: () => {
+          toast('Maybe Next Update !?', { icon: '🚀' });
+        },
+        icon: <FlagIcon size={18} />,
+      }
+    );
+
+    return options;
+  }, [commentId, comment.blogPostId, deleteComment, author, currentUser]);
 
   return (
     <div
@@ -79,28 +146,8 @@ const Comment = ({ comment }: ICommentProps) => {
               <MoreHorizontal size={20} />
             </button>
           }
-          items={[
-            {
-              label: 'Edit',
-              onClick: () => setMode('edit'),
-            },
-            {
-              label: 'Delete',
-              onClick: () => {
-                deleteComment.mutate({
-                  id: commentId,
-                  blogPostId: comment.blogPostId,
-                });
-              },
-            },
-            {
-              label: 'Report',
-              onClick: () => {
-                toast('Maybe Next Update !?', { icon: '🚀' });
-              },
-            },
-          ]}
-          closeOnClick={true}
+          items={commentOptions}
+          closeOnClick
         />
       </div>
 
@@ -175,6 +222,12 @@ const Comment = ({ comment }: ICommentProps) => {
           ))}
         </div>
       </AnimateHeight>
+      <EditHistory
+        commentId={commentId}
+        isOpen={editHistoryModalOpen}
+        onClose={() => setEditHistoryModalOpen(false)}
+        author={author}
+      />
     </div>
   );
 };

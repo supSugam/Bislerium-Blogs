@@ -11,7 +11,11 @@ import {
   ISuccessResponse,
 } from '../../Interfaces/IApiResponse';
 import { toastWithInterval } from '../../utils/toast';
-import { IComment, ICommentReactions } from '../../Interfaces/Models/IComment';
+import {
+  IComment,
+  ICommentHistory,
+  ICommentReactions,
+} from '../../Interfaces/Models/IComment';
 import { keyFactory } from '../../utils/constants';
 import { useCommentsStore } from '../../services/stores/useCommentsStore';
 import toast from 'react-hot-toast';
@@ -177,6 +181,15 @@ const useCommentsQuery = ({
     },
   });
 
+  const getCommentEditHistory = useQuery<
+    AxiosResponse<ISuccessResponse<ICommentHistory[]>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryFn: async () => await api.get(`/comments/${id}/history`),
+    queryKey: ['comments', id, 'history'],
+    enabled: !!id,
+  });
+
   return {
     getComments,
     publishComment,
@@ -186,6 +199,7 @@ const useCommentsQuery = ({
     downvoteComment,
     getCommentReactions,
     deleteComment,
+    getCommentEditHistory,
   };
 };
 

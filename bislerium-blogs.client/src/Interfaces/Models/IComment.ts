@@ -19,3 +19,10 @@ export interface ICommentReactions {
   isVotedDown: boolean;
   totalReplies: number;
 }
+
+export interface ICommentHistory {
+  commentHistoryId: string;
+  commentId: string;
+  body: string;
+  updatedAt: string;
+}

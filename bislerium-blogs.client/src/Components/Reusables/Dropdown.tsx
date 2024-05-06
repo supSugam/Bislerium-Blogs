@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
 import StyledText from '../Elements/StyledText';
 
-type DropdownItem = {
+export type DropdownItem = {
   icon?: React.ReactNode;
   bordered?: boolean;
 } & React.HTMLProps<HTMLDivElement> &

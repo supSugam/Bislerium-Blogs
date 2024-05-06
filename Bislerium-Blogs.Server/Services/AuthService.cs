@@ -1,10 +1,8 @@
 ﻿using Bislerium_Blogs.Server.Configs;
 using Bislerium_Blogs.Server.DTOs;
 using Bislerium_Blogs.Server.Enums;
-using Bislerium_Blogs.Server.Helpers;
 using Bislerium_Blogs.Server.Interfaces;
 using Bislerium_Blogs.Server.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,8 +19,6 @@ namespace Bislerium_Blogs.Server.Services
         private readonly IEmailService _emailService;
         private readonly BisleriumBlogsContext _context;
         private readonly IS3Service _s3Service;
-
-
 
         public AuthService(UserManager<IdentityUser> userManager,
             IEmailService emailService,

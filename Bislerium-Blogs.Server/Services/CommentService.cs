@@ -22,7 +22,7 @@ namespace Bislerium_Blogs.Server.Services
         }
 
 
-        public async Task<CommentPayload> GetCommentByIdAsync(Guid commentId, bool includeReplies=
+        public async Task<CommentPayload> GetCommentByIdAsync(Guid commentId,Guid? userId, bool includeReplies=
             true)
         {
             try
@@ -40,7 +40,11 @@ namespace Bislerium_Blogs.Server.Services
                     Console.WriteLine(comment?.Author?.FullName);
                     throw new Exception("Author not found");
                 }
-                    return new CommentPayload
+
+                bool IsEdited = await IsCommentEdited(comment.CommentId);
+                var reactions = await GetCommentReactionDetails(comment.CommentId, userId);
+                var replies = includeReplies == true ? await GetRepliesAsync(comment.CommentId, userId, true) : new List<CommentPayload>();
+                return new CommentPayload
                     {
                         CommentId = comment.CommentId,
                         Body = comment.Body,
@@ -55,12 +59,14 @@ namespace Bislerium_Blogs.Server.Services
                             CreatedAt = comment.Author.CreatedAt,
                             UpdatedAt = comment.Author.UpdatedAt,
                             AvatarUrl = comment.Author.AvatarUrl,
-                            Role = authorRole
+                            Role = authorRole,
                         },
+                        IsEdited= IsEdited,
                         BlogPostId = comment.BlogPostId,
                         ParentCommentId = comment.ParentCommentId,
-                        Replies = includeReplies == true ? await GetRepliesAsync(comment.CommentId, true): []
-                    };
+                        Reactions = reactions,
+                        Replies = replies
+                };
 
 
             }
@@ -70,7 +76,7 @@ namespace Bislerium_Blogs.Server.Services
             }
         }
 
-        public async Task<List<CommentPayload>> GetCommentsAsync(Guid blogPostId, bool includeReplies=true)
+        public async Task<List<CommentPayload>> GetCommentsAsync(Guid blogPostId,Guid? userId, bool includeReplies=true)
         {
             try
             {
@@ -99,7 +105,8 @@ namespace Bislerium_Blogs.Server.Services
                     {
                         continue;
                     }
-
+                    bool IsEdited = await IsCommentEdited(comment.CommentId);
+                    var reactions = await GetCommentReactionDetails(comment.CommentId, userId);
                     var commentPayload = new CommentPayload
                     {
                         CommentId = comment.CommentId,
@@ -108,12 +115,14 @@ namespace Bislerium_Blogs.Server.Services
                         UpdatedAt = comment.UpdatedAt,
                         Author = commentator,
                         BlogPostId = comment.BlogPostId,
-                        ParentCommentId = comment.ParentCommentId
+                        ParentCommentId = comment.ParentCommentId,
+                        IsEdited = IsEdited,
+                        Reactions = reactions,
                     };
 
                     if (includeReplies)
                     {
-                        var replies = await GetRepliesAsync(comment.CommentId, includeReplies);
+                        var replies = await GetRepliesAsync(comment.CommentId, userId, true);
                         commentPayload.Replies = replies;
                     }
 
@@ -129,7 +138,7 @@ namespace Bislerium_Blogs.Server.Services
 
         }
 
-        public async Task<List<CommentPayload>> GetRepliesAsync(Guid commentId, bool includeReplies = true)
+        public async Task<List<CommentPayload>> GetRepliesAsync(Guid commentId, Guid? userId, bool includeReplies = true)
         {
             try
             {
@@ -143,7 +152,8 @@ namespace Bislerium_Blogs.Server.Services
                 {
                     var author = await _userManager.FindByIdAsync(reply.Author.UserId.ToString());
                     var authorRoles = await _userManager.GetRolesAsync(author);
-
+                    bool IsEdited = await IsCommentEdited(reply.CommentId);
+                    var reactions = await GetCommentReactionDetails(reply.CommentId, userId);
                     var commentPayload = new CommentPayload
                     {
                         CommentId = reply.CommentId,
@@ -162,12 +172,14 @@ namespace Bislerium_Blogs.Server.Services
                             Role = authorRoles[0]
                         },
                         BlogPostId = reply.BlogPostId,
-                        ParentCommentId = reply.ParentCommentId
+                        ParentCommentId = reply.ParentCommentId,
+                        IsEdited = IsEdited,
+                        Reactions = reactions
                     };
 
                     if (includeReplies)
                     {
-                        var childReplies = await GetRepliesAsync(reply.CommentId, true);
+                        var childReplies = await GetRepliesAsync(reply.CommentId, userId, true);
                         commentPayload.Replies = childReplies;
                     }
                     else
@@ -282,12 +294,28 @@ namespace Bislerium_Blogs.Server.Services
             try
             {
                 ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
-                return await _context.CommentHistories.Where(x => x.CommentId == commentId).ToListAsync();
+                return await _context.CommentHistories.Where(x => x.CommentId == commentId)
+                    .OrderByDescending(x => x.UpdatedAt)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<bool> IsCommentEdited(Guid commentId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(commentId, nameof(commentId));
+                return await _context.CommentHistories.AnyAsync(x => x.CommentId == commentId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
     }
 }

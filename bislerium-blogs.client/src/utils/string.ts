@@ -107,10 +107,30 @@ export const estimateReadingTime = (content: string): number => {
 
   return readingTime;
 };
-
-export const getFormattedDate = (date?: Date | string | number): string => {
+// if (!date) return '';
+// return new Date(date).toLocaleDateString('en-US', {
+//   year: 'numeric',
+//   month: 'long',
+//   day: 'numeric',
+// });
+export const getFormattedDate = (
+  date?: Date | string | number,
+  withTime = false
+): string => {
   if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
+
+  const dateObj = new Date(date);
+  if (withTime) {
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      // second: 'numeric',
+    });
+  }
+  return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
