@@ -5,73 +5,156 @@ import { createRef, useEffect, useState } from 'react';
 import { cn } from '../../../utils/cn';
 import { motion } from 'framer-motion';
 import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
-interface ICommentInputProps {
-  blogPostId?: string;
-  parentCommentId?: string;
+import { isSameInnerHtml } from '../../../utils/string';
+
+type CommentInputProps = {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onCommentSubmit?: () => void;
-}
+} & (
+  | {
+      mode: 'comment';
+      blogPostId: string;
+      commentId?: undefined;
+      parentCommentId?: undefined;
+      comment?: undefined;
+    }
+  | {
+      mode: 'edit';
+      commentId: string;
+      blogPostId?: undefined;
+      comment: string;
+      parentCommentId?: undefined;
+    }
+  | {
+      parentCommentId: string;
+      mode: 'reply';
+      blogPostId: string;
+      commentId?: undefined;
+      comment?: undefined;
+    }
+);
+
 const CommentInput = ({
   blogPostId,
   parentCommentId,
   onCommentSubmit,
-}: ICommentInputProps) => {
+  mode = 'comment',
+  commentId,
+  comment,
+}: CommentInputProps) => {
   const { currentUser, openAuthModal } = useAuthStore();
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
   const commentInputRef = createRef<HTMLDivElement>();
   const {
     publishComment: { mutateAsync: publishCommentMutation, isPending },
+    updateComment: { mutateAsync: updateCommentMutation },
   } = useCommentsQuery({});
 
+  const onSuccess = () => {
+    if (commentInputRef.current) {
+      commentInputRef.current.textContent = '';
+      setShowPlaceholder(true);
+    } else {
+      const el = document.getElementById('comment-input');
+      if (el) {
+        el.textContent = '';
+        setShowPlaceholder(true);
+      }
+    }
+  };
+
   const onSubmit = async () => {
-    if (!currentUser || !blogPostId) {
+    if (!currentUser) {
       openAuthModal();
       return;
     }
     const body = commentInputRef.current?.innerHTML;
     if (!body) return;
-    onCommentSubmit?.();
-    await publishCommentMutation(
-      {
-        body,
-        blogPostId,
-        parentCommentId: parentCommentId ?? null,
-      },
-      {
-        onSuccess: () => {
-          if (commentInputRef.current) {
-            commentInputRef.current.textContent = '';
-            setShowPlaceholder(true);
-          } else {
-            const el = document.getElementById('comment-input');
-            if (el) {
-              el.textContent = '';
-              setShowPlaceholder(true);
-            }
-          }
+
+    if ((mode === 'comment' || mode === 'reply') && blogPostId) {
+      onCommentSubmit?.();
+      await publishCommentMutation(
+        {
+          body,
+          blogPostId,
+          parentCommentId:
+            mode === 'reply' && parentCommentId ? parentCommentId : null,
         },
-      }
-    );
+        {
+          onSuccess,
+        }
+      );
+    }
+
+    if (mode === 'edit' && commentId) {
+      if (body === comment) return;
+      onCommentSubmit?.();
+      await updateCommentMutation(
+        {
+          body,
+          id: commentId,
+        },
+        {
+          onSuccess,
+        }
+      );
+    }
   };
 
   useEffect(() => {
-    if (commentInputRef.current) {
-      commentInputRef.current.oninput = () => {
-        setShowPlaceholder(!commentInputRef.current?.innerText);
-      };
+    const current = commentInputRef.current;
+    const handleInput = () => {
+      if (current) {
+        setDisabled(isSameInnerHtml(current.innerHTML, comment ?? ''));
+        setShowPlaceholder(current.textContent === '');
+      }
+    };
+
+    if (current) {
+      current.oninput = handleInput;
     }
-  }, [commentInputRef]);
+
+    return () => {
+      if (current) {
+        current.oninput = null;
+      }
+    };
+  }, [commentInputRef, comment]);
+
+  const [disabled, setDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    setDisabled(
+      isPending ||
+        !currentUser ||
+        showPlaceholder ||
+        (mode === 'edit' && commentInputRef.current?.innerHTML === comment)
+    );
+  }, [comment, currentUser, isPending, mode, showPlaceholder, commentInputRef]);
+
+  useEffect(() => {
+    if (commentInputRef.current) {
+      if (mode === 'edit' && comment) {
+        commentInputRef.current.innerHTML = comment;
+        setShowPlaceholder(false);
+      } else {
+        commentInputRef.current.textContent = '';
+        setShowPlaceholder(true);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, comment]);
 
   return (
     <div
       className={cn(
         'w-full relative flex flex-col gap-y-4 p-4 border-neutral-300 bg-white shadow-normal rounded-sm',
         {
-          'opacity-50 pointer-events-none': isPending || !blogPostId,
+          'opacity-50 pointer-events-none': isPending,
         }
       )}
     >
-      {!parentCommentId && (
+      {mode === 'comment' && (
         <div className="flex gap-x-2 items-center">
           <img
             src={currentUser?.avatarUrl ?? AVATAR_PLACEHOLDER}
@@ -111,17 +194,39 @@ const CommentInput = ({
           </motion.span>
         )}
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-x-3 items-center">
+        {mode === 'edit' && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: 0.8,
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            whileHover={{ opacity: 1 }}
+            className="text-neutral-600 cursor-pointer"
+            onClick={() => {
+              if (commentInputRef.current && comment) {
+                commentInputRef.current.innerHTML = comment;
+                onCommentSubmit?.();
+              }
+              setShowPlaceholder(false);
+            }}
+          >
+            Cancel
+          </motion.span>
+        )}
         <StyledButton
           variant="dark"
           className={cn(
-            'px-6 w-auto self-end scale-90 bg-green-500 hover:bg-green-600',
+            'px-6 w-auto self-end scale-90 bg-green-600 hover:bg-green-700',
             {
-              'opacity-50 pointer-events-none':
-                isPending || !blogPostId || !currentUser || showPlaceholder,
+              'disabled opacity-60': disabled,
             }
           )}
-          text={parentCommentId ? 'Reply' : 'Comment'}
+          text={
+            mode === 'edit' ? 'Update' : mode === 'reply' ? 'Reply' : 'Comment'
+          }
           onClick={onSubmit}
         />
       </div>

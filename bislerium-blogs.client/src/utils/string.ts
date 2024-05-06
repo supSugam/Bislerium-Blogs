@@ -151,3 +151,11 @@ export const whenDidItHappen = (date: Date | string | number): string => {
     return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
   }
 };
+
+export const isSameInnerHtml = (html1: string, html2: string): boolean => {
+  // get rid of all props of html tags
+  const cleanHtml1 = html1.replace(/<[^>]+>/g, '');
+  const cleanHtml2 = html2.replace(/<[^>]+>/g, '');
+
+  return cleanHtml1 === cleanHtml2;
+};

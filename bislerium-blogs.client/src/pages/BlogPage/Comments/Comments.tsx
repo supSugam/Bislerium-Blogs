@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo } from 'react';
 import Modal from '../../../Components/Modal/Modal';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
 import Comment from './Comment';
@@ -11,7 +11,7 @@ interface ICommentsProps {
   isExpanded: boolean;
   onClose?: () => void;
 }
-const Comments = ({ id, isExpanded, onClose }: ICommentsProps) => {
+const Comments = memo(({ id, isExpanded, onClose }: ICommentsProps) => {
   const { setComments, comments, getCommentsCount } = useCommentsStore();
 
   const getAllCommentsConfig = useMemo(
@@ -59,7 +59,8 @@ const Comments = ({ id, isExpanded, onClose }: ICommentsProps) => {
             <X size={20} />
           </button>
         </div>
-        <CommentInput blogPostId={id} />
+        <CommentInput blogPostId={id ?? ''} mode="comment" />
+
         <div className="w-full h-[1px] bg-neutral-200 my-6" />
 
         {!isCommentsLoading && id ? (
@@ -74,6 +75,6 @@ const Comments = ({ id, isExpanded, onClose }: ICommentsProps) => {
       </motion.div>
     </>
   );
-};
+});
 
 export default Comments;

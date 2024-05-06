@@ -45,8 +45,13 @@ namespace Bislerium_Blogs.Server.Controllers
 
         // GET: api/Blogs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BlogPayload>> GetBlogPostById(Guid id)
+        public async Task<ActionResult<BlogPayload>> GetBlogPostById(Guid? id)
         {
+
+            if(id == null)
+            {
+                return BadRequest("No Blog Id Provided");
+            }
             try
             {
                 string? userId = null;

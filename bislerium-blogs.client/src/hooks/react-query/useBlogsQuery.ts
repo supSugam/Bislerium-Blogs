@@ -68,6 +68,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     queryFn: async () =>
       await api.get('/blogs', { params: getAllBlogsConfig?.params }),
     queryKey: ['blogs', getAllBlogsConfig?.params],
+    enabled: false,
     ...getAllBlogsConfig?.queryOptions,
   });
 
@@ -77,7 +78,8 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
   >({
     queryFn: async () => await api.get(`/blogs/${id}`),
     queryKey: ['blogs', id],
-    enabled: typeof id === 'string',
+    retry: true,
+    enabled: !!id,
   });
 
   const updateBlog = useMutation<
@@ -132,7 +134,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
   >({
     queryFn: async () => await api.get(`/blogs/${id}/reactions`),
     queryKey: [keyFactory.blogVotes],
-    enabled: typeof id === 'string',
+    enabled: !!id,
   });
 
   return {

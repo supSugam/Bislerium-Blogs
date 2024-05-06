@@ -32,18 +32,19 @@ const Comment = ({ comment }: ICommentProps) => {
   };
 
   const [isRepliesExpanded, setIsRepliesExpanded] = useState<boolean>(false);
-  const [isReplying, setIsReplying] = useState<boolean>(false);
+  const [mode, setMode] = useState<'reply' | 'edit' | 'none'>('none');
+
   const replyComponentRef = useRef<HTMLDivElement>(null);
 
   const onReplyToComment = () => {
-    setIsReplying((prev) => !prev);
+    mode === 'reply' ? setMode('none') : setMode('reply');
     replyComponentRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'center',
     });
   };
 
-  const { deleteComment, updateComment } = useCommentsQuery({});
+  const { deleteComment } = useCommentsQuery({});
 
   return (
     <div
@@ -81,12 +82,15 @@ const Comment = ({ comment }: ICommentProps) => {
           items={[
             {
               label: 'Edit',
-              onClick: () => console.log('Edit'),
+              onClick: () => setMode('edit'),
             },
             {
               label: 'Delete',
               onClick: () => {
-                deleteComment.mutate({ id: commentId });
+                deleteComment.mutate({
+                  id: commentId,
+                  blogPostId: comment.blogPostId,
+                });
               },
             },
             {
@@ -135,16 +139,28 @@ const Comment = ({ comment }: ICommentProps) => {
           className={cn(
             'w-full overflow-hidden ml-2 my-2 border-l-2 border-neutral-200',
             {
-              'h-0': !isReplying,
-              'h-auto': isReplying,
+              'h-0': mode === 'none',
+              'h-auto': mode !== 'none',
             }
           )}
         >
-          <CommentInput
-            blogPostId={comment.blogPostId}
-            parentCommentId={commentId}
-            onCommentSubmit={() => setIsReplying(false)}
-          />
+          {mode === 'edit' && (
+            <CommentInput
+              mode="edit"
+              {...{ comment: body, commentId }}
+              onCommentSubmit={() => setMode('none')}
+            />
+          )}
+          {mode === 'reply' && (
+            <CommentInput
+              mode="reply"
+              {...{
+                parentCommentId: commentId,
+                blogPostId: comment.blogPostId,
+              }}
+              onCommentSubmit={() => setMode('none')}
+            />
+          )}
         </div>
       </AnimateHeight>
       <AnimateHeight>

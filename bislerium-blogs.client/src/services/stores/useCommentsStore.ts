@@ -64,22 +64,38 @@ export const useCommentsStore = create<CommentsStore>((set, get) => ({
       },
     }));
   },
-  deleteCommentFromBlog: (blogId, commentId) => {
-    set((state) => ({
-      comments: {
-        ...state.comments,
-        [blogId]: state.comments[blogId].flatMap((comment) =>
-          comment.commentId === commentId
-            ? comment.replies
-            : [
-                comment,
-                ...comment.replies.filter(
-                  (reply) => reply.commentId !== commentId
-                ),
-              ]
-        ),
-      },
-    }));
+  deleteCommentFromBlog: (blogId: string, commentId: string) => {
+    set((state) => {
+      const comments = state.comments[blogId] || [];
+
+      // Helper function to remove comment and its replies recursively
+      const removeCommentAndReplies = (comments: IComment[]): IComment[] => {
+        return comments.flatMap((comment) => {
+          if (comment.commentId === commentId) {
+            // If it's a top-level comment, remove it and its replies
+            if (!comment.parentCommentId) {
+              return [];
+            } else {
+              // If it's a nested reply, remove only this reply
+              return comment.replies;
+            }
+          } else {
+            // Recursively remove the comment from the replies
+            const updatedReplies = removeCommentAndReplies(comment.replies);
+            return [{ ...comment, replies: updatedReplies }];
+          }
+        });
+      };
+
+      const newComments = removeCommentAndReplies(comments);
+
+      return {
+        comments: {
+          ...state.comments,
+          [blogId]: newComments,
+        },
+      };
+    });
   },
   doesCommentExist: (blogId, commentId) => {
     const comments = get().comments[blogId];
@@ -119,7 +135,7 @@ export const useCommentsStore = create<CommentsStore>((set, get) => ({
         return {
           comments: {
             ...state.comments,
-            [blogId]: [...comments, commentToAdd],
+            [blogId]: [commentToAdd, ...comments],
           },
         };
       }

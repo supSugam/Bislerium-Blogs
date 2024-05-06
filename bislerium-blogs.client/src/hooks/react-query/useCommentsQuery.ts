@@ -14,6 +14,7 @@ import { toastWithInterval } from '../../utils/toast';
 import { IComment, ICommentReactions } from '../../Interfaces/Models/IComment';
 import { keyFactory } from '../../utils/constants';
 import { useCommentsStore } from '../../services/stores/useCommentsStore';
+import toast from 'react-hot-toast';
 
 interface ICommentsQueryParams {
   includeReplies?: boolean;
@@ -66,7 +67,6 @@ const useCommentsQuery = ({
     onError: (error) => {
       toastWithInterval({ error });
     },
-    onSettled: (data, error) => {},
   });
 
   const getComments = useQuery<
@@ -88,7 +88,7 @@ const useCommentsQuery = ({
   >({
     queryFn: async () => await api.get(`/comments/${id}`),
     queryKey: ['comments', id],
-    enabled: typeof id === 'string',
+    enabled: !!id,
   });
 
   const updateComment = useMutation<
@@ -156,29 +156,24 @@ const useCommentsQuery = ({
   >({
     queryFn: async () => await api.get(`/comments/${id}/reactions`),
     queryKey: [keyFactory.commentReactions],
-    enabled: typeof id === 'string',
+    enabled: !!id,
   });
 
   const deleteComment = useMutation<
-    AxiosResponse<ISuccessResponse<IComment>>,
+    AxiosResponse<ISuccessResponse<string>>,
     AxiosError<IFailedResponse>,
-    { id: string }
+    { id: string; blogPostId: string }
   >({
     mutationFn: async ({ id }) => await api.delete(`/comments/${id}`),
     onError: (error) => {
       toastWithInterval({ error });
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }, vars) => {
+      toast.success(data.result);
       queryClient.invalidateQueries({
         queryKey: ['comments'],
       });
-      const deletedComment = data.data.result;
-      if (deletedComment) {
-        deleteCommentFromBlog(
-          deletedComment.blogPostId,
-          deletedComment.commentId
-        );
-      }
+      deleteCommentFromBlog(vars.blogPostId, vars.id);
     },
   });
 
