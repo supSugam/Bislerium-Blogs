@@ -33,12 +33,15 @@ const StyledButton = ({
     'cursor-pointer'
   );
 
-  const textStyles = cn({
-    'text-sm': size === 'small',
-    'text-base': size === 'medium',
-    'text-lg': size === 'large',
-    'text-white': variant === 'dark',
-  });
+  const textStyles = cn(
+    {
+      'text-sm': size === 'small',
+      'text-base': size === 'medium',
+      'text-lg': size === 'large',
+      'text-white': variant === 'dark',
+    },
+    'whitespace-nowrap'
+  );
 
   return (
     <AnimatePresence>

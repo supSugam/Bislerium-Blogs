@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '../../utils/cn';
 
@@ -32,13 +32,15 @@ export const AnimateHeight: React.FC<AnimateHeightProps> = ({
   }, []);
 
   return (
-    <motion.div
-      className={cn(className, 'overflow-hidden')}
-      style={{ height }}
-      animate={{ height }}
-      transition={{ duration: 0.1 }}
-    >
-      <div ref={containerRef}>{children}</div>
-    </motion.div>
+    <AnimatePresence>
+      <motion.div
+        className={cn(className, 'overflow-hidden')}
+        style={{ height }}
+        animate={{ height }}
+        transition={{ duration: 0.1 }}
+      >
+        <div ref={containerRef}>{children}</div>
+      </motion.div>
+    </AnimatePresence>
   );
 };

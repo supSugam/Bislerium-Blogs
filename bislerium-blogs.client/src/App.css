@@ -8,3 +8,113 @@
   color: var(--color-primary);
   position: relative;
 }
+
+#notification {
+  height: auto !important;
+}
+
+/* 
+for smallest screens
+*/
+
+@media screen and (max-width: 320px) {
+  #notifications {
+    width: 16rem;
+  }
+}
+
+/*
+for small screens
+*/
+
+@media screen and (min-width: 321px) and (max-width: 768px) {
+  #notifications {
+    width: 18rem;
+  }
+}
+
+/*
+for medium screens
+*/
+
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  #notifications {
+    width: 24rem;
+  }
+}
+
+/*
+for large screens
+*/
+
+@media screen and (min-width: 1025px) {
+  #notifications {
+    width: 26rem;
+  }
+}
+
+#notification-message strong {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+/* Minimal scrollbar */
+.minimal-scrollbar ::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent; /* Set background color */
+}
+
+/* Handle */
+.minimal-scrollbar ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2); /* Set handle color */
+  border-radius: 3px; /* Rounded corners */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Handle on hover */
+.minimal-scrollbar ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5); /* Darker handle color on hover */
+}
+
+/* Track */
+.minimal-scrollbar ::-webkit-scrollbar-track {
+  background: transparent; /* Set track color */
+}
+
+/* Track on hover */
+.minimal-scrollbar ::-webkit-scrollbar-track:hover {
+  background: transparent; /* Keep track color transparent on hover */
+}
+
+/* Show scrollbar when hovered */
+.minimal-scrollbar ::-webkit-scrollbar:hover {
+  width: 6px; /* Show scrollbar */
+}
+
+/* Hide scrollbar when inactive */
+.minimal-scrollbar ::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.2); /* Reset handle color on click */
+}
+
+/* Hide scrollbar when inactive */
+.minimal-scrollbar ::-webkit-scrollbar-thumb:after {
+  content: ''; /* Hide scrollbar thumb when inactive */
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background-color: transparent; /* Set background color */
+  transition: opacity 0.5s ease; /* Smooth transition */
+}
+
+/* Show scrollbar thumb when scrolling */
+.minimal-scrollbar ::-webkit-scrollbar-thumb:after {
+  opacity: 0; /* Hide scrollbar thumb by default */
+}
+
+/* Show scrollbar thumb when scrolling */
+.minimal-scrollbar ::-webkit-scrollbar-thumb:hover:after {
+  opacity: 1; /* Show scrollbar thumb on hover */
+}

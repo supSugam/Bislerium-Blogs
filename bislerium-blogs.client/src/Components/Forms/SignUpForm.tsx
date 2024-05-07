@@ -23,6 +23,9 @@ import useAuthQuery from '../../hooks/react-query/useAuthQuery';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import StyledButton from '../Elements/StyledButton';
 import useUsersQuery from '../../hooks/react-query/useUsersQuery';
+import ButtonWithIcon from '../Helpers/ButtonWithIcon';
+import GoogleIcon from '../../lib/SVGs/GoogleIcon';
+import toast from 'react-hot-toast';
 
 export function SignupForm({
   mode = 'signup',
@@ -80,9 +83,11 @@ export function SignupForm({
 
   const [avatar, setAvatar] = useState<File | null>(null);
   const [currentAvatar, setCurrentAvatar] = useState<string | null>(null);
-  const [role, setRole] = useState<UserRole>(UserRole.USER);
 
   const { currentUser } = useAuthStore();
+  const [role, setRole] = useState<UserRole>(
+    currentUser?.role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.BLOGGER
+  );
   useEffect(() => {
     if (mode === 'update-profile' && currentUser) {
       setRole(currentUser.role ?? UserRole.USER);
@@ -145,13 +150,23 @@ export function SignupForm({
         <LabelInputContainer htmlFor="role" label="Sign Up As">
           <Dropdown
             className="w-full"
-            items={Object.values(UserRole)
-              .filter((role) => role !== UserRole.ADMIN)
-              .map((role) => ({
-                label: capitalizeFirstLetter(role),
-                onClick: () => setRole(role as UserRole),
-                bordered: true,
-              }))}
+            items={
+              currentUser?.role === UserRole.ADMIN
+                ? [
+                    {
+                      label: capitalizeFirstLetter(role),
+                      onClick: () => setRole(UserRole.ADMIN),
+                      bordered: true,
+                    },
+                  ]
+                : [
+                    {
+                      label: capitalizeFirstLetter(UserRole.BLOGGER),
+                      onClick: () => setRole(UserRole.BLOGGER),
+                      bordered: true,
+                    },
+                  ]
+            }
             targetComponent={
               <StyledInput
                 value={capitalizeFirstLetter(role)}
@@ -224,29 +239,30 @@ export function SignupForm({
         isLoading={isPending}
       />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
-      {/* 
+
       <ButtonWithIcon
         icon={<GoogleIcon size={20} />}
-        onClick={async () => {
-          // await signInWithGoogle();
-          // setModalOpen(false);
+        onClick={(e) => {
+          e.preventDefault();
+          toast('Coming Soon, Uhh Maybe?', {
+            icon: '🤷‍♂️',
+          });
         }}
       >
         Continue with Google
-      </ButtonWithIcon> */}
-      {!currentUser && (
-        <StyledButton
-          onClick={() => setAuthModalActiveSection('login')}
-          text={
-            <StyledText className="text-center">
-              {`Already have an account?`}{' '}
-              <StyledText className="font-medium">Log In</StyledText>
-            </StyledText>
-          }
-          variant="secondary"
-          className="mt-3 w-full border-none"
-        />
-      )}
+      </ButtonWithIcon>
+
+      <StyledButton
+        onClick={() => setAuthModalActiveSection('login')}
+        text={
+          <StyledText className="text-center">
+            {`Already have an account?`}{' '}
+            <StyledText className="font-medium">Log In</StyledText>
+          </StyledText>
+        }
+        variant="secondary"
+        className="mt-3 w-full border-none"
+      />
     </form>
   );
 }

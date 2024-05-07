@@ -120,7 +120,12 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessage = $"{targetUser.FullName} just {(IsUpvote ? "upvoted" : "downvoted")} your blog post.";
+                if(targetUser.UserId == triggerUserId)
+                {
+                    return false;
+                }
+
+                string notificationMessage = $"<strong>{targetUser.FullName}</strong> just {(IsUpvote ? "upvoted" : "downvoted")} your blog post.";
 
                 var notification = new Notification
                 {
@@ -135,7 +140,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
 
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                await _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
+                _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
                 return true;
 
             }
@@ -174,7 +179,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessage = $"{triggerUser.FullName} just {(IsUpvote ? "upvoted" : "downvoted")} your comment on {blogPost.Title}.";
+                string notificationMessage = $"<strong>{triggerUser.FullName}</strong> just {(IsUpvote ? "upvoted" : "downvoted")} your comment on <strong>{blogPost.Title}</strong>.";
 
                 var notification = new Notification
                 {
@@ -190,7 +195,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
 
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                await _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
+                _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
 
 
                 return true;
@@ -224,7 +229,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessage = $"{triggerUser.FullName} just commented on your blog post {blogPost.Title}.";
+                string notificationMessage = $"<strong>{triggerUser.FullName}</strong> just commented on your blog post <strong>{blogPost.Title}</strong>.";
 
                 var notification = new Notification
                 {
@@ -239,7 +244,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
 
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                await _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
+                _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessage);
 
 
                 return true;
@@ -282,7 +287,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessageForTargetUser = $"{triggerUser.FullName} just replied to your comment on {blogPost.Title}.";
+                string notificationMessageForTargetUser = $"<strong>{triggerUser.FullName}</strong> just replied to your comment on <strong>{blogPost.Title}</strong>.";
 
                 var notificationForTargetUser = new Notification
                 {
@@ -296,7 +301,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     IsRead = false
                 };
 
-                string notificationMessageForBlogAuthor = $"{triggerUser.FullName} replied to {targetUser.FullName}'s comment on your blog post.";
+                string notificationMessageForBlogAuthor = $"<strong>{triggerUser.FullName}</strong> replied to <strong>{targetUser.FullName}'s</strong> comment on your blog post.";
 
                 var notificationForBlogAuthor = new Notification
                 {
@@ -313,8 +318,8 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                 await _context.Notifications.AddAsync(notificationForTargetUser);
                 await _context.Notifications.AddAsync(notificationForBlogAuthor);
                 await _context.SaveChangesAsync();
-                await _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessageForTargetUser);
-                await _emailService.SendNotificationEmail(blogPost.Author.Email, blogPost.Author.FullName, notificationMessageForBlogAuthor);
+                _emailService.SendNotificationEmail(targetUser.Email, targetUser.FullName, notificationMessageForTargetUser);
+                _emailService.SendNotificationEmail(blogPost.Author.Email, blogPost.Author.FullName, notificationMessageForBlogAuthor);
 
 
                 return true;
@@ -330,7 +335,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
         {
             try
             {
-                var blogPost = await _context.BlogPosts.FindAsync(blogPostId);
+                var blogPost = await _context.BlogPosts.Include(b => b.Author).FirstOrDefaultAsync(b => b.BlogPostId == blogPostId);
 
                 if (blogPost == null)
                 {
@@ -344,7 +349,12 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessage = $"{triggerUser.FullName} just bookmarked your blog post {blogPost.Title}.";
+                if(triggerUser.UserId == blogPost.AuthorId)
+                {
+                    return false;
+                }
+
+                string notificationMessage = $"<strong>{triggerUser.FullName}</strong> just bookmarked your blog post <strong>{blogPost.Title}</strong>.";
 
                 var notification = new Notification
                 {
@@ -358,7 +368,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                 };
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                await _emailService.SendNotificationEmail(blogPost.Author.Email, blogPost.Author.FullName, notificationMessage);
+                _emailService.SendNotificationEmail(blogPost.Author.Email, blogPost.Author.FullName, notificationMessage);
                 return true;
             } catch (Exception e)
             {

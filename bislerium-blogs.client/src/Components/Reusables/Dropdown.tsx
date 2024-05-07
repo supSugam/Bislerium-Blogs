@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn';
 import { useEffect, useRef, useState } from 'react';
 import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
 import StyledText from '../Elements/StyledText';
+import { AnimateHeight } from './AnimatedHeight';
 
 export type DropdownItem = {
   icon?: React.ReactNode;
@@ -38,6 +39,7 @@ const Dropdown = ({
   closeOnClick = true,
   takeFullWidth = false,
   gap = 10,
+  className,
   ...props
 }: IDropdownProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -62,28 +64,35 @@ const Dropdown = ({
 
   return (
     <div
-      className={cn('relative', {
-        'w-full': takeFullWidth,
-      })}
+      className={cn(
+        'relative',
+        {
+          'w-full': takeFullWidth,
+        },
+        className
+      )}
       ref={wrapperRef}
     >
       <div role="button" onClick={onClick} {...rest}>
         {targetComponent}
       </div>
-      <AnimatePresence>
+      <AnimateHeight>
         {isOpen && (
           <motion.div
             initial={{
+              height: 0,
               opacity: 0,
               y: -10,
             }}
             animate={{
               opacity: 1,
               y: gap,
+              height: 'auto',
             }}
             exit={{
               opacity: 0,
               y: -10,
+              height: 0,
             }}
             transition={{
               duration: 0.1,
@@ -157,7 +166,7 @@ const Dropdown = ({
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimateHeight>
     </div>
   );
 };

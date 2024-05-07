@@ -233,7 +233,7 @@ namespace Bislerium_Blogs.Server.Services
                 }
 
                 await _context.SaveChangesAsync();
-                _notificationService.SendCommentReactionNotification(commentId, userId, isUpvote);
+                await _notificationService.SendCommentReactionNotification(commentId, userId, isUpvote);
                 return await GetCommentReactionDetails(commentId, userId);
             }
             catch (Exception ex)

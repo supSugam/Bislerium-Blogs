@@ -128,7 +128,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 var blogPost = await _context.BlogPosts
                     .Include(bp => bp.BlogPostTags)
-                      .ThenInclude(bt => bt.Tag)
+                   
                     .FirstOrDefaultAsync(bp => bp.BlogPostId == blogPostId);
 
                 if (blogPost == null)
@@ -143,15 +143,18 @@ namespace Bislerium_Blogs.Server.Controllers
                     return Unauthorized("Only the author can update the blog post");
                 }
 
+                var oldTags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId);
+
 
                 // Add BlogPostHistory
                 string summary = _blogService.BlogUpdateSummaryBuilder(
                     updateBlogDto.Title != null && updateBlogDto.Title != blogPost.Title,
                    updateBlogDto.Tags != null &&
-blogPost.BlogPostTags != null &&  // Ensure BlogPostTags is not null
+oldTags != null &&  // Ensure BlogPostTags is not null
 !Compare.AreSameArray(
     updateBlogDto.Tags,
-    blogPost.BlogPostTags.Select(b => b.Tag.TagId.ToString()).ToArray()
+    oldTags.Select(t => t.TagId.ToString()).ToArray()
+
 )
 ,
                     updateBlogDto.Thumbnail != null,
@@ -163,11 +166,20 @@ blogPost.BlogPostTags != null &&  // Ensure BlogPostTags is not null
                     BlogPostId = blogPost.BlogPostId,
                     Title = blogPost.Title,
                     Body = blogPost.Body,
-                    UpdatedAt = blogPost.UpdatedAt,
+                    UpdatedAt = DateTime.Now,
                     Thumbnail = blogPost.Thumbnail,
                     ChangesSummary = summary,
-                    BlogPostHistoryTags = blogPost.BlogPostTags.Select(b => new BlogPostHistoryTag { Tag = b.Tag }).ToList()
                 };
+                if(oldTags == null || oldTags.Count == 0)
+                {
+                    blogPostHistory.BlogPostHistoryTags = new List<BlogPostHistoryTag>();
+                }
+                else
+                {
+                    blogPostHistory.BlogPostHistoryTags = oldTags.Select(t => new BlogPostHistoryTag { Tag = t }).ToList();
+
+                }
+               
 
                 await _blogService.CreateBlogHistoryAsync(blogPostHistory);
 

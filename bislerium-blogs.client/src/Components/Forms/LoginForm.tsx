@@ -81,39 +81,35 @@ export function LoginForm() {
         type="submit"
         text="Log In"
         variant="dark"
-        className="mt-4"
+        className="my-4"
         isLoading={isPending}
       />
 
-      {!currentUser && (
-        <>
-          <ButtonWithIcon
-            icon={<GoogleIcon size={20} />}
-            onClick={(e) => {
-              e.preventDefault();
-              toast('Coming Soon, Uhh Maybe?', {
-                icon: '🤷‍♂️',
-              });
-            }}
-          >
-            Continue with Google
-          </ButtonWithIcon>
-          <StyledButton
-            onClick={() => {
-              if (isPending) return;
-              setAuthModalActiveSection('signup');
-            }}
-            text={
-              <StyledText className="text-center">
-                {`Don't have an account?`}{' '}
-                <StyledText className="font-medium">Sign Up</StyledText>
-              </StyledText>
-            }
-            variant="secondary"
-            className="mt-3 w-full border-none"
-          />
-        </>
-      )}
+      <ButtonWithIcon
+        icon={<GoogleIcon size={20} />}
+        onClick={(e) => {
+          e.preventDefault();
+          toast('Coming Soon, Uhh Maybe?', {
+            icon: '🤷‍♂️',
+          });
+        }}
+      >
+        Continue with Google
+      </ButtonWithIcon>
+      <StyledButton
+        onClick={() => {
+          if (isPending) return;
+          setAuthModalActiveSection('signup');
+        }}
+        text={
+          <StyledText className="text-center">
+            {`Don't have an account?`}{' '}
+            <StyledText className="font-medium">Sign Up</StyledText>
+          </StyledText>
+        }
+        variant="secondary"
+        className="mt-3 w-full border-none"
+      />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
     </form>
   );

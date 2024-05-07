@@ -24,7 +24,7 @@ const useBlogHistoryQuery = ({
     AxiosResponse<ISuccessResponse<IBlogHistory>>,
     AxiosError<IFailedResponse>
   >({
-    queryFn: async () => await api.get(`/blogs/${blogHistoryId}/history`),
+    queryFn: async () => await api.get(`/blogs/history/${blogHistoryId}`),
     queryKey: ['blogs', blogHistoryId, 'history'],
     enabled: !!blogHistoryId,
   });

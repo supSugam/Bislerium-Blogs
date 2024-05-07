@@ -4,6 +4,7 @@
     {
         NEWEST,
         OLDEST,
-        POPULARARITY
+        POPULARARITY,
+        RANDOM
     }
 }

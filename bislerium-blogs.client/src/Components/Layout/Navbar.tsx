@@ -15,16 +15,20 @@ import { useAuthStore } from '../../services/stores/useAuthStore';
 import { NavbarAvatar } from './Avatar.navbar';
 import { useScreenDimensions } from '../../hooks/useScreenDimensions';
 import { useMousePosition } from '../../hooks/useMousePosition';
+import Notifications from '../Notifications/Notifications';
+import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
+import StyledButton from '../Elements/StyledButton';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
-  const { openAuthModal } = useAuthStore();
+  const { openAuthModal, isApiAuthorized } = useAuthStore();
 
   const [navbarHeight, setNavbarHeight] = useState<number>(0);
   const [navbarTranslateY, setNavbarTranslateY] = useState<number>(0);
   const [mounted, setMounted] = useState<boolean>(false);
 
   const navbarRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const { current } = navbarRef;
@@ -60,6 +64,13 @@ const Navbar = () => {
     }
   }, [y, navbarHeight]);
 
+  const [isNotificationsModalOpen, setNotificationsModalOpen] =
+    useState<boolean>(false);
+
+  useDetectOutsideClick(notificationsRef, () => {
+    setNotificationsModalOpen(false);
+  });
+
   return (
     <AnimatePresence>
       <motion.div
@@ -70,7 +81,7 @@ const Navbar = () => {
             : 0,
         }}
         className={cn(
-          'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111]  px-8 py-2 items-center transition-all duration-300 ease-in'
+          'flex w-full justify-between sticky top-0 bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[111] px-8 py-2 items-center transition-all duration-300 ease-in'
         )}
       >
         <div className="flex items-center space-x-3">
@@ -81,14 +92,60 @@ const Navbar = () => {
         </div>
         <div className="flex items-center space-x-7">
           <Link
-            to={'/blogs/publish'}
-            className="flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer"
+            to={'/write'}
+            className={cn(
+              'flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer',
+              {
+                hidden: !isApiAuthorized(),
+              }
+            )}
+            onClick={(e) => {
+              if (!isApiAuthorized()) {
+                e.preventDefault();
+                openAuthModal();
+              }
+            }}
           >
             <WriteIcon size={24} />
             <span className="text-sm font-medium">Write</span>
           </Link>
-          <NotificationIcon size={24} onClick={openAuthModal} />
+          {/* Notification */}
+
+          <button
+            className={cn('flex items-center justify-center relative', {
+              hidden: !isApiAuthorized(),
+            })}
+            onClick={() => setNotificationsModalOpen((p) => !p)}
+            ref={notificationsRef}
+          >
+            <NotificationIcon size={24} />
+            <Notifications isOpen={isNotificationsModalOpen} />
+          </button>
+
+          {/* Notification End */}
           <NavbarAvatar />
+
+          <div
+            className={cn('flex items-center ', {
+              hidden: isApiAuthorized(),
+            })}
+          >
+            <StyledButton
+              className={cn(
+                'flex outline-none border-none opacity-800 hover:opacity-70 transition-all duration-200 ease-in rounded-none'
+              )}
+              onClick={() => openAuthModal()}
+              text="Sign In"
+              variant="secondary"
+            />
+
+            <StyledButton
+              className={'rounded-full scale-90'}
+              onClick={() => openAuthModal()}
+              text="Get Started"
+              variant="dark"
+            />
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>

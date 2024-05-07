@@ -6,6 +6,8 @@ using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Payload;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Bislerium_Blogs.Server.Services
 {
@@ -67,39 +69,50 @@ namespace Bislerium_Blogs.Server.Services
                 ArgumentNullException.ThrowIfNull(blogHistoryId, nameof(blogHistoryId));
 
                 var blogHistory = await _context.BlogPostHistories
-                    .Include(x => x.BlogPost)
                     .Include(x => x.BlogPostHistoryTags)
+                    .ThenInclude(x => x.Tag)
+                    .Include(x => x.BlogPost)
                     .FirstOrDefaultAsync(x => x.BlogPostHistoryId == blogHistoryId);
 
-                if(blogHistory is null)
+                if (blogHistory is null)
                 {
                     throw new Exception("Blog History Not Found..");
                 }
-                var author = await _userService.GetUserById(blogHistory.BlogPost.AuthorId); 
+                var author = await _userService.GetUserById(blogHistory.BlogPost.AuthorId);
 
-                if(author is null)
+                if (author is null)
                 {
                     throw new Exception("Author Not Found..");
                 }
 
-                return  new BlogHistoryPayload
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+
+                // Serialize the blog history payload with the preserve reference handler
+                var payloadJson = JsonSerializer.Serialize(new BlogHistoryPayload
                 {
                     BlogPostHistoryId = blogHistory.BlogPostHistoryId,
                     BlogPostId = blogHistory.BlogPostId,
-                    Title = blogHistory.BlogPost.Title,
-                    Body = blogHistory.BlogPost.Body,
-                    Thumbnail = blogHistory.BlogPost.Thumbnail,
+                    Title = blogHistory.Title,
+                    Body = blogHistory.Body,
+                    Thumbnail = blogHistory.Thumbnail,
                     ChangesSummary = blogHistory.ChangesSummary,
                     UpdatedAt = blogHistory.UpdatedAt,
                     Tags = blogHistory.BlogPostHistoryTags.Select(x => x.Tag).ToList(),
-                    Author= author
-                    };
+                    Author = author
+                }, options);
+
+                // Deserialize the payload back to the BlogHistoryPayload object
+                return JsonSerializer.Deserialize<BlogHistoryPayload>(payloadJson, options);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
+
 
         public Task<List<BlogHistoryPreviewPayload>> GetHistoryPreviewByBlogIdAsync(Guid blogPostId)
         {
@@ -113,8 +126,8 @@ namespace Bislerium_Blogs.Server.Services
                     {
                         BlogPostHistoryId = x.BlogPostHistoryId,
                         BlogPostId = blogPostId,
-                        Title = x.BlogPost.Title,
-                        Thumbnail = x.BlogPost.Thumbnail,
+                        Title = x.Title,
+                        Thumbnail = x.Thumbnail,
                         ChangesSummary = x.ChangesSummary,
                         UpdatedAt = x.UpdatedAt
                     })
@@ -157,7 +170,7 @@ namespace Bislerium_Blogs.Server.Services
                 }
 
                 await _context.SaveChangesAsync();
-                _notificationService.SendBlogReactionNotification(blogPostId, userId, isUpvote);
+                await _notificationService.SendBlogReactionNotification(blogPostId, userId, isUpvote);
 
                 return await GetBlogReactionDetails(blogPostId, userId);
             }
@@ -234,7 +247,7 @@ namespace Bislerium_Blogs.Server.Services
                         UserId = userId
                     });
                     await _context.SaveChangesAsync();
-                    _notificationService.SendBookmarkedBlogNotification(blogPostId, userId);
+                    await _notificationService.SendBookmarkedBlogNotification(blogPostId, userId);
                     return true;
                 }
 

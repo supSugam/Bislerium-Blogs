@@ -64,7 +64,7 @@ const Comments = memo(
         />
         <motion.div
           initial={{ x: '100%' }}
-          animate={{ x: isExpanded ? 0 : '100%' }}
+          animate={{ x: isExpanded ? '0%' : '100%' }}
           exit={{ x: '100%' }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="fixed right-0 top-0 flex flex-col p-4 px-6 w-11/12 sm:w-10/12 md:w-1/2 lg:w-[35%] xl:w-[30%] min-h-full max-h-full border-l border-neutral-300 shadow-ld bg-white pt-10 gap-y-4 overflow-x-hidden  overflow-y-scroll z-[334]"

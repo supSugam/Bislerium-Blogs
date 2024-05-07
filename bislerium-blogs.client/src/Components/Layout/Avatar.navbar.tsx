@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import AlterModal from '../Modal/AlertModal';
 import ProfileWithName from '../Profile/ProfileWithName';
+import { cn } from '../../utils/cn';
 
 export const NavbarAvatar = () => {
   const {
@@ -56,6 +57,10 @@ export const NavbarAvatar = () => {
 
       <Dropdown
         closeOnClick
+        className={cn({
+          'cursor-pointer': currentUser,
+          hidden: !currentUser,
+        })}
         targetComponent={<Avatar src={currentUser?.avatarUrl} />}
         items={[
           {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { IBlogHistory } from '../../Interfaces/Models/IBlog';
 import './BlogPage.css';
 import ProfileWithName from '../../Components/Profile/ProfileWithName';
@@ -52,7 +52,7 @@ const BlogHistoryPage = () => {
           <h1 className="blog-title">{blogData?.title}</h1>
 
           <div className="flex flex-row gap-2 p-2 my-6 no-scrollbar overflow-x-auto items-center max-w-full">
-            {blogData?.tags.map((tag, i) => (
+            {(blogData?.tags ?? []).map((tag, i) => (
               <Capsule
                 key={tag.tagId}
                 label={tag.tagName}
@@ -90,9 +90,14 @@ const BlogHistoryPage = () => {
 
           <div className="flex justify-between items-center px-2 py-1 w-full border-y border-neutral-200 my-6">
             <div className="flex items-center space-x-6">
-              {/* //blogData.changesSummary as text */}
               <span className="text-sm font-thin">
-                {blogData.changesSummary}
+                {blogData.changesSummary}{' '}
+                <Link
+                  to={`/blog/${blogData.blogPostId}`}
+                  className="text-primary-500 hover:underline"
+                >
+                  View Original
+                </Link>
               </span>
             </div>
 
