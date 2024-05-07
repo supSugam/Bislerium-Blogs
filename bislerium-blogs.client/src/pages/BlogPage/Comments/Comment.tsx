@@ -18,7 +18,7 @@ import { AVATAR_PLACEHOLDER } from '../../../utils/constants';
 import Dropdown, { DropdownItem } from '../../../Components/Reusables/Dropdown';
 import toast from 'react-hot-toast';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
-import EditHistory from './EditHistory';
+import CommentEditHistory from './CommentEditHistory';
 import { useAuthStore } from '../../../services/stores/useAuthStore';
 import { UserRole } from '../../../enums/UserRole';
 
@@ -230,7 +230,7 @@ const Comment = ({ comment }: ICommentProps) => {
           ))}
         </div>
       </AnimateHeight>
-      <EditHistory
+      <CommentEditHistory
         commentId={commentId}
         isOpen={editHistoryModalOpen}
         onClose={() => setEditHistoryModalOpen(false)}

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Bislerium_Blogs.Server.Configs;
 
 namespace Bislerium_Blogs.Server.Models;
 
@@ -60,6 +59,18 @@ public partial class BisleriumBlogsContext : IdentityDbContext
             .WithMany(t => t.BlogPostTags)
             .HasForeignKey(bt => bt.TagId);
 
+        modelBuilder.Entity<BlogPostHistoryTag>()
+            .HasKey(bht => new { bht.BlogPostHistoryId, bht.TagId });
+        modelBuilder.Entity<BlogPostHistoryTag>()
+            .HasOne(bht => bht.BlogPostHistory)
+            .WithMany(bh => bh.BlogPostHistoryTags)
+            .HasForeignKey(bht => bht.BlogPostHistoryId);
+
+        modelBuilder.Entity<BlogPostHistoryTag>()
+            .HasOne(bht => bht.Tag)
+            .WithMany(t => t.BlogPostHistoryTags)
+            .HasForeignKey(bht => bht.TagId);
+
 
         modelBuilder.Entity<BlogPost>(entity =>
         {
@@ -83,9 +94,7 @@ public partial class BisleriumBlogsContext : IdentityDbContext
         modelBuilder.Entity<BlogPostHistory>(entity =>
         {
             entity.HasKey(e => e.BlogPostHistoryId).HasName("PK__BlogPost__E05DD7E774F4912D");
-
             entity.ToTable("BlogPostHistory");
-
             entity.Property(e => e.BlogPostHistoryId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Body).HasColumnType("text");
             entity.Property(e => e.Title)
@@ -93,11 +102,18 @@ public partial class BisleriumBlogsContext : IdentityDbContext
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
 
-            entity.HasOne(d => d.BlogPost).WithMany(p => p.BlogPostHistories)
+            entity.HasOne(d => d.BlogPost)
+                .WithMany(p => p.BlogPostHistories)
                 .HasForeignKey(d => d.BlogPostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__BlogPostH__BlogP__45F365D3");
+
+            // Add the navigation property configuration for BlogPostHistoryTags
+            entity.HasMany(bh => bh.BlogPostHistoryTags)
+                .WithOne(bht => bht.BlogPostHistory)
+                .HasForeignKey(bht => bht.BlogPostHistoryId);
         });
+
 
         modelBuilder.Entity<Bookmark>(entity =>
         {

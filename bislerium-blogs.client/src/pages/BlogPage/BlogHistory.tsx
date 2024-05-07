@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import useBlogsQuery from '../../hooks/react-query/useBlogsQuery';
 import { useParams } from 'react-router-dom';
-import { IBlog } from '../../Interfaces/Models/IBlog';
+import { IBlogHistory } from '../../Interfaces/Models/IBlog';
 import './BlogPage.css';
 import ProfileWithName from '../../Components/Profile/ProfileWithName';
 import StyledText from '../../Components/Elements/StyledText';
@@ -12,30 +11,23 @@ import {
   getRidOfWhiteSpace,
 } from '../../utils/string';
 import { Capsule } from '../../Components/Elements/MultiSelect';
-import Vote from '../../Components/Vote';
-import CommentIcon from '../../Components/Smol/CommentIcon';
-import Comments from './Comments/Comments';
 import { motion } from 'framer-motion';
-import Bookmark from '../../Components/Bookmark';
 import { History } from 'lucide-react';
 import { Tooltip } from '../../Components/Reusables/Tooltip';
 import BlogEditHistory from '../BlogEditor/BlogEditHistory';
+import useBlogHistoryQuery from '../../hooks/react-query/useBlogHistoryQuery';
 
-const BlogPage = () => {
-  const [blogData, setBlogData] = useState<IBlog>();
+const BlogHistoryPage = () => {
+  const [blogData, setBlogData] = useState<IBlogHistory>();
   const { id } = useParams();
   const {
-    getBlogById: { data: blogResponse },
-  } = useBlogsQuery({ id });
+    getBlogHistoryById: { data: blogResponse },
+  } = useBlogHistoryQuery({ blogHistoryId: id });
 
   useEffect(() => {
     setBlogData(blogResponse?.data?.result);
-    document.title = blogResponse?.data?.result?.title || 'Blog';
+    document.title = blogResponse?.data?.result?.title || 'Blog History';
   }, [blogResponse]);
-
-  const [commentsExpanded, setCommentsExpanded] = useState<boolean>(false);
-
-  const [marginRight, setMarginRight] = useState<number>(0);
 
   const [blogEditHistoryModalOpen, setBlogEditHistoryModalOpen] =
     useState<boolean>(false);
@@ -47,7 +39,6 @@ const BlogPage = () => {
           blogPostId={blogData?.blogPostId}
           isOpen={blogEditHistoryModalOpen}
           onClose={() => setBlogEditHistoryModalOpen(false)}
-          author={blogData?.author}
         />
       )}
 
@@ -56,7 +47,6 @@ const BlogPage = () => {
           id="blog-contents"
           className="flex flex-col px-5 md:px-0 w-full sm:w-10/12 md:w-9/12 lg:w-8/12 xl:w-7/12 mt-8"
           initial={{ marginRight: 0 }}
-          animate={{ marginRight: commentsExpanded ? marginRight : 0 }}
           transition={{ duration: 0.3, when: 'beforeChildren' }}
         >
           <h1 className="blog-title">{blogData?.title}</h1>
@@ -90,7 +80,7 @@ const BlogPage = () => {
             />
             <div className="flex justify-between items-end flex-col flex-shrink-0 gap-y-1">
               <StyledText className="text-sm font-thin">
-                {getFormattedDate(blogData?.createdAt)}
+                {getFormattedDate(blogData?.updatedAt)}
               </StyledText>
               <StyledText className="text-sm font-thin">
                 {estimateReadingTime(blogData?.body)} min read
@@ -100,22 +90,13 @@ const BlogPage = () => {
 
           <div className="flex justify-between items-center px-2 py-1 w-full border-y border-neutral-200 my-6">
             <div className="flex items-center space-x-6">
-              <Vote
-                id={blogData.blogPostId}
-                initialVoteCounts={blogData?.votePayload}
-              />
-              <CommentIcon
-                size={18}
-                count={blogData?.votePayload.totalComments}
-                onClick={() => setCommentsExpanded(true)}
-              />
+              {/* //blogData.changesSummary as text */}
+              <span className="text-sm font-thin">
+                {blogData.changesSummary}
+              </span>
             </div>
 
             <div className="flex items-center space-x-3 my-2">
-              <Bookmark
-                blogPostId={blogData.blogPostId}
-                bookmarked={blogData?.votePayload.isBookmarked}
-              />
               <Tooltip label="See Edit History">
                 <button
                   onClick={() => setBlogEditHistoryModalOpen(true)}
@@ -143,14 +124,8 @@ const BlogPage = () => {
           />
         </motion.article>
       )}
-      <Comments
-        id={blogData?.blogPostId}
-        isExpanded={commentsExpanded}
-        onClose={() => setCommentsExpanded(false)}
-        onCommentModalWidthChange={(width) => setMarginRight(width)}
-      />
     </main>
   );
 };
 
-export default BlogPage;
+export default BlogHistoryPage;

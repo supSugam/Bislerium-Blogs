@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import Modal from '../../../Components/Modal/Modal';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
 import Comment from './Comment';
@@ -52,7 +52,7 @@ const Comments = memo(
         modalRef.current.style.zIndex = contentZIndex.toString();
         commentsRef.current.style.zIndex = contentZIndex.toString() + 1 + '';
       }
-    }, [modalRef.current, isExpanded, commentsRef.current]);
+    }, [modalRef, isExpanded, commentsRef]);
 
     return (
       <>

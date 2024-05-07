@@ -14,3 +14,18 @@ export interface IBlog {
   tags: ITag[];
   votePayload: IVotePayload;
 }
+
+export interface IBlogHistoryPreview {
+  blogPostHistoryId: string;
+  blogPostId: string;
+  title: string;
+  thumbnail: string;
+  changesSummary: string;
+  updatedAt: Date;
+}
+
+export interface IBlogHistory extends IBlogHistoryPreview {
+  body: string;
+  tags: ITag[];
+  author: IUser;
+}

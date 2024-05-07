@@ -128,6 +128,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 var blogPost = await _context.BlogPosts
                     .Include(bp => bp.BlogPostTags)
+                      .ThenInclude(bt => bt.Tag)
                     .FirstOrDefaultAsync(bp => bp.BlogPostId == blogPostId);
 
                 if (blogPost == null)
@@ -142,13 +143,30 @@ namespace Bislerium_Blogs.Server.Controllers
                     return Unauthorized("Only the author can update the blog post");
                 }
 
+
                 // Add BlogPostHistory
+                string summary = _blogService.BlogUpdateSummaryBuilder(
+                    updateBlogDto.Title != null && updateBlogDto.Title != blogPost.Title,
+                   updateBlogDto.Tags != null &&
+blogPost.BlogPostTags != null &&  // Ensure BlogPostTags is not null
+!Compare.AreSameArray(
+    updateBlogDto.Tags,
+    blogPost.BlogPostTags.Select(b => b.Tag.TagId.ToString()).ToArray()
+)
+,
+                    updateBlogDto.Thumbnail != null,
+                    updateBlogDto.Body != null && updateBlogDto.Body != blogPost.Body
+                    );
+
                 var blogPostHistory = new BlogPostHistory
                 {
                     BlogPostId = blogPost.BlogPostId,
                     Title = blogPost.Title,
                     Body = blogPost.Body,
-                    UpdatedAt = blogPost.UpdatedAt
+                    UpdatedAt = blogPost.UpdatedAt,
+                    Thumbnail = blogPost.Thumbnail,
+                    ChangesSummary = summary,
+                    BlogPostHistoryTags = blogPost.BlogPostTags.Select(b => new BlogPostHistoryTag { Tag = b.Tag }).ToList()
                 };
 
                 await _blogService.CreateBlogHistoryAsync(blogPostHistory);
@@ -166,7 +184,7 @@ namespace Bislerium_Blogs.Server.Controllers
                     }
 
                     // Upload thumbnail to S3
-                    string thumbnailUrl = await _s3Service.UploadFileToS3(updateBlogDto.Thumbnail, Constants.BLOG_THUMBNAILS_DIRECTORY, blogPost.BlogPostId.ToString());
+                    string thumbnailUrl = await _s3Service.UploadFileToS3(updateBlogDto.Thumbnail, Constants.BLOG_THUMBNAILS_DIRECTORY, Guid.NewGuid().ToString());
                     blogPost.Thumbnail = thumbnailUrl;
                 }
 
@@ -241,7 +259,7 @@ namespace Bislerium_Blogs.Server.Controllers
                     AuthorId = Guid.Parse(userId),
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
-                    Popularity = 0 // Set popularity to initial value
+                    Popularity = 0 // initial value
                 };
 
                 // Upload thumbnail to S3
@@ -361,9 +379,9 @@ namespace Bislerium_Blogs.Server.Controllers
             {
                 var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
-                var bookmark = await _blogService.BookmarkBlogPostAsync(blogPostId, Guid.Parse(userId));
+                var bookmarked = await _blogService.BookmarkBlogPostAsync(blogPostId, Guid.Parse(userId));
 
-                if (bookmark)
+                if (bookmarked)
                 {
                     return Ok("Saved to Bookmarks!");
                 }
@@ -378,6 +396,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
 
         [HttpPost("{blogPostId}/remove-bookmark")]
+        [AuthorizedOnly]
         public
             async Task<ActionResult<string>> RemoveBookmark(Guid blogPostId)
         {
@@ -400,7 +419,36 @@ namespace Bislerium_Blogs.Server.Controllers
             }
         }
 
+        [HttpGet("{blogPostId}/history")]
+        public async Task<ActionResult<List<BlogHistoryPreviewPayload>>> GetBlogPostHistory(Guid blogPostId)
+        {
+            try
+            {
+                var blogPostHistory = await _blogService.GetHistoryPreviewByBlogIdAsync(blogPostId);
 
+                return Ok(blogPostHistory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("history/{blogPostHistoryId}")]
+        public async Task<ActionResult<BlogHistoryPayload>> GetBlogPostHistoryById(Guid blogPostHistoryId)
+        {
+            try
+            {
+                var blogPostHistory = await _blogService.GetBlogHistoryByIdAsync(blogPostHistoryId);
+
+                return Ok(blogPostHistory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     }
 }

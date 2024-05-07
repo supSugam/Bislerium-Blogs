@@ -8,3 +8,12 @@ public class BlogPostTag
     public Guid TagId { get; set; }
     public Tag Tag { get; set; }
 }
+
+public class BlogPostHistoryTag
+{
+    public Guid BlogPostHistoryId { get; set; }
+    public BlogPostHistory BlogPostHistory { get; set; }
+
+    public Guid TagId { get; set; }
+    public Tag Tag { get; set; }
+}

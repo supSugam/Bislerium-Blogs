@@ -10,4 +10,6 @@ public partial class Tag
 
     public DateTime UpdatedAt { get; set; }
     public virtual ICollection<BlogPostTag> BlogPostTags { get; set; } = new List<BlogPostTag>();
+
+    public virtual ICollection<BlogPostHistoryTag> BlogPostHistoryTags { get; set; } = new List<BlogPostHistoryTag>();
 }

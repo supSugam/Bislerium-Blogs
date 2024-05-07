@@ -3,4 +3,5 @@ export interface IVotePayload {
   isVotedUp: boolean;
   isVotedDown: boolean;
   totalComments: number;
+  isBookmarked: boolean;
 }

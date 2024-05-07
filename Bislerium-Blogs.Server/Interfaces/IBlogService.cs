@@ -9,7 +9,8 @@ namespace Bislerium_Blogs.Server.Interfaces
         public Task<List<Tag>> GetAllTagsOfABlog(Guid blogPostId);
 
         public Task<bool> CreateBlogHistoryAsync(BlogPostHistory blogPostHistory);
-        public Task<IEnumerable<BlogPostHistory>> GetHistoryByBlogIdAsync(Guid blogPostId);
+        public Task<List<BlogHistoryPreviewPayload>> GetHistoryPreviewByBlogIdAsync(Guid blogPostId);
+       public Task<BlogHistoryPayload> GetBlogHistoryByIdAsync(Guid blogPostHistoryId);
 
         public Task<VotePayload> ReactToBlogPostAsync(Guid blogPostId, Guid userId, bool isUpvote);
 
@@ -23,8 +24,14 @@ namespace Bislerium_Blogs.Server.Interfaces
 
         public Task<List<BlogPayload>> GetAllBlogsOfAUser(Guid userId);
 
+        public Task<bool> BookmarkBlogPostAsync(Guid blogPostId, Guid userId);
+
+        public Task<bool> RemoveBookmarkAsync(Guid blogPostId, Guid userId);
+
         public Task<bool> IsBlogBookmarked(Guid blogPostId, Guid userId);
 
         public Task<BlogPaginationPayload> GetBlogPaginationPayload(BlogPaginationDto blogPaginationDto, Guid? userId);
+        public string BlogUpdateSummaryBuilder(bool titleUpdates, bool tagsUpdated, bool thumbnailUpdated, bool bodyUpdated);
+
     }
 }

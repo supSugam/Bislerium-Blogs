@@ -5,6 +5,7 @@ using Bislerium_Blogs.Server.Interfaces;
 using Bislerium_Blogs.Server.Models;
 using Bislerium_Blogs.Server.Payload;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Bislerium_Blogs.Server.Services
 {
@@ -12,13 +13,16 @@ namespace Bislerium_Blogs.Server.Services
     {
         private readonly BisleriumBlogsContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IUserService _userService;
 
 
         public BlogService(BisleriumBlogsContext context,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IUserService userService)
         {
             _context = context;
             _notificationService = notificationService;
+            _userService = userService;
         }
 
 
@@ -56,12 +60,65 @@ namespace Bislerium_Blogs.Server.Services
             }
         }
 
-        public async Task<IEnumerable<BlogPostHistory>> GetHistoryByBlogIdAsync(Guid blogPostId)
+        public async Task<BlogHistoryPayload> GetBlogHistoryByIdAsync(Guid blogHistoryId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(blogHistoryId, nameof(blogHistoryId));
+
+                var blogHistory = await _context.BlogPostHistories
+                    .Include(x => x.BlogPost)
+                    .Include(x => x.BlogPostHistoryTags)
+                    .FirstOrDefaultAsync(x => x.BlogPostHistoryId == blogHistoryId);
+
+                if(blogHistory is null)
+                {
+                    throw new Exception("Blog History Not Found..");
+                }
+                var author = await _userService.GetUserById(blogHistory.BlogPost.AuthorId); 
+
+                if(author is null)
+                {
+                    throw new Exception("Author Not Found..");
+                }
+
+                return  new BlogHistoryPayload
+                {
+                    BlogPostHistoryId = blogHistory.BlogPostHistoryId,
+                    BlogPostId = blogHistory.BlogPostId,
+                    Title = blogHistory.BlogPost.Title,
+                    Body = blogHistory.BlogPost.Body,
+                    Thumbnail = blogHistory.BlogPost.Thumbnail,
+                    ChangesSummary = blogHistory.ChangesSummary,
+                    UpdatedAt = blogHistory.UpdatedAt,
+                    Tags = blogHistory.BlogPostHistoryTags.Select(x => x.Tag).ToList(),
+                    Author= author
+                    };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public Task<List<BlogHistoryPreviewPayload>> GetHistoryPreviewByBlogIdAsync(Guid blogPostId)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(blogPostId, nameof(blogPostId));
-                return await _context.BlogPostHistories.Where(x => x.BlogPostId == blogPostId).ToListAsync();
+
+                return _context.BlogPostHistories
+                    .Where(x => x.BlogPostId == blogPostId)
+                    .Select(x => new BlogHistoryPreviewPayload
+                    {
+                        BlogPostHistoryId = x.BlogPostHistoryId,
+                        BlogPostId = blogPostId,
+                        Title = x.BlogPost.Title,
+                        Thumbnail = x.BlogPost.Thumbnail,
+                        ChangesSummary = x.ChangesSummary,
+                        UpdatedAt = x.UpdatedAt
+                    })
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -143,14 +200,15 @@ namespace Bislerium_Blogs.Server.Services
                 bool isVotedDown =
                     userId is not null && await _context.Reactions.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId && !x.IsUpvote);
                 var totalComments = await _context.Comments.CountAsync(x => x.BlogPostId == blogPostId);
-
+                var isBookmarked = userId is not null && await _context.Bookmarks.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
 
                 return new VotePayload
                 {
                     Popularity = await UpdatePopularityOfABlog(blogPostId),
                     IsVotedUp = isVotedUp,
                     IsVotedDown = isVotedDown,
-                    TotalComments = totalComments
+                    TotalComments = totalComments,
+                    IsBookmarked = isBookmarked
                 };
             }
             catch (Exception ex)
@@ -329,6 +387,36 @@ namespace Bislerium_Blogs.Server.Services
         }
 
 
+        public string BlogUpdateSummaryBuilder(bool titleUpdates, bool tagsUpdated,bool thumbnailUpdated, bool bodyUpdated)
+        {
+            string summary = "Updated ";
+
+            if (titleUpdates)
+            {
+                bool hasMoreUpdates = tagsUpdated || thumbnailUpdated || bodyUpdated;
+                summary += hasMoreUpdates ? "title, " : "title of the blog.";
+                if(!hasMoreUpdates) return summary;
+            }
+            if (tagsUpdated)
+            {
+                bool hasMoreUpdates = thumbnailUpdated || bodyUpdated;
+                summary += hasMoreUpdates ? "tags, " : titleUpdates ? "and tags of the blog." : "tags of the blog.";
+                if (!hasMoreUpdates) return summary;
+            }
+            if (thumbnailUpdated)
+            {
+                bool hasMoreUpdates = bodyUpdated;
+                summary += hasMoreUpdates ? "thumbnail, " : titleUpdates || tagsUpdated ? "and thumbnail of the blog." : "thumbnail of the blog.";
+                if (!hasMoreUpdates) return summary;
+            }
+            if (bodyUpdated)
+            {
+                summary += titleUpdates || tagsUpdated || thumbnailUpdated ? "and body contents of the blog." : "body contents of the blog.";
+            }
+            return summary;
+        }
+
+
         public async Task<BlogPaginationPayload> GetBlogPaginationPayload(BlogPaginationDto blogPaginationDto, Guid? userId)
         {
             try
@@ -350,6 +438,11 @@ namespace Bislerium_Blogs.Server.Services
                     query = query.Where(x => x.CreatedAt.Month == blogPaginationDto.OfThisSpecificMonth.Value.Month && x.CreatedAt.Year == blogPaginationDto.OfThisSpecificMonth.Value.Year);
                 }
 
+                if (blogPaginationDto.Tags is not null && blogPaginationDto.Tags.Count > 0)
+                {
+                    query = query.Where(x => x.BlogPostTags.Any(y => blogPaginationDto.Tags.Contains(y.Tag.TagName) || blogPaginationDto.Tags.Contains(y.Tag.TagId.ToString())));
+                }
+
                 query = blogPaginationDto.SortBy switch
                 {
                     SortBy.POPULARARITY => query.OrderByDescending(x => x.Popularity),
@@ -360,8 +453,8 @@ namespace Bislerium_Blogs.Server.Services
 
                 var totalBlogs = await query.CountAsync();
                 var blogs = await query
-                    .Skip((blogPaginationDto.PageNumber - 1) * blogPaginationDto.PageSize)
-                    .Take(blogPaginationDto.PageSize)
+                    .Skip((blogPaginationDto.PageNumber??1 - 1) * blogPaginationDto.PageSize??10)
+                    .Take(blogPaginationDto.PageSize??10)
                     .Select(x => new BlogPayload
                     {
                         BlogPostId = x.BlogPostId,
@@ -399,7 +492,7 @@ namespace Bislerium_Blogs.Server.Services
                 {
                     Blogs = blogs,
                     TotalBlogs = totalBlogs,
-                    CurrentPage = blogPaginationDto.PageNumber
+                    CurrentPage = blogPaginationDto.PageNumber??1
                 };
 
             }

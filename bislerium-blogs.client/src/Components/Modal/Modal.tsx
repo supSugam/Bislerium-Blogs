@@ -60,6 +60,7 @@ const Modal: FC<ModalProps> = forwardRef<HTMLDivElement, ModalProps>(
     const [zIndex, setZIndex] = useState<number>(333);
 
     useEffect(() => {
+      if (!isOpen) return;
       const highestZIndex = Array.from(
         document.querySelectorAll('.modal-container')
       )
@@ -67,7 +68,7 @@ const Modal: FC<ModalProps> = forwardRef<HTMLDivElement, ModalProps>(
         .sort((a, b) => b - a)[0];
 
       setZIndex((highestZIndex ?? 333) + 1);
-    }, []);
+    }, [isOpen]);
 
     const modalContent = (
       <AnimatePresence>
