@@ -17,7 +17,6 @@ const Home = () => {
     useState<IBlogPaginationDto>({
       pageNumber: 1,
       pageSize: 3,
-      tags: [],
     });
 
   const {
@@ -44,35 +43,36 @@ const Home = () => {
     },
   });
 
-  // useEffect(() => {
-  //   setPaginationQueryParams((prev) => ({
-  //     ...prev,
-  //     search: throttledSearchInput,
-  //   }));
-  // }, [throttledSearchInput]);
+  useEffect(() => {
+    setPaginationQueryParams((prev) => ({
+      ...prev,
+      search: throttledSearchInput,
+    }));
+  }, [throttledSearchInput]);
 
-  // // update route on paginationQueryParams change
-  // const navigate = useNavigate();
+  // update route on paginationQueryParams change
+  const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   navigate({
-  //     search: new URLSearchParams(paginationQueryParams as any).toString(),
-  //   });
-  // }, [paginationQueryParams, navigate]);
+  useEffect(() => {
+    navigate({
+      search: `?search=${paginationQueryParams.search}&tag=${paginationQueryParams.tag}&page=${paginationQueryParams.pageNumber}`,
+    });
+  }, [paginationQueryParams, navigate]);
 
-  // Initial load, setting params
+  //Initial load, setting params
 
-  // useEffect(() => {
-  //   const urlSearchParams = new URLSearchParams(window.location.search);
-  //   const searchParams = Object.fromEntries(urlSearchParams.entries());
-  //   const tags = searchParams.tags ? searchParams.tags.split(',') : [];
-  //   setPaginationQueryParams({
-  //     pageNumber: Number(searchParams.pageNumber) || 1,
-  //     pageSize: Number(searchParams.pageSize) || 3,
-  //     tags,
-  //     search: searchParams.search,
-  //   });
-  // }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get('search');
+    const tag = params.get('tag');
+    const page = params.get('page');
+    setPaginationQueryParams((prev) => ({
+      ...prev,
+      search: search || '',
+      tag: tag || undefined,
+      pageNumber: page ? parseInt(page) : 1,
+    }));
+  }, []);
 
   return (
     <main className="w-full">
@@ -100,17 +100,13 @@ const Home = () => {
                 <Capsule
                   key={tag.tagId}
                   onClick={() => {
-                    setPaginationQueryParams((prev) =>
-                      prev.tags.includes(tag.tagName)
-                        ? {
-                            ...prev,
-                            tags: prev.tags.filter((t) => t !== tag.tagName),
-                          }
-                        : { ...prev, tags: [...prev.tags, tag.tagName] }
-                    );
+                    setPaginationQueryParams((prev) => ({
+                      ...prev,
+                      tag: tag.tagName,
+                    }));
                   }}
                   showIcon={false}
-                  selected={paginationQueryParams.tags.includes(tag.tagName)}
+                  selected={paginationQueryParams.tag === tag.tagName}
                   label={tag.tagName}
                 />
               ))}

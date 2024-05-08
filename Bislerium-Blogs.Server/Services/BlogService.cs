@@ -33,9 +33,9 @@ namespace Bislerium_Blogs.Server.Services
             try
             {
 
-            var blogPostTags = await _context.Tags
-                .Where(tag => tag.BlogPostTags.Any(blogPostTag => blogPostTag.BlogPostId == blogPostId))
-                .ToListAsync();
+                var blogPostTags = await _context.Tags
+                    .Where(tag => tag.BlogPostTags.Any(blogPostTag => blogPostTag.BlogPostId == blogPostId))
+                    .ToListAsync();
                 return blogPostTags;
 
             }
@@ -320,7 +320,7 @@ namespace Bislerium_Blogs.Server.Services
                             IsBookmarked = true
                         },
                         Thumbnail = x.BlogPost.Thumbnail,
-                        
+
                     })
                     .ToListAsync();
 
@@ -400,7 +400,7 @@ namespace Bislerium_Blogs.Server.Services
         }
 
 
-        public string BlogUpdateSummaryBuilder(bool titleUpdates, bool tagsUpdated,bool thumbnailUpdated, bool bodyUpdated)
+        public string BlogUpdateSummaryBuilder(bool titleUpdates, bool tagsUpdated, bool thumbnailUpdated, bool bodyUpdated)
         {
             string summary = "Updated ";
 
@@ -408,7 +408,7 @@ namespace Bislerium_Blogs.Server.Services
             {
                 bool hasMoreUpdates = tagsUpdated || thumbnailUpdated || bodyUpdated;
                 summary += hasMoreUpdates ? "title, " : "title of the blog.";
-                if(!hasMoreUpdates) return summary;
+                if (!hasMoreUpdates) return summary;
             }
             if (tagsUpdated)
             {
@@ -451,12 +451,13 @@ namespace Bislerium_Blogs.Server.Services
                     query = query.Where(x => x.CreatedAt.Month == blogPaginationDto.OfThisSpecificMonth.Value.Month && x.CreatedAt.Year == blogPaginationDto.OfThisSpecificMonth.Value.Year);
                 }
 
-                if (blogPaginationDto.Tags is not null && blogPaginationDto.Tags.Count > 0)
+                if (blogPaginationDto.Tag is not null)
                 {
                     query = query.Where(
                         x => x.BlogPostTags.Any(
-                                                       blogPostTag => blogPaginationDto.Tags.Contains(blogPostTag.Tag.TagName)
-                                                                              )
+                                                       blogPostTag =>
+                                                         blogPostTag.Tag.TagName.ToLower() == blogPaginationDto.Tag.ToLower()
+                                                         )
                     );
                 }
 
@@ -524,5 +525,5 @@ namespace Bislerium_Blogs.Server.Services
 
         }
 
-        }
+    }
 }

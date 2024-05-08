@@ -11,6 +11,6 @@ namespace Bislerium_Blogs.Server.DTOs
         public string? Search { get; set; }
         public SortBy? SortBy { get; set; } = Enums.SortBy.POPULARARITY;
         public DateTime? OfThisSpecificMonth { get; set; }
-        public List<string>? Tags { get; set; } = [];
+        public string? Tag { get; set; }
     }
 }
