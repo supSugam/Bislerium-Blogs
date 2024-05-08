@@ -16,16 +16,20 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { IVotePayload } from '../../Interfaces/Models/IVotePayload';
 import { keyFactory } from '../../utils/constants';
+import {
+  IBlogPaginatedResponse,
+  IBlogPaginationDto,
+} from '../../Interfaces/IPagination';
 
-interface IBlogsQueryParams {
-  search?: string;
-}
 interface IUseBlogsQueryProps {
   getAllBlogsConfig?: {
-    params?: IBlogsQueryParams;
+    params?: IBlogPaginationDto;
     queryOptions?: Partial<
       UseQueryOptions<
-        AxiosResponse<ISuccessResponse<IBlog[]>, IFailedResponse>,
+        AxiosResponse<
+          ISuccessResponse<IBlogPaginatedResponse>,
+          IFailedResponse
+        >,
         AxiosError<IFailedResponse>
       >
     >;
@@ -62,13 +66,13 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
   });
 
   const getBlogs = useQuery<
-    AxiosResponse<ISuccessResponse<IBlog[]>>,
+    AxiosResponse<ISuccessResponse<IBlogPaginatedResponse>>,
     AxiosError<IFailedResponse>
   >({
     queryFn: async () =>
       await api.get('/blogs', { params: getAllBlogsConfig?.params }),
     queryKey: ['blogs', getAllBlogsConfig?.params],
-    enabled: false,
+    enabled: !!getAllBlogsConfig?.params,
     ...getAllBlogsConfig?.queryOptions,
   });
 

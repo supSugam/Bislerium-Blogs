@@ -453,7 +453,11 @@ namespace Bislerium_Blogs.Server.Services
 
                 if (blogPaginationDto.Tags is not null && blogPaginationDto.Tags.Count > 0)
                 {
-                    query = query.Where(x => x.BlogPostTags.Any(y => blogPaginationDto.Tags.Contains(y.Tag.TagName) || blogPaginationDto.Tags.Contains(y.Tag.TagId.ToString())));
+                    query = query.Where(
+                        x => x.BlogPostTags.Any(
+                                                       blogPostTag => blogPaginationDto.Tags.Contains(blogPostTag.Tag.TagName)
+                                                                              )
+                    );
                 }
 
                 query = blogPaginationDto.SortBy switch
@@ -461,13 +465,16 @@ namespace Bislerium_Blogs.Server.Services
                     SortBy.POPULARARITY => query.OrderByDescending(x => x.Popularity),
                     SortBy.NEWEST => query.OrderByDescending(x => x.CreatedAt),
                     SortBy.OLDEST => query.OrderBy(x => x.CreatedAt),
+                    SortBy.RANDOM =>
+                    query.OrderBy(x => Guid.NewGuid()),
                     _ => query.OrderByDescending(x => x.CreatedAt)
                 };
 
                 var totalBlogs = await query.CountAsync();
-                var blogs = await query
-                    .Skip((blogPaginationDto.PageNumber??1 - 1) * blogPaginationDto.PageSize??10)
-                    .Take(blogPaginationDto.PageSize??10)
+                var blogs = await
+                    query
+                    .Skip((blogPaginationDto.PageNumber - 1) * blogPaginationDto.PageSize)
+                    .Take(blogPaginationDto.PageSize)
                     .Select(x => new BlogPayload
                     {
                         BlogPostId = x.BlogPostId,
@@ -477,7 +484,6 @@ namespace Bislerium_Blogs.Server.Services
                         Tags = x.BlogPostTags.Select(x => x.Tag).ToList(),
                         CreatedAt = x.CreatedAt,
                         UpdatedAt = x.UpdatedAt,
-                        Thumbnail = x.Thumbnail,
                         Author = new UserPayload
                         {
                             UserId = x.AuthorId,
@@ -489,14 +495,15 @@ namespace Bislerium_Blogs.Server.Services
                             CreatedAt = x.Author.CreatedAt,
                             UpdatedAt = x.Author.UpdatedAt
                         },
-                        VotePayload = userId !=null ? new VotePayload
+                        VotePayload = new VotePayload
                         {
                             Popularity = x.Popularity,
                             IsVotedUp = x.Reactions.Any(x => x.UserId == userId && x.IsUpvote),
                             IsVotedDown = x.Reactions.Any(x => x.UserId == userId && !x.IsUpvote),
-                            IsBookmarked = x.Bookmarks.Any(x => x.UserId == userId),
-                            TotalComments = x.Comments.Count
-                        }:new VotePayload(),
+                            TotalComments = x.Comments.Count,
+                            IsBookmarked = x.Bookmarks.Any(x => x.UserId == userId)
+                        },
+                        Thumbnail = x.Thumbnail
                     })
                     .ToListAsync();
 
@@ -505,7 +512,7 @@ namespace Bislerium_Blogs.Server.Services
                 {
                     Blogs = blogs,
                     TotalBlogs = totalBlogs,
-                    CurrentPage = blogPaginationDto.PageNumber??1
+                    CurrentPage = blogPaginationDto.PageNumber
                 };
 
             }

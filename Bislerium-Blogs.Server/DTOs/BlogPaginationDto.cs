@@ -6,8 +6,8 @@ namespace Bislerium_Blogs.Server.DTOs
     public class BlogPaginationDto : IPagination
     {
 
-        public int? PageNumber { get; set; } = 1;
-        public int? PageSize { get; set; } = 10;
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
         public string? Search { get; set; }
         public SortBy? SortBy { get; set; } = Enums.SortBy.POPULARARITY;
         public DateTime? OfThisSpecificMonth { get; set; }

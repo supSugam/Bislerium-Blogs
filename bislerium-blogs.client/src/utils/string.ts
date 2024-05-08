@@ -179,3 +179,8 @@ export const isSameInnerHtml = (html1: string, html2: string): boolean => {
 
   return cleanHtml1 === cleanHtml2;
 };
+
+export const htmlToText = (html: string): string => {
+  // should replace all html tags, add space after each tag, aalso get rid of unicode characters like &nbsp;
+  return html.replace(/<[^>]+>/g, ' ').replace(/&\w+;/g, '');
+};

@@ -77,7 +77,7 @@ const Dropdown = ({
         {targetComponent}
       </div>
       <AnimateHeight>
-        {isOpen && (
+        {isOpen && items.length > 0 && (
           <motion.div
             initial={{
               height: 0,

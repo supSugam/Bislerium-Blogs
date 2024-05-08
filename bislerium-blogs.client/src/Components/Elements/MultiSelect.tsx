@@ -166,27 +166,29 @@ export const Capsule = ({
   disabled = false,
   index = 1,
   showIcon = true,
+  className,
+  selected = false,
 }: {
   label: string;
   onClick: () => void;
   disabled?: boolean;
   index?: number;
   showIcon?: boolean;
+  className?: string;
+  selected?: boolean;
 }) => {
   return (
     <motion.button
       disabled={disabled}
       whileHover={{
-        scale: 1.02,
         boxShadow: '0 0 0 1px var(--blue-500)',
         transition: { duration: 0.1 },
       }}
       whileTap={{
-        scale: 0.95,
         boxShadow: '0 0 0 1px var(--blue-500)',
         transition: { duration: 0.1 },
       }}
-      initial={{ opacity: 0, x: -10 }}
+      initial={{ opacity: 0, x: -10, boxShadow: '0 0 0 1px transparent' }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
         duration: 0.1 * (index + 1),
@@ -194,7 +196,16 @@ export const Capsule = ({
         stiffness: 260,
         damping: 20,
       }}
-      className="flex items-center bg-white rounded-full px-2 py-1 gap-1 shadow-sm hover:shadow-md transition-all"
+      className={cn(
+        'flex items-center bg-white rounded-full px-2 py-1 gap-1 shadow-sm hover:shadow-md transition-all',
+        {
+          'bg-neutral-300': selected,
+          'cursor-pointer': !disabled,
+          'cursor-not-allowed': disabled,
+        },
+        className
+      )}
+      onClick={onClick}
     >
       <span className="text-sm font-medium">{label}</span>
       {showIcon && (

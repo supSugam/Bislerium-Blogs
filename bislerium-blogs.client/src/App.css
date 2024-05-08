@@ -118,3 +118,9 @@ for large screens
 .minimal-scrollbar ::-webkit-scrollbar-thumb:hover:after {
   opacity: 1; /* Show scrollbar thumb on hover */
 }
+
+.plain-text {
+  font-weight: 400 !important;
+  color: var(--color-primary) !important;
+  font-size: 1rem !important;
+}
