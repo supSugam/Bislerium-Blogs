@@ -116,7 +116,7 @@ const CommentInput = ({
     if (current) {
       current.oninput = handleInput;
       if (onBlur) {
-        current.addEventListener('blur', onBlur);
+        // current.addEventListener('blur', onBlur);
       }
     }
 
@@ -124,7 +124,7 @@ const CommentInput = ({
       if (current) {
         current.oninput = null;
         if (onBlur) {
-          current.removeEventListener('blur', onBlur);
+          // current.removeEventListener('blur', onBlur);
         }
       }
     };

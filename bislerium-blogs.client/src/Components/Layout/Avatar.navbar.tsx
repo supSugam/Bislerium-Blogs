@@ -7,6 +7,7 @@ import { useAuthStore } from '../../services/stores/useAuthStore';
 import AlterModal from '../Modal/AlertModal';
 import ProfileWithName from '../Profile/ProfileWithName';
 import { cn } from '../../utils/cn';
+import { UserRole } from '../../enums/UserRole';
 
 export const NavbarAvatar = () => {
   const {
@@ -109,6 +110,19 @@ export const NavbarAvatar = () => {
             icon: <Trash2 size={20} />,
             bordered: true,
           },
+
+          ...(currentUser?.role === UserRole.ADMIN
+            ? [
+                {
+                  label: 'Add New Admin',
+                  onClick: () => {
+                    setAuthModalActiveSection('signup');
+                    openAuthModal();
+                  },
+                  bordered: true,
+                },
+              ]
+            : []),
         ]}
       />
     </>

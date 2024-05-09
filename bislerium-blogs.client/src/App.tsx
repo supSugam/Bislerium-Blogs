@@ -9,9 +9,11 @@ import Layout from './Components/Layout/_layout';
 import BlogPage from './pages/BlogPage/BlogPage';
 import BlogEditor from './pages/BlogEditor/BlogEditor';
 import BlogHistoryPage from './pages/BlogPage/BlogHistory';
+import Dashboard from './Components/Admin/Dashboard';
+import { UserRole } from './enums/UserRole';
 function App() {
   const queryClient = new QueryClient();
-  const { onInitialize } = useAuthStore();
+  const { onInitialize, currentUser } = useAuthStore();
 
   useEffect(() => {
     onInitialize();
@@ -27,7 +29,12 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<Home />}>
+            <Route
+              path="/"
+              element={
+                currentUser?.role === UserRole.ADMIN ? <Dashboard /> : <Home />
+              }
+            >
               <Route path="blogs" element={<></>} />
               <Route path="contact" element={<></>} />
             </Route>

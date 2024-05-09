@@ -503,10 +503,10 @@ namespace Bislerium_Blogs.Server.Services
                         VotePayload = new VotePayload
                         {
                             Popularity = x.Popularity,
-                            IsVotedUp = x.Reactions.Any(x => x.UserId == userId && x.IsUpvote),
-                            IsVotedDown = x.Reactions.Any(x => x.UserId == userId && !x.IsUpvote),
+                            IsVotedUp = userId != null && x.Reactions.Any(x => x.UserId == userId && x.IsUpvote),
+                            IsVotedDown = userId != null && x.Reactions.Any(x => x.UserId == userId && !x.IsUpvote),
                             TotalComments = x.Comments.Count,
-                            IsBookmarked = x.Bookmarks.Any(x => x.UserId == userId)
+                            IsBookmarked = userId != null && x.Bookmarks.Any(x => x.UserId == userId)
                         },
                         Thumbnail = x.Thumbnail
                     })

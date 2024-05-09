@@ -141,6 +141,23 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     enabled: !!id,
   });
 
+  const deleteBlog = useMutation<
+    AxiosResponse<ISuccessResponse<string>>,
+    AxiosError<IFailedResponse>,
+    string
+  >({
+    mutationFn: async (id) => await api.delete(`/blogs/${id}`),
+    onSuccess: () => {
+      toast.success('Blog Deleted');
+      queryClient.invalidateQueries({
+        queryKey: ['blogs'],
+      });
+    },
+    onError: (error) => {
+      toastWithInterval({ error });
+    },
+  });
+
   return {
     getBlogs,
     publishBlog,
@@ -149,6 +166,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     upvoteVlog,
     downvoteBlog,
     getBlogVotes,
+    deleteBlog,
   };
 };
 

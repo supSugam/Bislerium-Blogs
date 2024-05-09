@@ -9,18 +9,27 @@ import { Capsule } from './Elements/MultiSelect';
 import Bookmark from './Bookmark';
 import Vote from './Vote';
 import CommentIcon from './Smol/CommentIcon';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { cn } from '../utils/cn';
+import BlogOptions from './Smol/BlogOptions';
 
 interface IBlogCardProps {
   blog: IBlog;
+  className?: string;
 }
-const BlogCard = ({ blog }: IBlogCardProps) => {
+const BlogCard = ({ blog, className }: IBlogCardProps) => {
   const [imageSource, setImageSource] = useState<string>(
     blog.thumbnail ?? 'https://source.unsplash.com/random'
   );
   const navigate = useNavigate();
+
   return (
-    <div className="flex justify-between gap-x-14 items-center border-b border-neutral-200">
+    <div
+      className={cn(
+        'flex justify-between gap-x-14 items-center border-b border-neutral-200 cursor-pointer',
+        className
+      )}
+    >
       <div className="flex flex-col gap-y-3">
         <div className="flex gap-x-1 items-center">
           <img
@@ -37,12 +46,12 @@ const BlogCard = ({ blog }: IBlogCardProps) => {
           </span>
         </div>
 
-        <div className="flex flex-col gap-y-3">
+        <Link to={`/blog/${blog.blogPostId}`} className="flex flex-col gap-y-3">
           <h1 className="text-xl font-bold">{blog.title}</h1>
           <p className="text-base font-normal line-clamp-3 text-pretty font-serif tracking-normal leading-6 text-neutral-700">
             {htmlToText(blog.body)}
           </p>
-        </div>
+        </Link>
         <div className="flex justify-between items-center w-full">
           <div className="flex gap-x-2">
             {blog.tags.slice(0, 2).map((tag, i) => (
@@ -66,7 +75,7 @@ const BlogCard = ({ blog }: IBlogCardProps) => {
             />
           </div>
 
-          <div className="flex items-center space-x-5 my-2 scale-75">
+          <div className="flex items-center space-x-5 my-2 scale-[0.8]">
             <Vote id={blog.blogPostId} initialVoteCounts={blog?.votePayload} />
             <CommentIcon
               size={18}
@@ -80,6 +89,7 @@ const BlogCard = ({ blog }: IBlogCardProps) => {
               bookmarked={blog?.votePayload.isBookmarked}
               className="border-none"
             />
+            <BlogOptions id={blog.blogPostId} author={blog.author} />
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ const YearAndMonthPicker = ({
     } else {
       onYearAndMonthChange?.(undefined);
     }
-  }, [year, month]);
+  }, [year, month, onYearAndMonthChange]);
 
   return (
     <div className="flex border border-neutral-300 rounded-md w-full flex-col">

@@ -104,7 +104,7 @@ const BlogEditor = ({ mode = 'publish' }: { mode?: 'publish' | 'update' }) => {
       title,
       body: blogBodyContent,
       tags: selectedTags.map((tag) => tag.id),
-      ...(mode === 'update' ? { thumbnail: thumbnail } : {}),
+      thumbnail,
     });
     if (mode === 'update' && id) {
       updateBlogMutation({ id, data: payload });
@@ -246,6 +246,10 @@ const BlogEditor = ({ mode = 'publish' }: { mode?: 'publish' | 'update' }) => {
             text: 'Drag and drop or click to upload thumbnail',
             classNames: 'text-gray-600 font-semibold text-xl mt-2',
             iconSize: 60,
+          }}
+          onDelete={() => {
+            setThumbnail(null);
+            setCurrentThumbnail(null);
           }}
         />
         <ReactQuill

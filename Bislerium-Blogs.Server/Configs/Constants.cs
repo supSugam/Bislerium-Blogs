@@ -19,5 +19,7 @@ namespace Bislerium_Blogs.Server.Configs
         public static readonly int UPVOTE_WEIGHTAGE = 2;
         public static readonly int DOWNVOTE_WEIGHTAGE = -1;
         public static readonly int COMMENT_WEIGHTAGE = 1;
+
+        public static readonly string ADMIN_AVATAR = "https://cdn.vectorstock.com/i/500p/02/70/black-and-white-b-modern-logo-capital-vector-44240270.jpg";
     }
 }
