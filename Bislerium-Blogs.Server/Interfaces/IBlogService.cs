@@ -21,6 +21,7 @@ namespace Bislerium_Blogs.Server.Interfaces
         public Task<VotePayload> GetBlogReactionDetails(Guid blogPostId, Guid? userId);
 
         public Task<List<BlogPayload>> GetAllBookmarksOfAUser(string userIdorUsername);
+        public Task<List<BlogPayload>> GetAllBlogsOfAUser(string userIdorUsername);
         public Task<List<BlogPayload>> GetAllBlogsOfAUser(Guid userId);
 
         public Task<bool> BookmarkBlogPostAsync(Guid blogPostId, Guid userId);

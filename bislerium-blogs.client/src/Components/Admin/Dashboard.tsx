@@ -66,7 +66,7 @@ const Dashboard = () => {
   }, [top10StatsData]);
   return (
     <main className="w-full min-h-screen">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-[90%]">
         <div className="flex justify-between items-center mb-5 ">
           <h1 className="text-[26px] font-bold tracking-tight">
             Admin Dashboard

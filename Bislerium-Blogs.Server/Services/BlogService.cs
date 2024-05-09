@@ -211,7 +211,6 @@ namespace Bislerium_Blogs.Server.Services
             try
             {
                 ArgumentNullException.ThrowIfNull(blogPostId, nameof(blogPostId));
-                ArgumentNullException.ThrowIfNull(userId, nameof(userId));
 
                 bool isVotedUp = userId is not null && await _context.Reactions.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId && x.IsUpvote);
                 bool isVotedDown =
@@ -340,6 +339,67 @@ namespace Bislerium_Blogs.Server.Services
                     .ToListAsync();
 
                 return bookmarks;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<List<BlogPayload>> GetAllBlogsOfAUser(string userIdorUsername)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(userIdorUsername, nameof(userIdorUsername));
+
+                var isGuid = Guid.TryParse(userIdorUsername, out Guid userId);
+                if (!isGuid)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userIdorUsername);
+                    if (user is null)
+                    {
+                        throw new Exception("User Not Found..");
+                    }
+                    userId = user.UserId;
+                }
+
+                var blogs = await _context.BlogPosts
+                    .Where(x => x.AuthorId == userId)
+                    .Include(x => x.BlogPostTags)
+                    .Include(x => x.Author)
+                    .Select(x => new BlogPayload
+                    {
+                        BlogPostId = x.BlogPostId,
+                        Title = x.Title,
+                        Body = x.Body,
+                        Popularity = x.Popularity,
+                        Tags = x.BlogPostTags.Select(x => x.Tag).ToList(),
+                        CreatedAt = x.CreatedAt,
+                        UpdatedAt = x.UpdatedAt,
+                        Author = new UserPayload
+                        {
+                            UserId = x.AuthorId,
+                            Username = x.Author.Username,
+                            AvatarUrl = x.Author.AvatarUrl,
+                            Email = x.Author.Email,
+                            Role = Constants.EnumToString(UserRole.BLOGGER),
+                            FullName = x.Author.FullName,
+                            CreatedAt = x.Author.CreatedAt,
+                            UpdatedAt = x.Author.UpdatedAt
+                        },
+                        VotePayload = new VotePayload
+                        {
+                            Popularity = x.Popularity,
+                            IsVotedUp = x.Reactions.Any(x => x.UserId == userId && x.IsUpvote),
+                            IsVotedDown = x.Reactions.Any(x => x.UserId == userId && !x.IsUpvote),
+                            TotalComments = x.Comments.Count,
+                            IsBookmarked = x.Bookmarks.Any(x => x.UserId == userId)
+                        },
+                        Thumbnail = x.Thumbnail
+                    })
+                    .ToListAsync();
+
+                return blogs;
             }
             catch (Exception ex)
             {

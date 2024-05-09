@@ -162,12 +162,12 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 if (postACommentDto.ParentCommentId != null)
                 {
-               _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
+               await _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
 
                 }
                 else
                 {
-               _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
+               await _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
 
                 }
 

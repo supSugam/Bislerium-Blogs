@@ -34,6 +34,7 @@ namespace Bislerium_Blogs.Server.Controllers
             }
         }
 
+
         [HttpGet("{username}")]
         public async Task<ActionResult<List<BlogPayload>>> GetAllBookmarksOfAUser(string username)
         {

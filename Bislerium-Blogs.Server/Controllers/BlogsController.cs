@@ -78,7 +78,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
             if (blogPost == null)
             {
-                return NotFound();
+                return NotFound("Blog Not Found");
             }
 
             string role = await _userService.GetRoleByUserId(blogPost.AuthorId) ?? Constants.EnumToString(UserRole.USER);
@@ -468,6 +468,22 @@ oldTags != null &&  // Ensure BlogPostTags is not null
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("user/{username}")]
+
+        public async Task<ActionResult<List<BlogPayload>>> GetAllBlogsOfABlogger(string username)
+        {
+            try
+            {
+                var bookmarks = await _blogService.GetAllBlogsOfAUser(username);
+                return Ok(bookmarks);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
 

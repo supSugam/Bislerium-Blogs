@@ -3,14 +3,16 @@ import { useEffect, useState } from 'react';
 import { cn } from '../utils/cn';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+
 interface IYearAndMonthPickerProps {
   onYearAndMonthChange?: (date?: Date) => void;
 }
+
 const YearAndMonthPicker = ({
   onYearAndMonthChange,
 }: IYearAndMonthPickerProps) => {
-  const [year, setYear] = useState<number>();
-  const [month, setMonth] = useState<number>();
+  const [year, setYear] = useState<number | undefined>(undefined);
+  const [month, setMonth] = useState<number | undefined>(undefined);
   const [isYearSelectOpen, setIsYearSelectOpen] = useState(true);
   const months = [
     'Jan',
@@ -28,8 +30,8 @@ const YearAndMonthPicker = ({
   ];
 
   useEffect(() => {
-    if (year && month) {
-      onYearAndMonthChange?.(new Date(year, month));
+    if (year !== undefined && month !== undefined) {
+      onYearAndMonthChange?.(new Date(year, month - 1));
     } else {
       onYearAndMonthChange?.(undefined);
     }
@@ -58,17 +60,17 @@ const YearAndMonthPicker = ({
         >
           {isYearSelectOpen
             ? 'Select Year'
-            : year
-            ? year && month
-              ? `${year} - ${months[month - 1]}`
-              : year
+            : year !== undefined && month !== undefined
+            ? `${year} - ${months[month - 1]}`
+            : year !== undefined
+            ? year
             : 'Select Month'}
         </motion.span>
 
         <ChevronRight
           size={20}
           onClick={() => {
-            if (year) {
+            if (year !== undefined) {
               setIsYearSelectOpen(false);
             } else {
               toast('Please select a year first', {
@@ -79,7 +81,7 @@ const YearAndMonthPicker = ({
           }}
           className={cn('cursor-pointer', {
             'opacity-50 disabled cursor-not-allowed':
-              !year || !isYearSelectOpen,
+              year === undefined || !isYearSelectOpen,
           })}
         />
       </div>
@@ -106,7 +108,7 @@ const YearAndMonthPicker = ({
                       setYear(undefined);
                     } else {
                       if (
-                        year &&
+                        year !== undefined &&
                         new Date().getFullYear() === year &&
                         new Date().getMonth() < index
                       ) {
@@ -124,7 +126,7 @@ const YearAndMonthPicker = ({
                     {
                       'font-semibold': month === index + 1,
                       'opacity-50 disabled cursor-not-allowed':
-                        year &&
+                        year !== undefined &&
                         new Date().getMonth() < index &&
                         year === new Date().getFullYear(),
                     }
