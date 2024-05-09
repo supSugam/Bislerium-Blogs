@@ -11,8 +11,22 @@ import { yupResolver } from '@hookform/resolvers/yup';
 const signUpFormSchema = yup.object().shape({
   fullName: yup.string().required('Full name is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
-  username: yup.string().required('Username is required'),
-  password: yup.string().required('Password is required'),
+  username: yup
+    .string()
+    .required('Username is required')
+    .matches(
+      /^[a-zA-Z0-9_]*$/,
+      'Username cannot contain spaces or special characters'
+    ),
+
+  password: yup
+    .string()
+    .required('Password is required')
+    .min(8, 'Password must be at least 8 characters')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character'
+    ),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref('password')], 'Passwords must match'),
