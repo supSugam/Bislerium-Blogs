@@ -120,6 +120,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
         [HttpPatch("{blogPostId}")]
         [Consumes("multipart/form-data")]
+        [AuthorizedOnly(Roles = "BLOGGER")]
         public async Task<ActionResult<string>> UpdateBlogPost(Guid blogPostId, [FromForm] UpdateBlogDto updateBlogDto)
         {
             try
@@ -235,7 +236,7 @@ oldTags != null &&  // Ensure BlogPostTags is not null
         // POST: api/Blogs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        //[AuthorizedOnly(Roles = "BLOGGER")]
+        [AuthorizedOnly(Roles = "BLOGGER")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<string>> PostBlogPost(
             [FromForm] PublishBlogDto publishBlogDto)
@@ -311,12 +312,19 @@ oldTags != null &&  // Ensure BlogPostTags is not null
 
         // DELETE: api/Blogs/5
         [HttpDelete("{id}")]
+        [AuthorizedOnly(Roles = "BLOGGER")]
         public async Task<IActionResult> DeleteBlogPost(Guid id)
         {
+            _ = Guid.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out Guid userId);
             var blogPost = await _context.BlogPosts.FindAsync(id);
             if (blogPost == null)
             {
                 return NotFound();
+            }
+
+            if(blogPost.AuthorId != userId)
+            {
+                return Unauthorized("Only the author can delete the blog post");
             }
 
             _context.BlogPosts.Remove(blogPost);
@@ -327,7 +335,7 @@ oldTags != null &&  // Ensure BlogPostTags is not null
 
 
         [HttpPost("{blogPostId}/upvote")]
-        [AuthorizedOnly]
+        [AuthorizedOnly(Roles = "BLOGGER")]
         public async Task<ActionResult<VotePayload>> UpvoteBlogPost(Guid blogPostId)
         {
             try
@@ -346,7 +354,7 @@ oldTags != null &&  // Ensure BlogPostTags is not null
         }
 
         [HttpPost("{blogPostId}/downvote")]
-        [AuthorizedOnly]
+        [AuthorizedOnly(Roles = "BLOGGER")]
         public async Task<ActionResult<VotePayload>> DownvoteBlogPost(Guid blogPostId)
         {
             try

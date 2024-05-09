@@ -286,14 +286,25 @@ namespace Bislerium_Blogs.Server.Services
             }
         }
 
-        public async Task<List<BlogPayload>> GetAllBookmarksOfAUser(Guid userId)
+        public async Task<List<BlogPayload>> GetAllBookmarksOfAUser(string userIdorUsername)
         {
             try
             {
-                ArgumentNullException.ThrowIfNull(userId, nameof(userId));
+                ArgumentNullException.ThrowIfNull(userIdorUsername, nameof(userIdorUsername));
+
+                var isGuid = Guid.TryParse(userIdorUsername, out Guid userId);
+                if (!isGuid)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userIdorUsername);
+                    if (user is null)
+                    {
+                        throw new Exception("User Not Found..");
+                    }
+                    userId = user.UserId;
+                }
 
                 var bookmarks = await _context.Bookmarks
-                    .Where(x => x.UserId == userId)
+                    .Where(x =>x.UserId == userId)
                     .Include(x => x.BlogPost)
                     .Select(x => new BlogPayload
                     {

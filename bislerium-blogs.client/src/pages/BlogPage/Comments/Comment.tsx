@@ -20,7 +20,6 @@ import toast from 'react-hot-toast';
 import useCommentsQuery from '../../../hooks/react-query/useCommentsQuery';
 import CommentEditHistory from './CommentEditHistory';
 import { useAuthStore } from '../../../services/stores/useAuthStore';
-import { UserRole } from '../../../enums/UserRole';
 
 interface ICommentProps {
   comment: IComment;
@@ -77,10 +76,7 @@ const Comment = ({ comment }: ICommentProps) => {
         });
       }
 
-      if (
-        currentUser?.role === UserRole.ADMIN ||
-        currentUser?.userId === author.userId
-      ) {
+      if (currentUser?.userId === author.userId) {
         options.push({
           label: 'Delete Comment',
           onClick: () => {

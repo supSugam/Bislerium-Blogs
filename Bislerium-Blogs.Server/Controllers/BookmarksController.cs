@@ -25,7 +25,21 @@ namespace Bislerium_Blogs.Server.Controllers
             try
             {
                 Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
-                var bookmarks = await _blogService.GetAllBookmarksOfAUser(userId);
+                var bookmarks = await _blogService.GetAllBookmarksOfAUser(userId.ToString());
+                return Ok(bookmarks);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("{username}")]
+        public async Task<ActionResult<List<BlogPayload>>> GetAllBookmarksOfAUser(string username)
+        {
+            try
+            {
+                var bookmarks = await _blogService.GetAllBookmarksOfAUser(username);
                 return Ok(bookmarks);
             }
             catch (Exception e)

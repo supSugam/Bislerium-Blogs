@@ -8,6 +8,7 @@ import AlterModal from '../Modal/AlertModal';
 import ProfileWithName from '../Profile/ProfileWithName';
 import { cn } from '../../utils/cn';
 import { UserRole } from '../../enums/UserRole';
+import { useNavigate } from 'react-router-dom';
 
 export const NavbarAvatar = () => {
   const {
@@ -30,6 +31,7 @@ export const NavbarAvatar = () => {
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState<boolean>(false);
 
+  const navigate = useNavigate();
   return (
     <>
       <AlterModal
@@ -39,6 +41,7 @@ export const NavbarAvatar = () => {
         onConfirm={() => {
           logout();
           setIsLogOutModalOpen(false);
+          navigate('/');
         }}
         onCancel={() => setIsLogOutModalOpen(false)}
         type="warn"

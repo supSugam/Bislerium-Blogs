@@ -210,8 +210,8 @@ namespace Bislerium_Blogs.Server.Controllers
                 return Unauthorized("You are not permitted to delete this comment");
             }
 
-            _context.Comments.Remove(comment);
-            _context.Comments.RemoveRange(comment.InverseParentComment);
+            _context.Comments.RemoveRange(_context.Comments.Where(c => c.ParentCommentId == id));
+                _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
 
             return Ok("Comment Deleted");

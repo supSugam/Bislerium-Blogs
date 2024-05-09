@@ -91,7 +91,6 @@ export const useAuthStore = create<AuthStore>(
     logout: () => {
       localStorage.removeItem('accessToken');
       set(() => ({ api }));
-      window.location.reload();
     },
     authSession: {},
     setAuthSession: (data) => {

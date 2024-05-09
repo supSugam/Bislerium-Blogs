@@ -11,6 +11,7 @@ import BlogEditor from './pages/BlogEditor/BlogEditor';
 import BlogHistoryPage from './pages/BlogPage/BlogHistory';
 import Dashboard from './Components/Admin/Dashboard';
 import { UserRole } from './enums/UserRole';
+import Profile from './Components/Profile/Profile';
 function App() {
   const queryClient = new QueryClient();
   const { onInitialize, currentUser } = useAuthStore();
@@ -48,6 +49,8 @@ function App() {
             />
             <Route path="/blog/:id" element={<BlogPage />} />
             <Route path="/blog/history/:id" element={<BlogHistoryPage />} />
+
+            <Route path="/profile/:username" element={<Profile />} />
           </Routes>
         </Layout>
       </BrowserRouter>

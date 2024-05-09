@@ -20,6 +20,7 @@ import Bookmark from '../../Components/Bookmark';
 import { History } from 'lucide-react';
 import { Tooltip } from '../../Components/Reusables/Tooltip';
 import BlogEditHistory from '../BlogEditor/BlogEditHistory';
+import BlogOptions from '../../Components/Smol/BlogOptions';
 
 const BlogPage = () => {
   const [blogData, setBlogData] = useState<IBlog>();
@@ -131,6 +132,7 @@ const BlogPage = () => {
                   <History size={20} />
                 </button>
               </Tooltip>
+              <BlogOptions author={blogData.author} id={blogData.blogPostId} />
             </div>
           </div>
           {/* Thumbnail */}
