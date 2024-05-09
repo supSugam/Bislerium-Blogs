@@ -90,8 +90,12 @@ namespace Bislerium_Blogs.Server.Services
                     ReferenceHandler = ReferenceHandler.Preserve
                 };
 
+                var tags = await _context.Tags
+                    .Where(tag => tag.BlogPostTags.Any(blogPostTag => blogPostTag.BlogPostId == blogHistory.BlogPostId))
+                    .ToListAsync();
+
                 // Serialize the blog history payload with the preserve reference handler
-                var payloadJson = JsonSerializer.Serialize(new BlogHistoryPayload
+                var payload = new BlogHistoryPayload
                 {
                     BlogPostHistoryId = blogHistory.BlogPostHistoryId,
                     BlogPostId = blogHistory.BlogPostId,
@@ -100,12 +104,12 @@ namespace Bislerium_Blogs.Server.Services
                     Thumbnail = blogHistory.Thumbnail,
                     ChangesSummary = blogHistory.ChangesSummary,
                     UpdatedAt = blogHistory.UpdatedAt,
-                    Tags = blogHistory.BlogPostHistoryTags.Select(x => x.Tag).ToList(),
+                    Tags = tags,
                     Author = author
-                }, options);
+                };
 
                 // Deserialize the payload back to the BlogHistoryPayload object
-                return JsonSerializer.Deserialize<BlogHistoryPayload>(payloadJson, options);
+                return payload;
             }
             catch (Exception ex)
             {

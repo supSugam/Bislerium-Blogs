@@ -14,7 +14,7 @@ export interface IPagination {
 }
 
 export interface IBlogPaginationDto extends IPagination {
-  sortBy?: SortBy;
+  sortBy: SortBy;
   ofThisSpecificMonth?: Date;
   tag?: string;
 }
