@@ -14,11 +14,10 @@ const useNotificationsQuery = () => {
   >({
     queryKey: ['notifications'],
     queryFn: async () => await api.get('/notifications'),
-    // staleTime: 1000 * 10, // 10 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    // refetchInterval: 1000 * 10, // 10 seconds
+    refetchInterval: 1000 * 60 * 1, // 1 minute
     enabled: isApiAuthorized(),
   });
   // fomib53644@lewenbo.com Test@123

@@ -68,7 +68,9 @@ const Home = () => {
               sortBy: key as SortBy,
             }));
           },
-          className: cn('font-semibold', paginationQueryParams.sortBy === key),
+          className: cn({
+            'font-semibold': paginationQueryParams.sortBy === key,
+          }),
         } as DropdownItem;
       });
   }, [setPaginationQueryParams, paginationQueryParams]);
@@ -78,8 +80,8 @@ const Home = () => {
       <main className="w-full h-screen">
         <section className="mx-auto flex gap-x-12 justify-between w-full sm:w-11/12 md:w-10/12 lg:w-4/5 min-h-[80%]">
           {/*  */}
-          <div className="flex flex-col gap-y-8 flex-1">
-            <div className="flex flex-col w-full gap-y-4">
+          <div className="flex flex-col flex-1 gap-y-4">
+            <div className="flex flex-col w-full gap-y-2 mb-6">
               <Dropdown
                 targetComponent={
                   <div className="flex justify-center gap-3 items-center bg-gray-100 rounded-md px-2">
@@ -95,7 +97,7 @@ const Home = () => {
                 }
                 items={[]}
               />
-              <div className="no-scrollbar flex gap-x-2 px-2 py-1 overflow-x-auto">
+              <div className="no-scrollbar flex gap-x-2 px-2 py-1 overflow-x-auto ">
                 {(tagsData?.data?.result ?? []).map((tag) => (
                   <Capsule
                     key={tag.tagId}

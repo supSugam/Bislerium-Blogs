@@ -10,6 +10,7 @@ import { Dot, ListChecks } from 'lucide-react';
 import { Tooltip } from '../Reusables/Tooltip';
 import { Link } from 'react-router-dom';
 import { NotificationType } from '../../enums/NotificationType';
+import toast from 'react-hot-toast';
 interface INotificationProps {
   isOpen: boolean;
 }
@@ -33,6 +34,19 @@ const Notifications = forwardRef<HTMLDivElement, INotificationProps>(
     useEffect(() => {
       setNotifications(notificationsData?.data.result ?? []);
     }, [notificationsData]);
+
+    useEffect(() => {
+      const showToast =
+        notificationsData?.data.result?.[0]?.notificationId !==
+        notifications?.[0]?.notificationId;
+      if (showToast) {
+        toast(
+          notificationsData?.data.result?.[0]?.notificationMessage ??
+            'New Notification!',
+          { icon: '🔔' }
+        );
+      }
+    }, [notificationsData, notifications]);
 
     const getNotificationLink = (notification: INotification) => {
       switch (notification.notificationType) {

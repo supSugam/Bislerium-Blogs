@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import useBookmarksQuery from '../hooks/react-query/useBookmarksQuery';
 import { Tooltip } from './Reusables/Tooltip';
 import { BookmarkCheck, Bookmark as BookmarkIcon } from 'lucide-react';
+import { cn } from '../utils/cn';
 
-interface IBookmarkProps {
+interface IBookmarkProps extends React.HTMLProps<HTMLButtonElement> {
   blogPostId: string;
   bookmarked: boolean;
 }
-const Bookmark = ({ bookmarked, blogPostId }: IBookmarkProps) => {
+const Bookmark = ({ bookmarked, blogPostId, ...rest }: IBookmarkProps) => {
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
 
   useEffect(() => {
@@ -52,7 +53,10 @@ const Bookmark = ({ bookmarked, blogPostId }: IBookmarkProps) => {
     <Tooltip label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}>
       <button
         onClick={onToggleBookmark}
-        className="flex items-center justify-center p-2 rounded-md border border-neutral-300 bg-white"
+        className={cn(
+          'flex items-center justify-center p-2 rounded-md border border-neutral-300 bg-white',
+          rest.className
+        )}
       >
         {isBookmarked ? (
           <BookmarkCheck size={20} />

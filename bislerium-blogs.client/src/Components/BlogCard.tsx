@@ -1,13 +1,26 @@
+import { useState } from 'react';
 import { IBlog } from '../Interfaces/Models/IBlog';
-import { htmlToText, whenDidItHappen } from '../utils/string';
+import {
+  estimateReadingTime,
+  htmlToText,
+  whenDidItHappen,
+} from '../utils/string';
 import { Capsule } from './Elements/MultiSelect';
+import Bookmark from './Bookmark';
+import Vote from './Vote';
+import CommentIcon from './Smol/CommentIcon';
+import { useNavigate } from 'react-router-dom';
 
 interface IBlogCardProps {
   blog: IBlog;
 }
 const BlogCard = ({ blog }: IBlogCardProps) => {
+  const [imageSource, setImageSource] = useState<string>(
+    blog.thumbnail ?? 'https://source.unsplash.com/random'
+  );
+  const navigate = useNavigate();
   return (
-    <div className="flex justify-between gap-x-14 items-center">
+    <div className="flex justify-between gap-x-14 items-center border-b border-neutral-200">
       <div className="flex flex-col gap-y-3">
         <div className="flex gap-x-1 items-center">
           <img
@@ -30,27 +43,57 @@ const BlogCard = ({ blog }: IBlogCardProps) => {
             {htmlToText(blog.body)}
           </p>
         </div>
-        <div className="flex gap-x-2">
-          {blog.tags.map((tag, i) => (
+        <div className="flex justify-between items-center w-full">
+          <div className="flex gap-x-2">
+            {blog.tags.slice(0, 2).map((tag, i) => (
+              <Capsule
+                key={tag.tagId}
+                label={tag.tagName}
+                index={i}
+                onClick={() => {
+                  console.log(tag.tagName);
+                }}
+                showIcon={false}
+                className="shadow-sm border-neutral-400 bg-neutral-50"
+              />
+            ))}
             <Capsule
-              key={tag.tagId}
-              label={tag.tagName}
-              index={i}
-              onClick={() => {
-                console.log(tag.tagName);
-              }}
+              key={blog.blogPostId + 'MinRead'}
+              label={`${estimateReadingTime(blog.body)} min read`}
+              onClick={() => {}}
               showIcon={false}
               className="shadow-sm border-neutral-400 bg-neutral-50"
             />
-          ))}
+          </div>
+
+          <div className="flex items-center space-x-5 my-2 scale-75">
+            <Vote id={blog.blogPostId} initialVoteCounts={blog?.votePayload} />
+            <CommentIcon
+              size={18}
+              count={blog?.votePayload.totalComments}
+              onClick={() => {
+                navigate(`/blog/${blog.blogPostId}?comments=true`);
+              }}
+            />
+            <Bookmark
+              blogPostId={blog.blogPostId}
+              bookmarked={blog?.votePayload.isBookmarked}
+              className="border-none"
+            />
+          </div>
         </div>
       </div>
 
-      <img
-        src={blog.thumbnail ?? 'https://source.unsplash.com/random'}
-        className="w-32 h-32 rounded-md"
-        alt="Blog Image"
-      />
+      <div className="relative min-w-32 min-h-32">
+        <img
+          src={imageSource}
+          alt="Blog Thumbnail"
+          className="w-32 h-32 object-cover rounded-md"
+          onError={() => {
+            setImageSource('https://source.unsplash.com/random');
+          }}
+        />
+      </div>
     </div>
   );
 };

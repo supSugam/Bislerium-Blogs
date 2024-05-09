@@ -40,6 +40,13 @@ const BlogPage = () => {
   const [blogEditHistoryModalOpen, setBlogEditHistoryModalOpen] =
     useState<boolean>(false);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('comments') === 'true') {
+      setCommentsExpanded(true);
+    }
+  }, []);
+
   return (
     <main id="blog-page" className="w-full flex justify-center">
       {blogData && (

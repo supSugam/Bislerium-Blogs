@@ -11,7 +11,7 @@ public class UserPayload
     public string FullName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public string AvatarUrl { get; set; }
+    public string? AvatarUrl { get; set; }
 
     public string Role { get; set; } = Constants.EnumToString(UserRole.BLOGGER);
 }
