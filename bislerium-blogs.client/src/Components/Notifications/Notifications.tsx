@@ -3,7 +3,7 @@ import useNotificationsQuery from '../../hooks/react-query/useNotificationsQuery
 import NotificationIcon from '../../lib/SVGs/NotificationIcon';
 import { cn } from '../../utils/cn';
 import { INotification } from '../../Interfaces/Models/INotification';
-import { whenDidItHappen } from '../../utils/string';
+import { htmlToText, whenDidItHappen } from '../../utils/string';
 import { AVATAR_PLACEHOLDER, COLORS } from '../../utils/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dot, ListChecks } from 'lucide-react';
@@ -41,8 +41,10 @@ const Notifications = forwardRef<HTMLDivElement, INotificationProps>(
         notifications?.[0]?.notificationId;
       if (showToast) {
         toast(
-          notificationsData?.data.result?.[0]?.notificationMessage ??
-            'New Notification!',
+          htmlToText(
+            notificationsData?.data.result?.[0]?.notificationMessage ??
+              'New Notification!'
+          ),
           { icon: '🔔' }
         );
       }

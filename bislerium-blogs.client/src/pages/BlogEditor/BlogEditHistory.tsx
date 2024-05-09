@@ -99,7 +99,7 @@ const BlogEditHistory = ({
                       </div>
                     </div>
                     <Link
-                      to={`/blogs/history/${blogPostHistoryId}`}
+                      to={`/blog/history/${blogPostHistoryId}`}
                       target="_blank"
                       className="opacity-75 hover:opacity-100 hover:scale-105 transition-all duration-100 ease-in cursor-pointer"
                     >

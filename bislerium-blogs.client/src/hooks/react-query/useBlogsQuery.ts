@@ -58,7 +58,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });
-      navigate(`/blogs/${data.data.result}`);
+      navigate(`/blog/${data.data.result}`);
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -102,7 +102,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });
-      navigate(`/blogs/${id}`);
+      navigate(`/blog/${id}`);
     },
     onError: (error) => {
       console.log(error);

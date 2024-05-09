@@ -125,7 +125,14 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                string notificationMessage = $"<strong>{targetUser.FullName}</strong> just {(IsUpvote ? "upvoted" : "downvoted")} your blog post.";
+                var triggerUser = await _context.Users.FindAsync(triggerUserId);
+
+                if(triggerUser == null)
+                {
+                    return false;
+                }
+
+                string notificationMessage = $"<strong>{triggerUser.FullName}</strong> just {(IsUpvote ? "upvoted" : "downvoted")} your blog post.";
 
                 var notification = new Notification
                 {

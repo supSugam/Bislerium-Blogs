@@ -147,6 +147,7 @@ namespace Bislerium_Blogs.Server.Services
             {
                 var replies = await _context.Comments
                     .Where(c => c.ParentCommentId == commentId)
+                    .Include(c => c.Author)
                     .ToListAsync();
 
                 var commentPayloads = new List<CommentPayload>();

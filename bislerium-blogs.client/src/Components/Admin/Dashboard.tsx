@@ -5,8 +5,8 @@ import {
   ThumbsUp,
   Users,
   MessageSquare,
-  TrendingUp,
   Flame,
+  ArrowUpRightFromSquare,
 } from 'lucide-react';
 import { IDashboardStats, ITop10Stats } from '../../Interfaces/IDashboard';
 import StatCard from './StatCard';
@@ -20,6 +20,7 @@ import YearAndMonthPicker from '../YearAndMonthPicker';
 import StyledInput from '../Elements/StyledInput';
 import { AVATAR_PLACEHOLDER } from '../../utils/constants';
 import { UserRole } from '../../enums/UserRole';
+import { Link } from 'react-router-dom';
 
 const InitialDashboardStats: IDashboardStats = {
   totalBloggers: 0,
@@ -225,7 +226,7 @@ const Dashboard = () => {
               .map((blogger) => (
                 <div
                   key={blogger.userId}
-                  className="bg-white rounded-md shadow-normal p-4 border-neutral-200 w-full"
+                  className="bg-white rounded-md shadow-normal p-4 border-neutral-200 w-full flex justify-between items-center gap-x-4"
                 >
                   <div className="flex items-center">
                     <img
@@ -242,6 +243,9 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
+                  <Link to={`/profile/${blogger.username}`}>
+                    <ArrowUpRightFromSquare size={20} />
+                  </Link>
                 </div>
               ))}
           </div>
