@@ -13,6 +13,7 @@ import { capitalizeFirstLetter } from '../utils/string';
 import { cn } from '../utils/cn';
 import YearAndMonthPicker from './YearAndMonthPicker';
 import { AnimatePresence } from 'framer-motion';
+import Paginate from './Paginate';
 
 const Home = () => {
   const [searchInput, setSearchInput] = useState<string>();
@@ -74,8 +75,8 @@ const Home = () => {
 
   return (
     <AnimatePresence>
-      <main className="w-full">
-        <section className="mx-auto flex gap-x-8 justify-between w-full min-h-screen sm:w-11/12 md:w-10/12 lg:w-4/5">
+      <main className="w-full h-screen">
+        <section className="mx-auto flex gap-x-12 justify-between w-full sm:w-11/12 md:w-10/12 lg:w-4/5 min-h-[80%]">
           {/*  */}
           <div className="flex flex-col gap-y-8 flex-1">
             <div className="flex flex-col w-full gap-y-4">
@@ -116,7 +117,7 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="flex gap-y-5 w-1/3 pl-5 border-l border-neutral-300  relative">
+          <div className="flex gap-y-5 w-1/3 pl-10 border-l border-neutral-300 relative">
             <div className="flex flex-col gap-y-5 sticky top-0 left-0 w-full">
               <Dropdown
                 items={sortOptions}
@@ -142,6 +143,17 @@ const Home = () => {
                     ofThisSpecificMonth: date,
                   }));
                 }}
+              />
+              <Paginate
+                onPageChange={(pageNumber) => {
+                  setPaginationQueryParams((prev) => ({
+                    ...prev,
+                    pageNumber,
+                  }));
+                }}
+                pageSize={paginationQueryParams.pageSize}
+                totalItems={blogsData?.data.result.totalBlogs || 0}
+                currentPage={paginationQueryParams.pageNumber}
               />
             </div>
           </div>

@@ -79,7 +79,8 @@ namespace Bislerium_Blogs.Server.Services
                 throw new Exception("User with this email already exists");
             }
 
-            var existingUserWithSameUsername = await _context.Users.FirstOrDefaultAsync(x => x.Username == registerUserDto.Username);
+            var existingUserWithSameUsername = await _userManager.FindByNameAsync(
+                registerUserDto.Username);
 
             if (existingUserWithSameUsername != null)
             {
@@ -88,12 +89,12 @@ namespace Bislerium_Blogs.Server.Services
 
             var user = new IdentityUser
             {
-                UserName = registerUserDto.Email,
+                UserName = registerUserDto.Username,
                 Email = registerUserDto.Email,
             };
 
             var result = await _userManager.CreateAsync(user, registerUserDto.Password);
-            await _userManager.AddToRoleAsync(user, Constants.EnumToString(UserRole.USER));
+            await _userManager.AddToRoleAsync(user, registerUserDto.Role ?? Constants.EnumToString(RoleEnum.BLOGGER));
 
             if (!result.Succeeded)
             {
@@ -101,26 +102,34 @@ namespace Bislerium_Blogs.Server.Services
             }
 
             var existingUser = await _userManager.FindByEmailAsync(registerUserDto.Email);
+
+            if(existingUser == null)
+            {
+                throw new Exception("User Registration Failed");
+            }
+
             string? imageUrl = null;
             if (registerUserDto.Avatar is not null)
             {
                 imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY, existingUser.Id);
             }
 
-            _context.Users.Add(new User
+            var newUser = new User
             {
-                UserId = new Guid(existingUser.Id),
-                Email = existingUser.Email,
-                Username = existingUser.UserName,
+                UserId = Guid.Parse(existingUser.Id),
+                Username = registerUserDto.Username,
+                Email = registerUserDto.Email,
                 FullName = registerUserDto.FullName,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-                AvatarUrl = imageUrl
-            });
+                AvatarUrl = imageUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _context.Users.AddAsync(newUser);
 
             await _context.SaveChangesAsync();
 
-            await _emailService.SendOTP(registerUserDto.Email, registerUserDto.FullName);
+            await _emailService.SendOTP(registerUserDto.Email, registerUserDto.Username);
 
             return "Signed Up, Check your email and enter the code to verify.";
 

@@ -243,7 +243,12 @@ public partial class BisleriumBlogsContext : IdentityDbContext
 
             entity.HasIndex(e => e.Email, "UQ__Users__A9D1053494AA17E2").IsUnique();
 
+
             entity.Property(e => e.UserId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.AvatarUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)

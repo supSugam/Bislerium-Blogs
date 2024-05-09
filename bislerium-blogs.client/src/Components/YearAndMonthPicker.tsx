@@ -33,11 +33,11 @@ const YearAndMonthPicker = ({
     } else {
       onYearAndMonthChange?.(undefined);
     }
-  }, [year, month, onYearAndMonthChange]);
+  }, [year, month]);
 
   return (
-    <div className="flex border border-neutral-400 rounded-sm w-full flex-col">
-      <div className="flex justify-between items-center p-2 border-b border-neutral-400">
+    <div className="flex border border-neutral-300 rounded-md w-full flex-col">
+      <div className="flex justify-between items-center p-2 border-b border-neutral-300">
         <ChevronLeft
           size={20}
           className={cn('cursor-pointer', {
