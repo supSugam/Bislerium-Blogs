@@ -265,6 +265,7 @@ oldTags != null &&  // Ensure BlogPostTags is not null
 
                 var blogPost = new BlogPost
                 {
+                    BlogPostId = Guid.NewGuid(),
                     Title = publishBlogDto.Title,
                     Body = publishBlogDto.Body,
                     Thumbnail = publishBlogDto.Thumbnail.FileName,
