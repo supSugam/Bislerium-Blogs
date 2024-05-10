@@ -74,7 +74,7 @@ const Notifications = forwardRef<HTMLDivElement, INotificationProps>(
       <AnimatePresence key={'notifications'}>
         {isOpen && (
           <motion.div
-            className={`absolute flex bg-white shadow-normal bottom-0 right-0 h-auto rounded-md border-neutral-300`}
+            className={`absolute flex bg-white shadow-normal bottom-0 right-0 h-auto rounded-md border-neutral-300 max-h-[70vh]`}
             initial={{ opacity: 0, y: '90%' }}
             animate={{ opacity: isOpen ? 1 : 0, y: '103%' }}
             exit={{ opacity: 0 }}

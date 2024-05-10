@@ -1,36 +1,38 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useBookmarksQuery from '../../hooks/react-query/useBookmarksQuery';
 import useBlogsQuery from '../../hooks/react-query/useBlogsQuery';
 import BlogCard from '../BlogCard';
 import { AnimatedTabs } from '../Reusables/AnimatedTabs';
 import useUsersQuery from '../../hooks/react-query/useUsersQuery';
-import { AVATAR_PLACEHOLDER } from '../../utils/constants';
 import { getFormattedDate } from '../../utils/string';
-import {
-  Book,
-  Bookmark,
-  Calendar,
-  Clock,
-  Mail,
-  ShieldCheckIcon,
-  User,
-} from 'lucide-react';
+import { Book, Bookmark, Calendar, Clock, Mail, User } from 'lucide-react';
 import { IBlog } from '../../Interfaces/Models/IBlog';
 import { IUser } from '../../Interfaces/Models/IUser';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '../../services/stores/useAuthStore';
+import {
+  IFailedResponse,
+  ISuccessResponse,
+} from '../../Interfaces/IApiResponse';
+import { AxiosError, AxiosResponse } from 'axios';
 
 const Profile = () => {
   const { username } = useParams();
+  const { api } = useAuthStore();
+
+  const { data: blogsData } = useQuery<
+    AxiosResponse<ISuccessResponse<IBlog[]>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryFn: async () => await api.get(`/blogs/user/${username}`),
+    queryKey: ['blogs'],
+    enabled: !!username,
+  });
 
   const {
     getAllBookmarksOfUser: { data: bookmarksData },
   } = useBookmarksQuery({
-    id: username,
-  });
-
-  const {
-    getAllBlogsOfUser: { data: blogsData },
-  } = useBlogsQuery({
     id: username,
   });
 

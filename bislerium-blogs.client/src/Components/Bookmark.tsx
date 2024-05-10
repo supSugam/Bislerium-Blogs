@@ -5,6 +5,7 @@ import { BookmarkCheck, Bookmark as BookmarkIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../services/stores/useAuthStore';
 import toast from 'react-hot-toast';
+import { UserRole } from '../enums/UserRole';
 
 interface IBookmarkProps extends React.HTMLProps<HTMLButtonElement> {
   blogPostId: string;
@@ -34,6 +35,13 @@ const Bookmark = ({ bookmarked, blogPostId, ...rest }: IBookmarkProps) => {
         icon: '🔒',
       });
       openAuthModal();
+      return;
+    }
+
+    if (currentUser?.role === UserRole.ADMIN) {
+      toast('Admins cannot bookmark a blog post', {
+        icon: '🔒',
+      });
       return;
     }
 

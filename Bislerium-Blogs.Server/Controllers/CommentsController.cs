@@ -133,6 +133,7 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 var comment = new Comment
                 {
+                    CommentId = Guid.NewGuid(),
                     Body = postACommentDto.Body,
                     BlogPostId = postACommentDto.BlogPostId,
                     AuthorId = authorId,

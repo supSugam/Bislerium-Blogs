@@ -31,7 +31,10 @@ const BlogCard = ({ blog, className }: IBlogCardProps) => {
       )}
     >
       <div className="flex flex-col gap-y-3">
-        <div className="flex gap-x-1 items-center">
+        <Link
+          to={`/profile/${blog.author.userId}`}
+          className="flex gap-x-1 items-center"
+        >
           <img
             src={blog.author.avatarUrl ?? 'https://source.unsplash.com/random'}
             className="w-6 h-6 rounded-full"
@@ -44,7 +47,7 @@ const BlogCard = ({ blog, className }: IBlogCardProps) => {
           <span className="text-sm text-neutral-500">
             {whenDidItHappen(blog.createdAt)}
           </span>
-        </div>
+        </Link>
 
         <Link to={`/blog/${blog.blogPostId}`} className="flex flex-col gap-y-3">
           <h1 className="text-xl font-bold">{blog.title}</h1>

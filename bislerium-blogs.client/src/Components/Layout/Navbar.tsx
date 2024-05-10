@@ -17,11 +17,16 @@ import { useMousePosition } from '../../hooks/useMousePosition';
 import Notifications from '../Notifications/Notifications';
 import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
 import StyledButton from '../Elements/StyledButton';
+import { UserRole } from '../../enums/UserRole';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
-  const { openAuthModal, isApiAuthorized, setAuthModalActiveSection } =
-    useAuthStore();
+  const {
+    openAuthModal,
+    isApiAuthorized,
+    setAuthModalActiveSection,
+    currentUser,
+  } = useAuthStore();
 
   const [navbarHeight, setNavbarHeight] = useState<number>(0);
   const [navbarTranslateY, setNavbarTranslateY] = useState<number>(0);
@@ -94,7 +99,8 @@ const Navbar = () => {
             className={cn(
               'flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer',
               {
-                hidden: !isApiAuthorized(),
+                hidden:
+                  !isApiAuthorized() || currentUser?.role !== UserRole.BLOGGER,
               }
             )}
             onClick={(e) => {

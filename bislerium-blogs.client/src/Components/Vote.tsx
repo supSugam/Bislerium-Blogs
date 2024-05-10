@@ -8,6 +8,9 @@ import { motion } from 'framer-motion';
 import { ICommentReactions } from '../Interfaces/Models/IComment';
 import useCommentsQuery from '../hooks/react-query/useCommentsQuery';
 import { cn } from '../utils/cn';
+import { useAuthStore } from '../services/stores/useAuthStore';
+import toast from 'react-hot-toast';
+import { UserRole } from '../enums/UserRole';
 type VoteProps = {
   id: string;
   className?: string;
@@ -27,6 +30,7 @@ const Vote = ({
   type = 'blog',
   className,
 }: VoteProps) => {
+  const { currentUser, openAuthModal } = useAuthStore();
   const {
     upvoteVlog: {
       mutateAsync: upvoteBlogMutation,
@@ -59,6 +63,19 @@ const Vote = ({
   >(initialVoteCounts);
 
   const onUpvote = async () => {
+    if (!currentUser) {
+      toast('You need to be logged in to bookmark a blog post', {
+        icon: '🔒',
+      });
+      openAuthModal();
+      return;
+    }
+    if (currentUser?.role === UserRole.ADMIN) {
+      toast('Admins cannot vote', {
+        icon: '🔒',
+      });
+      return;
+    }
     if (upvotePending || downvotePending) return;
 
     switch (type) {

@@ -158,15 +158,6 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     },
   });
 
-  const getAllBlogsOfUser = useQuery<
-    AxiosResponse<ISuccessResponse<IBlog[]>>,
-    AxiosError<IFailedResponse>
-  >({
-    queryFn: async () => await api.get(`/blogs/user/${id}`),
-    queryKey: ['blogs'],
-    enabled: !!id,
-  });
-
   return {
     getBlogs,
     publishBlog,
@@ -176,7 +167,6 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     downvoteBlog,
     getBlogVotes,
     deleteBlog,
-    getAllBlogsOfUser,
   };
 };
 
