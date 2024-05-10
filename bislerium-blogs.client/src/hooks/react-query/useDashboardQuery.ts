@@ -17,7 +17,7 @@ const useDashboardQuery = ({
   statsOfThisSpecificMonth,
   top10StatsOfThisSpecificMonth,
 }: IUseDashboardQueryProps) => {
-  const { api, currentUser } = useAuthStore();
+  const { api, isApiAuthorized } = useAuthStore();
 
   const getDashboardStats = useQuery<
     AxiosResponse<ISuccessResponse<IDashboardStats>>,
@@ -28,7 +28,7 @@ const useDashboardQuery = ({
       await api.get('/dashboard', {
         params: { ofThisSpecificMonth: statsOfThisSpecificMonth },
       }),
-    enabled: currentUser?.role === UserRole.ADMIN,
+    enabled: isApiAuthorized(),
     refetchOnWindowFocus: true,
   });
 
@@ -38,7 +38,7 @@ const useDashboardQuery = ({
       await api.get('/dashboard/top-10', {
         params: { ofThisSpecificMonth: top10StatsOfThisSpecificMonth },
       }),
-    enabled: currentUser?.role === UserRole.ADMIN,
+    enabled: isApiAuthorized(),
     refetchOnWindowFocus: true,
   });
 
