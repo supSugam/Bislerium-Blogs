@@ -30,6 +30,7 @@ const useDashboardQuery = ({
       }),
     enabled: isApiAuthorized(),
     refetchOnWindowFocus: true,
+    retry: true,
   });
 
   const getTop10Stats = useQuery<AxiosResponse<ISuccessResponse<ITop10Stats>>>({
@@ -40,6 +41,7 @@ const useDashboardQuery = ({
       }),
     enabled: isApiAuthorized(),
     refetchOnWindowFocus: true,
+    retry: true,
   });
 
   return {
