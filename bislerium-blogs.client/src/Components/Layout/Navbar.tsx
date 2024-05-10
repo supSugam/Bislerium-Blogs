@@ -10,7 +10,6 @@ import {
   useMotionValueEvent,
 } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import SearchInput from '../SearchInput';
 import { useAuthStore } from '../../services/stores/useAuthStore';
 import { NavbarAvatar } from './Avatar.navbar';
 import { useScreenDimensions } from '../../hooks/useScreenDimensions';
@@ -21,7 +20,8 @@ import StyledButton from '../Elements/StyledButton';
 
 const Navbar = () => {
   const { scrollYProgress } = useScroll();
-  const { openAuthModal, isApiAuthorized } = useAuthStore();
+  const { openAuthModal, isApiAuthorized, setAuthModalActiveSection } =
+    useAuthStore();
 
   const [navbarHeight, setNavbarHeight] = useState<number>(0);
   const [navbarTranslateY, setNavbarTranslateY] = useState<number>(0);
@@ -132,14 +132,20 @@ const Navbar = () => {
               className={cn(
                 'flex outline-none border-none opacity-800 hover:opacity-70 transition-all duration-200 ease-in rounded-none'
               )}
-              onClick={() => openAuthModal()}
+              onClick={() => {
+                setAuthModalActiveSection('login');
+                openAuthModal();
+              }}
               text="Sign In"
               variant="secondary"
             />
 
             <StyledButton
               className={'rounded-full scale-90'}
-              onClick={() => openAuthModal()}
+              onClick={() => {
+                setAuthModalActiveSection('signup');
+                openAuthModal();
+              }}
               text="Get Started"
               variant="dark"
             />

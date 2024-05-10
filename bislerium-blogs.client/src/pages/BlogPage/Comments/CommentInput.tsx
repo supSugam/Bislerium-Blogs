@@ -181,11 +181,6 @@ const CommentInput = ({
           id="comment-input"
           contentEditable
           ref={commentInputRef}
-          // onFocus={() => {
-          //   if (!currentUser) {
-          //     openAuthModal();
-          //   }
-          // }}
           className="w-full p-4 rounded-sm resize-none outline-none focus:outline-none z-20"
         />
         {showPlaceholder && (

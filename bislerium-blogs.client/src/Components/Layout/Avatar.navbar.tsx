@@ -68,13 +68,10 @@ export const NavbarAvatar = () => {
         targetComponent={<Avatar src={currentUser?.avatarUrl} />}
         items={[
           {
-            onClick: () => {
-              setAuthModalActiveSection('update-profile');
-              openAuthModal();
-            },
             bordered: true,
             element: (
               <ProfileWithName
+                username={currentUser?.username}
                 name={currentUser?.fullName}
                 avatar={currentUser?.avatarUrl ?? ''}
                 subtitle={currentUser?.role}

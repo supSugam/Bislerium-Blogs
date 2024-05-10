@@ -64,15 +64,10 @@ namespace Bislerium_Blogs.Server.Controllers
             }
             try
             {
-                string? userId = null;
-                try
-                {
-                    userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                }
-                catch (Exception)
-                {
-                    userId = null;
-                }
+                bool IsGuid = Guid.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out Guid userId);
+
+
+
 
                 var blogPost = await _context.BlogPosts.FindAsync(id);
 
@@ -84,7 +79,8 @@ namespace Bislerium_Blogs.Server.Controllers
             string role = await _userService.GetRoleByUserId(blogPost.AuthorId) ?? Constants.EnumToString(UserRole.USER);
 
             var tags = await _blogService.GetAllTagsOfABlog(blogPost.BlogPostId);
-            var votePayload = await _blogService.GetBlogReactionDetails(blogPost.BlogPostId, userId is not null ? Guid.Parse(userId) : null);
+            var votePayload = await _blogService.GetBlogReactionDetails(blogPost.BlogPostId, IsGuid ? userId : (Guid?)null
+                );
 
                 var blogPayload = new BlogPayload
             {

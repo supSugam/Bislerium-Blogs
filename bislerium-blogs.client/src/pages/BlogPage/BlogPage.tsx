@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useBlogsQuery from '../../hooks/react-query/useBlogsQuery';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { IBlog } from '../../Interfaces/Models/IBlog';
 import './BlogPage.css';
 import ProfileWithName from '../../Components/Profile/ProfileWithName';
@@ -83,6 +83,7 @@ const BlogPage = () => {
           </div>
           <div className="flex items-center justify-between">
             <ProfileWithName
+              username={blogData?.author.username}
               name={
                 <StyledText className="text-base leading-tight ml-1">
                   {blogData?.author.fullName}

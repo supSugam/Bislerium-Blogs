@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { toastWithInterval } from '../../utils/toast';
 import { IUser } from '../../Interfaces/Models/IUser';
-const useUsersQuery = () => {
+const useUsersQuery = (username?: string) => {
   const { api, isApiAuthorized, setCurrentUser, closeAuthModal } =
     useAuthStore();
 
@@ -23,6 +23,15 @@ const useUsersQuery = () => {
     queryFn: async () => await api.get('/users/me'),
     queryKey: ['me'],
     enabled: isApiAuthorized(),
+  });
+
+  const getUserByUsername = useQuery<
+    AxiosResponse<ISuccessResponse<IUser>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryFn: async () => await api.get(`/users/username/${username}`),
+    queryKey: ['user', username],
+    enabled: !!username,
   });
 
   const deleteMe = useMutation<
@@ -65,7 +74,7 @@ const useUsersQuery = () => {
     },
   });
 
-  return { getMe, deleteMe, updateMe };
+  return { getMe, deleteMe, updateMe, getUserByUsername };
 };
 
 export default useUsersQuery;

@@ -254,6 +254,33 @@ namespace Bislerium_Blogs.Server.Controllers
         }
 
 
+        [HttpGet("username/{username}")]
+        public async Task<ActionResult<UserPayload>> GetUserByUsername(string username)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username || u.UserId.ToString() == username);
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var role = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(user.UserId.ToString()))
+                ?? throw new DataException("User has no role");
+
+            return new UserPayload
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                Username = user.Username,
+                FullName = user.FullName,
+                AvatarUrl = user.AvatarUrl,
+                UpdatedAt = user.UpdatedAt,
+                CreatedAt = user.CreatedAt,
+                Role = role[0]
+            };
+        }
+
+
 
     }
 

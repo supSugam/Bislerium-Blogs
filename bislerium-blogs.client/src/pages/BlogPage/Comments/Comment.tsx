@@ -78,7 +78,7 @@ const Comment = ({ comment }: ICommentProps) => {
 
       if (currentUser?.userId === author.userId) {
         options.push({
-          label: 'Delete Comment',
+          label: mode === 'reply' ? 'Delete Reply' : 'Delete Comment',
           onClick: () => {
             deleteComment.mutate({
               id: commentId,

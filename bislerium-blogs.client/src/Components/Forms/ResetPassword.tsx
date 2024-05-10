@@ -38,11 +38,18 @@ export function ResetPassword() {
   } = useAuthStore();
 
   const onSubmit = async (data: yup.InferType<typeof resetPasswordSchema>) => {
-    await sendOtp.mutateAsync({
-      email: currentUser?.email || data.email,
-      fullName: nameFromEmail(currentUser?.email || data.email),
-      subject: 'Verify Reset Password',
-    });
+    await sendOtp.mutateAsync(
+      {
+        email: currentUser?.email || data.email,
+        fullName: nameFromEmail(currentUser?.email || data.email),
+        subject: 'Verify Reset Password',
+      },
+      {
+        onSuccess: () => {
+          setAuthModalActiveSection('verify-reset-password');
+        },
+      }
+    );
     setPasswordSession({ email: data.email, password: data.password });
   };
 

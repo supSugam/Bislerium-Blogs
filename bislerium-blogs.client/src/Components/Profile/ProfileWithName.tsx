@@ -3,6 +3,7 @@ import Avatar from '../Reusables/Avatar';
 import StyledText from '../Elements/StyledText';
 import { ChevronRight } from 'lucide-react';
 import { capitalizeFirstLetter } from '../../utils/string';
+import { Link } from 'react-router-dom';
 
 interface IProfileWithNameProps {
   name: string | React.ReactNode;
@@ -10,6 +11,7 @@ interface IProfileWithNameProps {
   subtitle: string | React.ReactNode;
   showChevron?: boolean;
   avatarSize?: number;
+  username?: string;
 }
 
 const ProfileWithName = ({
@@ -18,10 +20,12 @@ const ProfileWithName = ({
   subtitle,
   showChevron = false,
   avatarSize = 48,
+  username,
   ...rest
 }: IProfileWithNameProps) => {
   return (
-    <div
+    <Link
+      to={`/profile/${username}`}
       className="flex flex-row w-full items-center justify-between cursor-pointer"
       {...rest}
     >
@@ -39,7 +43,7 @@ const ProfileWithName = ({
         </div>
       </div>
       {showChevron && <ChevronRight size={20} />}
-    </div>
+    </Link>
   );
 };
 

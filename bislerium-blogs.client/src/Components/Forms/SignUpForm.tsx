@@ -254,17 +254,19 @@ export function SignupForm({
       />
       <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-4 h-[1px] w-full" />
 
-      <ButtonWithIcon
-        icon={<GoogleIcon size={20} />}
-        onClick={(e) => {
-          e.preventDefault();
-          toast('Coming Soon, Uhh Maybe?', {
-            icon: '🤷‍♂️',
-          });
-        }}
-      >
-        Continue with Google
-      </ButtonWithIcon>
+      {mode === 'signup' && (
+        <ButtonWithIcon
+          icon={<GoogleIcon size={20} />}
+          onClick={(e) => {
+            e.preventDefault();
+            toast('Coming Soon, Uhh Maybe?', {
+              icon: '🤷‍♂️',
+            });
+          }}
+        >
+          Continue with Google
+        </ButtonWithIcon>
+      )}
 
       <StyledButton
         onClick={() => setAuthModalActiveSection('login')}

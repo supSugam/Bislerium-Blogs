@@ -65,6 +65,7 @@ const BlogHistoryPage = () => {
           </div>
           <div className="flex items-center justify-between">
             <ProfileWithName
+              username={blogData?.author.username}
               name={
                 <StyledText className="text-base leading-tight ml-1">
                   {blogData?.author.fullName}

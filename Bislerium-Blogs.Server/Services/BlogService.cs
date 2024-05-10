@@ -212,18 +212,30 @@ namespace Bislerium_Blogs.Server.Services
             {
                 ArgumentNullException.ThrowIfNull(blogPostId, nameof(blogPostId));
 
+                int Popularity = await UpdatePopularityOfABlog(blogPostId);
+                int TotalComments = await _context.Comments.CountAsync(x => x.BlogPostId == blogPostId);
+
+                if(userId is null) return new VotePayload
+                {
+                    Popularity = Popularity,
+                    IsVotedUp = false,
+                    IsVotedDown = false,
+                    TotalComments = TotalComments,
+                    IsBookmarked = false
+                };
+
+
                 bool isVotedUp = userId is not null && await _context.Reactions.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId && x.IsUpvote);
                 bool isVotedDown =
                     userId is not null && await _context.Reactions.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId && !x.IsUpvote);
-                var totalComments = await _context.Comments.CountAsync(x => x.BlogPostId == blogPostId);
-                var isBookmarked = userId is not null && await _context.Bookmarks.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
+                var isBookmarked = userId is not null & await _context.Bookmarks.AnyAsync(x => x.BlogPostId == blogPostId && x.UserId == userId);
 
                 return new VotePayload
                 {
-                    Popularity = await UpdatePopularityOfABlog(blogPostId),
+                    Popularity = Popularity,
                     IsVotedUp = isVotedUp,
                     IsVotedDown = isVotedDown,
-                    TotalComments = totalComments,
+                    TotalComments = TotalComments,
                     IsBookmarked = isBookmarked
                 };
             }

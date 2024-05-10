@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   IFailedResponse,
   ISuccessResponse,
@@ -7,8 +7,12 @@ import { useAuthStore } from '../../services/stores/useAuthStore';
 import { AxiosError, AxiosResponse } from 'axios';
 import toast from 'react-hot-toast';
 import { toastWithInterval } from '../../utils/toast';
+import { IBlog } from '../../Interfaces/Models/IBlog';
 
-const useBookmarksQuery = () => {
+interface IUseBookmarksQuery {
+  id?: string;
+}
+const useBookmarksQuery = (props: IUseBookmarksQuery) => {
   const { api } = useAuthStore();
   const queryClient = useQueryClient();
   const bookmarkBlog = useMutation<
@@ -47,9 +51,19 @@ const useBookmarksQuery = () => {
     },
   });
 
+  const getAllBookmarksOfUser = useQuery<
+    AxiosResponse<ISuccessResponse<IBlog[]>>,
+    AxiosError<IFailedResponse>
+  >({
+    queryKey: ['bookmarks'],
+    queryFn: async () => await api.get(`/bookmarks/${props?.id}`),
+    enabled: !!props?.id,
+  });
+
   return {
     bookmarkBlog,
     removeBookmark,
+    getAllBookmarksOfUser,
   };
 };
 

@@ -3,6 +3,8 @@ import useBookmarksQuery from '../hooks/react-query/useBookmarksQuery';
 import { Tooltip } from './Reusables/Tooltip';
 import { BookmarkCheck, Bookmark as BookmarkIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAuthStore } from '../services/stores/useAuthStore';
+import toast from 'react-hot-toast';
 
 interface IBookmarkProps extends React.HTMLProps<HTMLButtonElement> {
   blogPostId: string;
@@ -10,7 +12,7 @@ interface IBookmarkProps extends React.HTMLProps<HTMLButtonElement> {
 }
 const Bookmark = ({ bookmarked, blogPostId, ...rest }: IBookmarkProps) => {
   const [isBookmarked, setIsBookmarked] = useState<boolean>(bookmarked);
-
+  const { currentUser, openAuthModal } = useAuthStore();
   useEffect(() => {
     setIsBookmarked(bookmarked);
   }, [bookmarked]);
@@ -24,9 +26,17 @@ const Bookmark = ({ bookmarked, blogPostId, ...rest }: IBookmarkProps) => {
       mutateAsync: removeBookmarkMutateAsync,
       isPending: isBookmarkRemovePending,
     },
-  } = useBookmarksQuery();
+  } = useBookmarksQuery({});
 
   const onToggleBookmark = () => {
+    if (!currentUser) {
+      toast('You need to be logged in to bookmark a blog post', {
+        icon: '🔒',
+      });
+      openAuthModal();
+      return;
+    }
+
     if (isBookmarkPending || isBookmarkRemovePending) return;
     if (isBookmarked) {
       removeBookmarkMutateAsync(
