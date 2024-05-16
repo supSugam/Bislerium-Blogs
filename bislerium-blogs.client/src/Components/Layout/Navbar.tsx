@@ -100,7 +100,9 @@ const Navbar = () => {
               'flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer',
               {
                 hidden:
-                  !isApiAuthorized() || currentUser?.role === UserRole.ADMIN,
+                  !isApiAuthorized() ||
+                  !currentUser ||
+                  currentUser?.role === UserRole.ADMIN,
               }
             )}
             onClick={(e) => {
@@ -117,7 +119,7 @@ const Navbar = () => {
 
           <button
             className={cn('flex items-center justify-center relative', {
-              hidden: !isApiAuthorized(),
+              hidden: !currentUser,
             })}
             onClick={() => setNotificationsModalOpen((p) => !p)}
             ref={notificationsRef}
@@ -131,7 +133,7 @@ const Navbar = () => {
 
           <div
             className={cn('flex items-center ', {
-              hidden: isApiAuthorized(),
+              hidden: !!currentUser,
             })}
           >
             <StyledButton
