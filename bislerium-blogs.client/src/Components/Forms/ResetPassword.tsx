@@ -72,7 +72,7 @@ export function ResetPassword() {
             placeholder="sugam.subedi@example.com"
             type="email"
             {...register('email')}
-            disabled={isApiAuthorized()}
+            disabled={!!currentUser}
           />
         </LabelInputContainer>
 

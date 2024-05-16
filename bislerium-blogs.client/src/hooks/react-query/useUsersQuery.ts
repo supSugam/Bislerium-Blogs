@@ -23,6 +23,8 @@ const useUsersQuery = (username?: string) => {
     queryFn: async () => await api.get('/users/me'),
     queryKey: ['me'],
     enabled: isApiAuthorized() || !!currentUser,
+    retry: true,
+    refetchOnWindowFocus: true,
   });
 
   const getUserByUsername = useQuery<
@@ -41,9 +43,9 @@ const useUsersQuery = (username?: string) => {
   >({
     mutationFn: async () => await api.delete('/users/me'),
     onSuccess: () => {
-      toast.success('Your account has been deleted successfully');
       navigate('/');
       window.location.reload();
+      toast.success('Your account has been deleted successfully');
     },
     onError: (error) => {
       toastWithInterval({ error });
@@ -65,12 +67,7 @@ const useUsersQuery = (username?: string) => {
       setCurrentUser(data.data.result);
       toast.success('Profile Updated');
       closeAuthModal();
-      queryClient.invalidateQueries({
-        queryKey: ['me'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['user', username],
-      });
+      getMe.refetch();
       queryClient.invalidateQueries({
         queryKey: ['user', username],
       });

@@ -119,7 +119,7 @@ const Navbar = () => {
 
           <button
             className={cn('flex items-center justify-center relative', {
-              hidden: !currentUser,
+              hidden: !currentUser || !isApiAuthorized(),
             })}
             onClick={() => setNotificationsModalOpen((p) => !p)}
             ref={notificationsRef}
@@ -133,7 +133,7 @@ const Navbar = () => {
 
           <div
             className={cn('flex items-center ', {
-              hidden: !!currentUser,
+              hidden: isApiAuthorized(),
             })}
           >
             <StyledButton

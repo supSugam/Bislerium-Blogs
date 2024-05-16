@@ -131,19 +131,22 @@ namespace Bislerium_Blogs.Server.Controllers
                 return NotFound("User not found");
             }
 
-            if(updateUserDto.DeleteAvatar == true)
+            if (updateUserDto.DeleteAvatar == true)
             {
                 user.AvatarUrl = null;
                 if(user.AvatarUrl is not null)
                 {
-                   await _s3Service.DeleteFileFromS3(Constants.USER_AVATARS_DIRECTORY, user.UserId.ToString());
+                   await _s3Service.DeleteFileFromS3(Constants.USER_AVATARS_DIRECTORY, $"{user.UserId.ToString()}-{user.UpdatedAt}");
                 }
             }
             else
             {
                 if (updateUserDto.Avatar is not null)
                 {
-                    string imageUrl = await _s3Service.UploadFileToS3(updateUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY, user.UserId.ToString());
+                    user.UpdatedAt = DateTime.Now;
+
+                    string imageUrl = await _s3Service.UploadFileToS3(updateUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY,
+                        $"{user.UserId.ToString()}-{user.UpdatedAt}");
                     user.AvatarUrl = imageUrl;
                 }
             }
@@ -180,7 +183,6 @@ namespace Bislerium_Blogs.Server.Controllers
 
             }
 
-            user.UpdatedAt = DateTime.Now;
             _context.Entry(user).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();

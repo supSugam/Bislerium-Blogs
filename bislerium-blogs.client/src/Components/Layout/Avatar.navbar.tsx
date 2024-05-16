@@ -24,7 +24,7 @@ export const NavbarAvatar = () => {
   } = useAuthStore();
 
   useEffect(() => {
-    setCurrentUser(data?.data?.result ?? null);
+    if (data?.data?.result) setCurrentUser(data?.data?.result);
   }, [data, setCurrentUser]);
 
   const [isLogOutModalOpen, setIsLogOutModalOpen] = useState<boolean>(false);

@@ -54,8 +54,9 @@ const Profile = () => {
   }, [bookmarksData]);
 
   useEffect(() => {
-    if (currentUser?.username === username) setUser(currentUser ?? undefined);
-    else setUser(userData?.data?.result);
+    if (currentUser?.username?.toLowerCase() === username?.toLowerCase())
+      setUser(currentUser ?? undefined);
+    else setUser(userData?.data?.result ?? undefined);
   }, [userData, currentUser, username]);
 
   const blogContent = useMemo(() => {

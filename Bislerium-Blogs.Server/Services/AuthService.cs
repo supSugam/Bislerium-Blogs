@@ -107,23 +107,24 @@ namespace Bislerium_Blogs.Server.Services
             {
                 throw new Exception("User Registration Failed");
             }
-
-            string? imageUrl = null;
-            if (registerUserDto.Avatar is not null)
-            {
-                imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY, existingUser.Id);
-            }
-
             var newUser = new User
             {
                 UserId = Guid.Parse(existingUser.Id),
                 Username = registerUserDto.Username,
                 Email = registerUserDto.Email,
                 FullName = registerUserDto.FullName,
-                AvatarUrl = imageUrl,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+
+            string? imageUrl = null;
+            if (registerUserDto.Avatar is not null)
+            {
+                imageUrl = await _s3Service.UploadFileToS3(registerUserDto.Avatar, Constants.USER_AVATARS_DIRECTORY, $"{existingUser.Id}-{newUser.UpdatedAt}");
+                newUser.AvatarUrl = imageUrl;
+            }
+
+
 
             await _context.Users.AddAsync(newUser);
 
