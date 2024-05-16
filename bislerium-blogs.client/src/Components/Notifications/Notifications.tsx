@@ -36,7 +36,6 @@ const Notifications = forwardRef<HTMLDivElement, INotificationProps>(
     }, [notificationsData]);
 
     useEffect(() => {
-      if (notifications.length < 1) return;
       const showToast =
         notificationsData?.data.result?.[0]?.notificationId !==
         notifications?.[0]?.notificationId;

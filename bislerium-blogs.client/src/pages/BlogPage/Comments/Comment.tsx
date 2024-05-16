@@ -50,6 +50,7 @@ const Comment = ({ comment }: ICommentProps) => {
 
   const onReplyToComment = useCallback(() => {
     mode === 'reply' ? setMode('none') : setMode('reply');
+
     replyComponentRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'center',
@@ -113,6 +114,7 @@ const Comment = ({ comment }: ICommentProps) => {
     author,
     currentUser,
     onReplyToComment,
+    mode,
   ]);
 
   return (
@@ -208,7 +210,15 @@ const Comment = ({ comment }: ICommentProps) => {
                 parentCommentId: commentId,
                 blogPostId: comment.blogPostId,
               }}
-              onCommentSubmit={() => setMode('none')}
+              onCommentSubmit={() => {
+                if (mode !== 'reply') {
+                  replyComponentRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                  });
+                }
+                setMode('none');
+              }}
               onBlur={() => setMode('none')}
             />
           )}

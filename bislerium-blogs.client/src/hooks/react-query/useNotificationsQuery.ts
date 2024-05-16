@@ -17,7 +17,7 @@ const useNotificationsQuery = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchInterval: 1000 * 60 * 1, // 1 minute
+    refetchInterval: 30 * 1000, // 30 seconds
     enabled: isApiAuthorized(),
   });
   // fomib53644@lewenbo.com Test@123
