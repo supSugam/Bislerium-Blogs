@@ -133,10 +133,10 @@ namespace Bislerium_Blogs.Server.Controllers
 
             if(updateUserDto.DeleteAvatar == true)
             {
+                user.AvatarUrl = null;
                 if(user.AvatarUrl is not null)
                 {
                    await _s3Service.DeleteFileFromS3(Constants.USER_AVATARS_DIRECTORY, user.UserId.ToString());
-                    user.AvatarUrl = null;
                 }
             }
             else
@@ -191,7 +191,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 Email = user.Email,
                 Username = user.Username,
                 FullName = user.FullName,
-                AvatarUrl = user.AvatarUrl,
+                AvatarUrl = updateUserDto.DeleteAvatar == true ? null : user.AvatarUrl,
                 UpdatedAt = user.UpdatedAt,
                 CreatedAt = user.CreatedAt,
                 Role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value

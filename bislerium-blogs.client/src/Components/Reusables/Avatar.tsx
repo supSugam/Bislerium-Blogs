@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { AVATAR_PLACEHOLDER } from '../../utils/constants';
 interface IAvatarProps {
   size?: 'small' | 'medium' | 'large' | number;
   src?: string | null;
@@ -17,7 +18,7 @@ const Avatar = ({ size = 'medium', src }: IAvatarProps) => {
       }}
     >
       <img
-        src={src ?? 'https://avatar.iran.liara.run/public/92'}
+        src={src ?? AVATAR_PLACEHOLDER}
         alt="avatar"
         className="rounded-full"
         style={{ width: '100%', height: '100%' }}

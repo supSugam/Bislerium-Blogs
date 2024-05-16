@@ -16,6 +16,7 @@ import {
   ISuccessResponse,
 } from '../../Interfaces/IApiResponse';
 import { AxiosError, AxiosResponse } from 'axios';
+import { AVATAR_PLACEHOLDER } from '../../utils/constants';
 
 const Profile = () => {
   const { username } = useParams();
@@ -102,7 +103,7 @@ const Profile = () => {
         <div className="bg-white border border-neutral-200 rounded-lg p-6 h-fit sticky top-0 flex-grow">
           <div className="flex items-center mb-4">
             <img
-              src={user?.avatarUrl ?? '/placeholder-avatar.png'}
+              src={user?.avatarUrl ?? AVATAR_PLACEHOLDER}
               alt="Profile"
               className="w-16 h-16 rounded-full mr-4"
             />

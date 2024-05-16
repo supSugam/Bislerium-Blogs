@@ -207,7 +207,9 @@ export const Capsule = ({
       )}
       onClick={onClick}
     >
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-medium text-nowrap text-ellipsis">
+        {label}
+      </span>
       {showIcon && (
         <X
           className="cursor-pointer transition-all hover:scale-110 ease-linear duration-150"

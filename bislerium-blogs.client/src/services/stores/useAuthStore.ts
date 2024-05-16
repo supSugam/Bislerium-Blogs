@@ -3,6 +3,7 @@ import { AxiosInstance } from 'axios';
 import { api } from '../../utils/constants';
 import { jwtDecode } from 'jwt-decode';
 import { IUser } from '../../Interfaces/Models/IUser';
+import toast from 'react-hot-toast';
 
 interface AuthSessionData {
   email?: string;
@@ -89,6 +90,7 @@ export const useAuthStore = create<AuthStore>(
       localStorage.setItem('accessToken', accessToken);
     },
     logout: () => {
+      toast("Logged Out, You're now a Surfer 🏄‍♂️", { icon: '🏄‍♂️' });
       localStorage.removeItem('accessToken');
       set(() => ({ api, currentUser: null, accessToken: null }));
       if (window.location.pathname !== '/') window.location.replace('/');

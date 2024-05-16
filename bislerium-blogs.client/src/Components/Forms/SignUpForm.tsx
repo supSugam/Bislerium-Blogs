@@ -91,9 +91,7 @@ export function SignupForm({
         ...(data.username !== currentUser?.username && {
           username: data.username,
         }),
-        role: UserRole.BLOGGER,
       };
-      console.log(payload);
       const formData = objectToFormData(payload);
       updateProfileMutation(formData);
     }

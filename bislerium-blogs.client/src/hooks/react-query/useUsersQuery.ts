@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toastWithInterval } from '../../utils/toast';
 import { IUser } from '../../Interfaces/Models/IUser';
 const useUsersQuery = (username?: string) => {
-  const { api, isApiAuthorized, setCurrentUser, closeAuthModal } =
+  const { api, isApiAuthorized, setCurrentUser, closeAuthModal, currentUser } =
     useAuthStore();
 
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const useUsersQuery = (username?: string) => {
   >({
     queryFn: async () => await api.get('/users/me'),
     queryKey: ['me'],
-    enabled: isApiAuthorized(),
+    enabled: isApiAuthorized() || !!currentUser,
   });
 
   const getUserByUsername = useQuery<
@@ -67,6 +67,9 @@ const useUsersQuery = (username?: string) => {
       closeAuthModal();
       queryClient.invalidateQueries({
         queryKey: ['me'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['user', username],
       });
       queryClient.invalidateQueries({
         queryKey: ['user', username],
