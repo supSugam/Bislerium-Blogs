@@ -218,7 +218,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
         {
             try
             {
-                var blogPost = await _context.BlogPosts.FindAsync(blogPostId);
+                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.BlogPostId == blogPostId);
                 if (blogPost == null)
                 {
                     return false;
@@ -267,7 +267,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
         {
             try
             {
-                var comment = await _context.Comments.FindAsync(commentId);
+                var comment = await _context.Comments.FirstOrDefaultAsync(c => c.CommentId == commentId);
                 if (comment == null)
                 {
                     return false;

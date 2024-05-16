@@ -163,12 +163,14 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 if (postACommentDto.ParentCommentId != null)
                 {
-               await _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
+                    Console.WriteLine("Sending Comment Reply Notification");
+                    await _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
 
                 }
                 else
                 {
-               await _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
+                    Console.WriteLine("Sending Blog Comment Notification");
+                    await _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
 
                 }
 
@@ -211,8 +213,15 @@ namespace Bislerium_Blogs.Server.Controllers
                 return Unauthorized("You are not permitted to delete this comment");
             }
 
-            _context.Comments.RemoveRange(_context.Comments.Where(c => c.ParentCommentId == id));
+                // Remove all reactions to the comment
+                _context.Reactions.RemoveRange(_context.Reactions.Where(r => r.CommentId == id));
+                // Remove all replies to the comment
+                _context.Comments.RemoveRange(_context.Comments.Where(c => c.ParentCommentId == id));
+                // Remove all comment history
+                _context.CommentHistories.RemoveRange(_context.CommentHistories.Where(ch => ch.CommentId == id));
+                // Remove the comment
                 _context.Comments.Remove(comment);
+                // Save changes
                 await _context.SaveChangesAsync();
 
             return Ok("Comment Deleted");

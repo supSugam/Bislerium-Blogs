@@ -149,6 +149,7 @@ const useBlogsQuery = ({ getAllBlogsConfig, id }: IUseBlogsQueryProps) => {
     mutationFn: async (id) => await api.delete(`/blogs/${id}`),
     onSuccess: () => {
       toast.success('Blog Deleted');
+      navigate('/');
       queryClient.invalidateQueries({
         queryKey: ['blogs'],
       });

@@ -91,6 +91,7 @@ export const useAuthStore = create<AuthStore>(
     logout: () => {
       localStorage.removeItem('accessToken');
       set(() => ({ api, currentUser: null, accessToken: null }));
+      if (window.location.pathname !== '/') window.location.replace('/');
     },
     authSession: {},
     setAuthSession: (data) => {

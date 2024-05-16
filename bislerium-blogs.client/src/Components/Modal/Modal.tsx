@@ -46,7 +46,7 @@ const Modal: FC<ModalProps> = forwardRef<HTMLDivElement, ModalProps>(
         document.body.style.overflowY = 'auto';
         document.body.style.overflowX = 'hidden';
       }
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, setMounted]);
 
     const handleBackdropClick = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
@@ -68,7 +68,7 @@ const Modal: FC<ModalProps> = forwardRef<HTMLDivElement, ModalProps>(
         .sort((a, b) => b - a)[0];
 
       setZIndex((highestZIndex ?? 333) + 1);
-    }, [isOpen]);
+    }, [isOpen, setZIndex]);
 
     const modalContent = (
       <AnimatePresence>

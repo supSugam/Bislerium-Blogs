@@ -100,7 +100,7 @@ const Navbar = () => {
               'flex items-center space-x-2 opacity-70 hover:opacity-100 duration-100 ease-in cursor-pointer',
               {
                 hidden:
-                  !isApiAuthorized() || currentUser?.role !== UserRole.BLOGGER,
+                  !isApiAuthorized() || currentUser?.role === UserRole.ADMIN,
               }
             )}
             onClick={(e) => {

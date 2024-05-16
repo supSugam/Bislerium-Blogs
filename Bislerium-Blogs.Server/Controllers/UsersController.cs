@@ -51,36 +51,7 @@ namespace Bislerium_Blogs.Server.Controllers
             return user;
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(Guid id, User user)
-        {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -165,6 +136,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 if(user.AvatarUrl is not null)
                 {
                    await _s3Service.DeleteFileFromS3(Constants.USER_AVATARS_DIRECTORY, user.UserId.ToString());
+                    user.AvatarUrl = null;
                 }
             }
             else
@@ -183,10 +155,16 @@ namespace Bislerium_Blogs.Server.Controllers
             }
             if (updateUserDto.UserName is not null)
             {
+
+                //check if username is already taken
+                if (await _context.Users.AnyAsync(u => u.Username == updateUserDto.UserName))
+                {
+                    return BadRequest("Username is already taken");
+                }
                 user.Username = updateUserDto.UserName;
             }
 
-            if(updateUserDto.Role is not null)
+            if (updateUserDto.Role is not null)
             {
                 if (updateUserDto.Role == Constants.EnumToString(UserRole.ADMIN))
                 {
@@ -203,6 +181,8 @@ namespace Bislerium_Blogs.Server.Controllers
             }
 
             user.UpdatedAt = DateTime.Now;
+            _context.Entry(user).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
             return Ok(new UserPayload

@@ -31,7 +31,7 @@ const YearAndMonthPicker = ({
 
   useEffect(() => {
     if (year !== undefined && month !== undefined) {
-      onYearAndMonthChange?.(new Date(year, month - 1));
+      onYearAndMonthChange?.(new Date(year, month));
     } else {
       onYearAndMonthChange?.(undefined);
     }

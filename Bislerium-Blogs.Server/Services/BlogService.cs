@@ -195,6 +195,13 @@ namespace Bislerium_Blogs.Server.Services
 
                 int popularity = totalUpvotes * Constants.UPVOTE_WEIGHTAGE + totalDownvotes * Constants.DOWNVOTE_WEIGHTAGE + totalComments * Constants.COMMENT_WEIGHTAGE;
 
+                Console.WriteLine($"Total Upvotes: {totalUpvotes}");
+                Console.WriteLine($"Total Downvotes: {totalDownvotes}");
+                Console.WriteLine($"Total Comments: {totalComments}");
+                Console.WriteLine($"Total Popularity: {popularity}");
+
+
+
                 await _context.BlogPosts.Where(x => x.BlogPostId == blogPostId).ForEachAsync(x => x.Popularity = popularity);
                 await _context.SaveChangesAsync();
                 return popularity;
