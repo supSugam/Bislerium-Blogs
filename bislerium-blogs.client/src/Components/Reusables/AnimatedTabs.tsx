@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 
 type Tab = {
   title: string;
   value: string;
-  content?: string | React.ReactNode | any;
+  content: React.ReactNode;
   icon?: React.ReactNode;
 };
 
@@ -34,6 +34,10 @@ export const AnimatedTabs = ({
   };
 
   const [hovering, setHovering] = useState(false);
+
+  useEffect(() => {
+    setTabs(propTabs);
+  }, [propTabs]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -104,6 +108,7 @@ export const AnimatedTabs = ({
 export const FadeInDiv = ({
   className,
   tabs,
+  active,
 }: {
   className?: string;
   key?: string;
@@ -116,7 +121,7 @@ export const FadeInDiv = ({
   };
   return (
     <div className="relative w-full h-full flex-1 mt-4">
-      {tabs.map((tab, idx) => (
+      {tabs.map((tab) => (
         <motion.div
           key={tab.value}
           layoutId={tab.value}

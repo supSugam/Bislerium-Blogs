@@ -205,7 +205,7 @@ namespace Bislerium_Blogs.Server.Controllers
             user.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
-            return new UserPayload
+            return Ok(new UserPayload
             {
                 UserId = user.UserId,
                 Email = user.Email,
@@ -215,7 +215,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 UpdatedAt = user.UpdatedAt,
                 CreatedAt = user.CreatedAt,
                 Role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value
-            };
+            });
         }
 
 

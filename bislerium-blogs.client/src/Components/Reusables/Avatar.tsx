@@ -5,9 +5,9 @@ interface IAvatarProps {
 }
 const Avatar = ({ size = 'medium', src }: IAvatarProps) => {
   const classes = classNames('rounded-full bg-gray-100 overflow-hidden', {
-    'w-6': size === 'small',
-    'w-10': size === 'medium',
-    'w-14': size === 'large',
+    'w-6 h-6': size === 'small',
+    'w-10 h-10': size === 'medium',
+    'w-14 h-14': size === 'large',
   });
   return (
     <div

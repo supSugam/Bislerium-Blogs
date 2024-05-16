@@ -84,11 +84,13 @@ export function SignupForm({
       const payload = {
         ...(currentUser?.role !== role && { role }),
         ...(avatar && { avatar }),
-        deleteAvatar: !avatar && !currentAvatar,
+        deleteAvatar: !avatar,
         ...(data.fullName !== currentUser?.fullName && {
           fullName: data.fullName,
         }),
-        ...(data.email !== currentUser?.email && { email: data.email }),
+        ...(data.username !== currentUser?.username && {
+          username: data.username,
+        }),
       };
       const formData = objectToFormData(payload);
       updateProfileMutation(formData);
