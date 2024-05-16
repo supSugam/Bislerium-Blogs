@@ -32,7 +32,7 @@ const BlogCard = ({ blog, className }: IBlogCardProps) => {
     >
       <div className="flex flex-col gap-y-3">
         <Link
-          to={`/profile/${blog.author.userId}`}
+          to={`/profile/${blog.author.username}`}
           className="flex gap-x-1 items-center"
         >
           <img

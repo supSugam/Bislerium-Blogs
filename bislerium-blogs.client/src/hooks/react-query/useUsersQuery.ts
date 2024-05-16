@@ -67,6 +67,9 @@ const useUsersQuery = (username?: string) => {
       setCurrentUser(data.data.result);
       toast.success('Profile Updated');
       closeAuthModal();
+      queryClient.invalidateQueries({
+        queryKey: ['me'],
+      });
       getMe.refetch();
       queryClient.invalidateQueries({
         queryKey: ['user', username],
