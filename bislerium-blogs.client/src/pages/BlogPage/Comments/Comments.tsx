@@ -81,7 +81,7 @@ const Comments = memo(
           <div className="w-full h-[1px] bg-neutral-200 my-6" />
 
           {!isCommentsLoading && id ? (
-            comments[id].map((comment) => (
+            (comments?.[id] ?? []).map((comment) => (
               <Comment key={comment.commentId} comment={comment} />
             ))
           ) : (
