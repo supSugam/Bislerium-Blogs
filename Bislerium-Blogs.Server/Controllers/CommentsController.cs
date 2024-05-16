@@ -33,19 +33,20 @@ namespace Bislerium_Blogs.Server.Controllers
 
         // GET: api/Comments
         [HttpGet("{blogPostId}")]
-        public async Task<ActionResult<List<CommentPayload>>> GetComments(Guid blogPostId, bool includeReplies=true){
+        public async Task<ActionResult<List<CommentPayload>>> GetComments(Guid blogPostId, bool includeReplies = true)
+        {
             try
             {
                 Guid.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out Guid userId);
-                
+
                 var comments = await _commentService.GetCommentsAsync(blogPostId, userId, includeReplies);
                 return Ok(comments);
-    }
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-}
-}
+            }
+        }
 
 
         // PATCH: api/Comments/5
@@ -97,7 +98,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 BlogPostId = comment.BlogPostId,
                 ParentCommentId = comment.ParentCommentId,
                 Reactions = reactions,
-                IsEdited=true,
+                IsEdited = true,
                 Replies = replies,
             });
         }
@@ -156,25 +157,12 @@ namespace Bislerium_Blogs.Server.Controllers
 
                 UserPayload? userPayload = await _userService.GetUserById(authorId);
 
-                if(userPayload == null)
+                if (userPayload == null)
                 {
                     return NotFound("User Not Found");
                 }
 
-                if (postACommentDto.ParentCommentId != null)
-                {
-                    Console.WriteLine("Sending Comment Reply Notification");
-                    await _notificationService.SendCommentReplyNotification(comment.CommentId, authorId);
-
-                }
-                else
-                {
-                    Console.WriteLine("Sending Blog Comment Notification");
-                    await _notificationService.SendBlogCommentNotification(comment.CommentId, authorId);
-
-                }
-
-                return new CommentPayload
+                var commentPayload = new CommentPayload
                 {
                     CommentId = comment.CommentId,
                     Body = comment.Body,
@@ -185,6 +173,21 @@ namespace Bislerium_Blogs.Server.Controllers
                     ParentCommentId = comment.ParentCommentId,
                     Reactions = new CommentReactionsPayload()
                 };
+
+                if (postACommentDto.ParentCommentId != null)
+                {
+                    Console.WriteLine("Sending Comment Reply Notification");
+                    await _notificationService.SendCommentReplyNotification(commentPayload, authorId);
+
+                }
+                else
+                {
+                    Console.WriteLine("Sending Blog Comment Notification");
+                    await _notificationService.SendBlogCommentNotification(comment.BlogPostId, authorId);
+
+                }
+
+                return commentPayload;
             }
             catch (Exception ex)
             {
@@ -201,17 +204,17 @@ namespace Bislerium_Blogs.Server.Controllers
             try
             {
 
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-            var IsPermitted = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value) == comment.AuthorId || User.IsInRole(Constants.EnumToString(UserRole.ADMIN));
+                var comment = await _context.Comments.FindAsync(id);
+                if (comment == null)
+                {
+                    return NotFound();
+                }
+                var IsPermitted = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value) == comment.AuthorId || User.IsInRole(Constants.EnumToString(UserRole.ADMIN));
 
-            if (!IsPermitted)
-            {
-                return Unauthorized("You are not permitted to delete this comment");
-            }
+                if (!IsPermitted)
+                {
+                    return Unauthorized("You are not permitted to delete this comment");
+                }
 
                 // Remove all reactions to the comment
                 _context.Reactions.RemoveRange(_context.Reactions.Where(r => r.CommentId == id));
@@ -224,7 +227,7 @@ namespace Bislerium_Blogs.Server.Controllers
                 // Save changes
                 await _context.SaveChangesAsync();
 
-            return Ok("Comment Deleted");
+                return Ok("Comment Deleted");
             }
 
             catch (Exception ex)

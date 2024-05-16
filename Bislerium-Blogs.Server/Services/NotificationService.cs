@@ -100,11 +100,11 @@ namespace Bislerium_Blogs.Server.Services
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-    }
-}
+            }
+        }
 
 
-public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid triggerUserId, bool IsUpvote)
+        public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid triggerUserId, bool IsUpvote)
         {
             try
             {
@@ -120,14 +120,14 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                if(targetUser.UserId == triggerUserId)
+                if (targetUser.UserId == triggerUserId)
                 {
                     return false;
                 }
 
                 var triggerUser = await _context.Users.FindAsync(triggerUserId);
 
-                if(triggerUser == null)
+                if (triggerUser == null)
                 {
                     return false;
                 }
@@ -218,12 +218,14 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
         {
             try
             {
-                var blogPost = await _context.BlogPosts.FirstOrDefaultAsync(b => b.BlogPostId == blogPostId);
+                var blogPost = await _context.BlogPosts.
+                    Include(b => b.Author)
+                    .FirstOrDefaultAsync(b => b.BlogPostId == blogPostId);
                 if (blogPost == null)
                 {
                     return false;
                 }
-                var targetUser = await _context.Users.FindAsync(blogPost.AuthorId);
+                var targetUser = await _context.Users.FindAsync(blogPost.Author.UserId);
                 var triggerUser = await _context.Users.FindAsync(triggerUserId);
 
                 if (targetUser == null || triggerUser == null)
@@ -263,16 +265,12 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
             }
         }
 
-        public async Task<bool> SendCommentReplyNotification(Guid commentId, Guid triggerUserId)
+        public async Task<bool> SendCommentReplyNotification(CommentPayload commentPayload, Guid triggerUserId)
         {
             try
             {
-                var comment = await _context.Comments.FirstOrDefaultAsync(c => c.CommentId == commentId);
-                if (comment == null)
-                {
-                    return false;
-                }
-                var targetUser = await _context.Users.FindAsync(comment.AuthorId);
+
+                var targetUser = commentPayload.Author;
                 var triggerUser = await _context.Users.FindAsync(triggerUserId);
 
                 if (targetUser == null || triggerUser == null)
@@ -287,7 +285,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
 
                 var blogPost = await _context.BlogPosts.
                     Include(b => b.Author)
-                    .FirstOrDefaultAsync(b => b.BlogPostId == comment.BlogPostId);
+                    .FirstOrDefaultAsync(b => b.BlogPostId == commentPayload.BlogPostId);
 
                 if (blogPost == null)
                 {
@@ -301,7 +299,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     BlogPostId = blogPost.BlogPostId,
                     TargetUserId = targetUser.UserId,
                     TriggerUserId = triggerUserId,
-                    CommentId = commentId,
+                    CommentId = commentPayload.CommentId,
                     NotificationType = (byte)NotificationType.REPLY,
                     NotificationMessage = notificationMessageForTargetUser,
                     CreatedAt = DateTime.Now,
@@ -315,7 +313,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     BlogPostId = blogPost.BlogPostId,
                     TargetUserId = blogPost.AuthorId,
                     TriggerUserId = triggerUserId,
-                    CommentId = commentId,
+                    CommentId = commentPayload.CommentId,
                     NotificationType = (byte)NotificationType.REPLY,
                     NotificationMessage = notificationMessageForBlogAuthor,
                     CreatedAt = DateTime.Now,
@@ -356,7 +354,7 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                     return false;
                 }
 
-                if(triggerUser.UserId == blogPost.AuthorId)
+                if (triggerUser.UserId == blogPost.AuthorId)
                 {
                     return false;
                 }
@@ -377,10 +375,11 @@ public async Task<bool> SendBlogReactionNotification(Guid blogPostId, Guid trigg
                 await _context.SaveChangesAsync();
                 _emailService.SendNotificationEmail(blogPost.Author.Email, blogPost.Author.FullName, notificationMessage);
                 return true;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
         }
     }
-    }
+}
